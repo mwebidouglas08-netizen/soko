@@ -1,0 +1,1190 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="var_Stake">Stake</variable>
+    <variable id="var_Trades_Completed">Trades Completed</variable>
+    <variable id="var_Maximum_Stake">Maximum Stake</variable>
+    <variable id="var_Starting_Profit">Starting Profit</variable>
+    <variable id="var_Session_Profit">Session Profit</variable>
+    <variable id="var_Take_Profit">Take Profit</variable>
+    <variable id="var_Session_Ready">Session Ready</variable>
+    <variable id="var_Stop_Loss">Stop Loss</variable>
+    <variable id="var_Peak_Profit">Peak Profit</variable>
+    <variable id="var_Maximum_Trades">Maximum Trades</variable>
+    <variable id="var_Loss_Streak">Loss Streak</variable>
+    <variable id="var_Maximum_Loss_Streak">Maximum Loss Streak</variable>
+    <variable id="var_Next_Entry_Time">Next Entry Time</variable>
+    <variable id="var_Confirmation_Ticks">Confirmation Ticks</variable>
+    <variable id="var_Short_Window">Short Window</variable>
+    <variable id="var_Long_Window">Long Window</variable>
+    <variable id="var_Win_Pause_Seconds">Win Pause Seconds</variable>
+    <variable id="var_Loss_Pause_Seconds">Loss Pause Seconds</variable>
+    <variable id="var_Short_Margin">Short Margin</variable>
+    <variable id="var_Long_Margin">Long Margin</variable>
+    <variable id="var_Trail_Activation">Trail Activation</variable>
+    <variable id="var_Trailing_Drawdown">Trailing Drawdown</variable>
+  </variables>
+  <block type="trade_definition" id="obsidian_24" deletable="false" x="0" y="60">
+    <comment pinned="false" h="140" w="360">Obsidian Parity Premium: fixed stake; streak entry requires 40/120-tick frequency agreement. Margins are percentage points above uniform-digit frequency, not win probabilities. Pauses: 10 seconds after wins, 30 after losses. Trailing drawdown activates at 1 profit. The next stake must fit both loss budgets. Historical digit patterns do not guarantee the next digit. Limits reset on manual restart. Demo-test before live use.</comment>
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="obsidian_26" deletable="false" movable="false">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">random_index</field>
+        <field name="SYMBOL_LIST">R_50</field>
+        <field name="ALTERNATE_MARKETS">FALSE</field>
+        <field name="ALTERNATE_EVERY">1</field>
+        <field name="MULTI_MARKET">FALSE</field>
+        <field name="VH_ENABLED">FALSE</field>
+        <field name="VH_SETTINGS_BTN">VH Settings</field>
+        <next>
+          <block type="trade_definition_tradetype" id="obsidian_37" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">digits</field>
+            <field name="TRADETYPE_LIST">evenodd</field>
+            <next>
+              <block type="trade_definition_contracttype" id="obsidian_41" deletable="false" movable="false">
+                <field name="TYPE_LIST">both</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="obsidian_44" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="obsidian_47" deletable="false" movable="false">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="obsidian_50" deletable="false" movable="false">
+                            <field name="RESTARTONERROR">FALSE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="obsidian_54">
+        <field name="VAR" id="var_Stake">Stake</field>
+        <value name="VALUE">
+          <block type="math_number" id="obsidian_57">
+            <field name="NUM">0.35</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="obsidian_60">
+            <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+            <value name="VALUE">
+              <block type="math_number" id="obsidian_63">
+                <field name="NUM">0.7</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="obsidian_66">
+                <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                <value name="VALUE">
+                  <block type="math_number" id="obsidian_69">
+                    <field name="NUM">2</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="obsidian_72">
+                    <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="obsidian_75">
+                        <field name="NUM">2</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="obsidian_78">
+                        <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="obsidian_81">
+                            <field name="NUM">25</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="obsidian_84">
+                            <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                            <value name="VALUE">
+                              <block type="math_number" id="obsidian_87">
+                                <field name="NUM">3</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="variables_set" id="obsidian_90">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                <value name="VALUE">
+                                  <block type="math_number" id="obsidian_93">
+                                    <field name="NUM">4</field>
+                                  </block>
+                                </value>
+                                <next>
+                                  <block type="variables_set" id="obsidian_96">
+                                    <field name="VAR" id="var_Short_Window">Short Window</field>
+                                    <value name="VALUE">
+                                      <block type="math_number" id="obsidian_99">
+                                        <field name="NUM">40</field>
+                                      </block>
+                                    </value>
+                                    <next>
+                                      <block type="variables_set" id="obsidian_102">
+                                        <field name="VAR" id="var_Long_Window">Long Window</field>
+                                        <value name="VALUE">
+                                          <block type="math_number" id="obsidian_105">
+                                            <field name="NUM">120</field>
+                                          </block>
+                                        </value>
+                                        <next>
+                                          <block type="variables_set" id="obsidian_108">
+                                            <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                            <value name="VALUE">
+                                              <block type="math_number" id="obsidian_111">
+                                                <field name="NUM">10</field>
+                                              </block>
+                                            </value>
+                                            <next>
+                                              <block type="variables_set" id="obsidian_114">
+                                                <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                                <value name="VALUE">
+                                                  <block type="math_number" id="obsidian_117">
+                                                    <field name="NUM">5</field>
+                                                  </block>
+                                                </value>
+                                                <next>
+                                                  <block type="variables_set" id="obsidian_120">
+                                                    <field name="VAR" id="var_Win_Pause_Seconds">Win Pause Seconds</field>
+                                                    <value name="VALUE">
+                                                      <block type="math_number" id="obsidian_123">
+                                                        <field name="NUM">10</field>
+                                                      </block>
+                                                    </value>
+                                                    <next>
+                                                      <block type="variables_set" id="obsidian_126">
+                                                        <field name="VAR" id="var_Loss_Pause_Seconds">Loss Pause Seconds</field>
+                                                        <value name="VALUE">
+                                                          <block type="math_number" id="obsidian_129">
+                                                            <field name="NUM">30</field>
+                                                          </block>
+                                                        </value>
+                                                        <next>
+                                                          <block type="variables_set" id="obsidian_132">
+                                                            <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                            <value name="VALUE">
+                                                              <block type="math_number" id="obsidian_135">
+                                                                <field name="NUM">1</field>
+                                                              </block>
+                                                            </value>
+                                                            <next>
+                                                              <block type="variables_set" id="obsidian_138">
+                                                                <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                                <value name="VALUE">
+                                                                  <block type="math_number" id="obsidian_141">
+                                                                    <field name="NUM">0.7</field>
+                                                                  </block>
+                                                                </value>
+                                                                <next>
+                                                                  <block type="variables_set" id="obsidian_144">
+                                                                    <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                                                    <value name="VALUE">
+                                                                      <block type="math_number" id="obsidian_147">
+                                                                        <field name="NUM">0</field>
+                                                                      </block>
+                                                                    </value>
+                                                                    <next>
+                                                                      <block type="variables_set" id="obsidian_150">
+                                                                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                                                                        <value name="VALUE">
+                                                                          <block type="math_number" id="obsidian_153">
+                                                                            <field name="NUM">0</field>
+                                                                          </block>
+                                                                        </value>
+                                                                        <next>
+                                                                          <block type="variables_set" id="obsidian_156">
+                                                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                                            <value name="VALUE">
+                                                                              <block type="math_number" id="obsidian_159">
+                                                                                <field name="NUM">0</field>
+                                                                              </block>
+                                                                            </value>
+                                                                            <next>
+                                                                              <block type="variables_set" id="obsidian_162">
+                                                                                <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                                                                                <value name="VALUE">
+                                                                                  <block type="math_number" id="obsidian_165">
+                                                                                    <field name="NUM">0</field>
+                                                                                  </block>
+                                                                                </value>
+                                                                                <next>
+                                                                                  <block type="variables_set" id="obsidian_168">
+                                                                                    <field name="VAR" id="var_Session_Ready">Session Ready</field>
+                                                                                    <value name="VALUE">
+                                                                                      <block type="math_number" id="obsidian_171">
+                                                                                        <field name="NUM">0</field>
+                                                                                      </block>
+                                                                                    </value>
+                                                                                    <next>
+                                                                                      <block type="variables_set" id="obsidian_174">
+                                                                                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                                                        <value name="VALUE">
+                                                                                          <block type="math_number" id="obsidian_177">
+                                                                                            <field name="NUM">0</field>
+                                                                                          </block>
+                                                                                        </value>
+                                                                                        <next>
+                                                                                          <block type="variables_set" id="obsidian_180">
+                                                                                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                                                                                            <value name="VALUE">
+                                                                                              <block type="math_number" id="obsidian_183">
+                                                                                                <field name="NUM">0</field>
+                                                                                              </block>
+                                                                                            </value>
+                                                                                          </block>
+                                                                                        </next>
+                                                                                      </block>
+                                                                                    </next>
+                                                                                  </block>
+                                                                                </next>
+                                                                              </block>
+                                                                            </next>
+                                                                          </block>
+                                                                        </next>
+                                                                      </block>
+                                                                    </next>
+                                                                  </block>
+                                                                </next>
+                                                              </block>
+                                                            </next>
+                                                          </block>
+                                                        </next>
+                                                      </block>
+                                                    </next>
+                                                  </block>
+                                                </next>
+                                              </block>
+                                            </next>
+                                          </block>
+                                        </next>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="trade_definition_tradeoptions" id="obsidian_186">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>
+        <field name="DURATIONTYPE_LIST">t</field>
+        <value name="DURATION">
+          <block type="math_number" id="obsidian_190">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <value name="AMOUNT">
+          <block type="variables_get" id="obsidian_193">
+            <field name="VAR" id="var_Stake">Stake</field>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="after_purchase" id="obsidian_509" x="6622" y="60">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="variables_set" id="obsidian_511">
+        <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+        <value name="VALUE">
+          <block type="math_arithmetic" id="obsidian_514">
+            <field name="OP">ADD</field>
+            <value name="A">
+              <block type="variables_get" id="obsidian_517">
+                <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="obsidian_520">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="obsidian_523">
+            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="obsidian_526">
+                <field name="OP">MINUS</field>
+                <value name="A">
+                  <block type="total_profit" id="obsidian_529"></block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="obsidian_531">
+                    <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" id="obsidian_534">
+                <value name="IF0">
+                  <block type="logic_compare" id="obsidian_537">
+                    <field name="OP">GT</field>
+                    <value name="A">
+                      <block type="variables_get" id="obsidian_540">
+                        <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="variables_get" id="obsidian_543">
+                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="variables_set" id="obsidian_546">
+                    <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                    <value name="VALUE">
+                      <block type="variables_get" id="obsidian_549">
+                        <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                      </block>
+                    </value>
+                  </block>
+                </statement>
+                <next>
+                  <block type="controls_if" id="obsidian_552">
+                    <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                    <value name="IF0">
+                      <block type="contract_check_result" id="obsidian_555">
+                        <field name="CHECK_RESULT">win</field>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="variables_set" id="obsidian_558">
+                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="obsidian_561">
+                            <field name="NUM">0</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="obsidian_564">
+                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="obsidian_567">
+                                <field name="OP">ADD</field>
+                                <value name="A">
+                                  <block type="epoch" id="obsidian_570"></block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="obsidian_572">
+                                    <field name="VAR" id="var_Win_Pause_Seconds">Win Pause Seconds</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <statement name="ELSE">
+                      <block type="variables_set" id="obsidian_575">
+                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                        <value name="VALUE">
+                          <block type="math_arithmetic" id="obsidian_578">
+                            <field name="OP">ADD</field>
+                            <value name="A">
+                              <block type="variables_get" id="obsidian_581">
+                                <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number" id="obsidian_584">
+                                <field name="NUM">1</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="obsidian_587">
+                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="obsidian_590">
+                                <field name="OP">ADD</field>
+                                <value name="A">
+                                  <block type="epoch" id="obsidian_593"></block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="obsidian_595">
+                                    <field name="VAR" id="var_Loss_Pause_Seconds">Loss Pause Seconds</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="controls_if" id="obsidian_598">
+                        <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                        <value name="IF0">
+                          <block type="logic_operation" id="obsidian_601">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="obsidian_604">
+                                <field name="OP">LT</field>
+                                <value name="A">
+                                  <block type="variables_get" id="obsidian_607">
+                                    <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="obsidian_610">
+                                    <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="obsidian_613">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="obsidian_616">
+                                    <field name="OP">LT</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="obsidian_619">
+                                        <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="obsidian_622">
+                                        <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="obsidian_625">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="obsidian_628">
+                                        <field name="OP">LTE</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="obsidian_631">
+                                            <field name="VAR" id="var_Stake">Stake</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="math_arithmetic" id="obsidian_634">
+                                            <field name="OP">ADD</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="obsidian_637">
+                                                <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="obsidian_640">
+                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_operation" id="obsidian_643">
+                                        <field name="OP">AND</field>
+                                        <value name="A">
+                                          <block type="logic_compare" id="obsidian_646">
+                                            <field name="OP">LT</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="obsidian_649">
+                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="obsidian_652">
+                                                <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="logic_operation" id="obsidian_655">
+                                            <field name="OP">AND</field>
+                                            <value name="A">
+                                              <block type="logic_compare" id="obsidian_658">
+                                                <field name="OP">LTE</field>
+                                                <value name="A">
+                                                  <block type="variables_get" id="obsidian_661">
+                                                    <field name="VAR" id="var_Stake">Stake</field>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="variables_get" id="obsidian_664">
+                                                    <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="logic_operation" id="obsidian_667">
+                                                <field name="OP">AND</field>
+                                                <value name="A">
+                                                  <block type="logic_compare" id="obsidian_670">
+                                                    <field name="OP">GT</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="obsidian_673">
+                                                        <field name="VAR" id="var_Stake">Stake</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="math_number" id="obsidian_676">
+                                                        <field name="NUM">0</field>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="logic_operation" id="obsidian_679">
+                                                    <field name="OP">OR</field>
+                                                    <value name="A">
+                                                      <block type="logic_compare" id="obsidian_682">
+                                                        <field name="OP">LT</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="obsidian_685">
+                                                            <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="variables_get" id="obsidian_688">
+                                                            <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="logic_compare" id="obsidian_691">
+                                                        <field name="OP">LTE</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="obsidian_694">
+                                                            <field name="VAR" id="var_Stake">Stake</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="math_arithmetic" id="obsidian_697">
+                                                            <field name="OP">MINUS</field>
+                                                            <value name="A">
+                                                              <block type="variables_get" id="obsidian_700">
+                                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                              </block>
+                                                            </value>
+                                                            <value name="B">
+                                                              <block type="math_arithmetic" id="obsidian_703">
+                                                                <field name="OP">MINUS</field>
+                                                                <value name="A">
+                                                                  <block type="variables_get" id="obsidian_706">
+                                                                    <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                                  </block>
+                                                                </value>
+                                                                <value name="B">
+                                                                  <block type="variables_get" id="obsidian_709">
+                                                                    <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                                  </block>
+                                                                </value>
+                                                              </block>
+                                                            </value>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <statement name="DO0">
+                          <block type="trade_again" id="obsidian_712"></block>
+                        </statement>
+                        <statement name="ELSE">
+                          <block type="text_print" id="obsidian_714">
+                            <value name="TEXT">
+                              <block type="text" id="obsidian_716">
+                                <field name="TEXT">Obsidian Parity Premium: session stopped. Check profit target, remaining loss/trailing budget, trade count, loss streak and stake cap.</field>
+                              </block>
+                            </value>
+                          </block>
+                        </statement>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="before_purchase" id="obsidian_195" deletable="false" x="0" y="1822">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="controls_if" id="obsidian_197">
+        <value name="IF0">
+          <block type="logic_compare" id="obsidian_200">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="variables_get" id="obsidian_203">
+                <field name="VAR" id="var_Session_Ready">Session Ready</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="obsidian_206">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="variables_set" id="obsidian_209">
+            <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+            <value name="VALUE">
+              <block type="total_profit" id="obsidian_212"></block>
+            </value>
+            <next>
+              <block type="variables_set" id="obsidian_214">
+                <field name="VAR" id="var_Session_Ready">Session Ready</field>
+                <value name="VALUE">
+                  <block type="math_number" id="obsidian_217">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <next>
+          <block type="variables_set" id="obsidian_220">
+            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="obsidian_223">
+                <field name="OP">MINUS</field>
+                <value name="A">
+                  <block type="total_profit" id="obsidian_226"></block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="obsidian_228">
+                    <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" id="obsidian_231">
+                <value name="IF0">
+                  <block type="logic_operation" id="obsidian_234">
+                    <field name="OP">AND</field>
+                    <value name="A">
+                      <block type="logic_operation" id="obsidian_237">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare" id="obsidian_240">
+                            <field name="OP">LT</field>
+                            <value name="A">
+                              <block type="variables_get" id="obsidian_243">
+                                <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="variables_get" id="obsidian_246">
+                                <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="obsidian_249">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="obsidian_252">
+                                <field name="OP">LT</field>
+                                <value name="A">
+                                  <block type="variables_get" id="obsidian_255">
+                                    <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="obsidian_258">
+                                    <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="obsidian_261">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="obsidian_264">
+                                    <field name="OP">LTE</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="obsidian_267">
+                                        <field name="VAR" id="var_Stake">Stake</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="math_arithmetic" id="obsidian_270">
+                                        <field name="OP">ADD</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="obsidian_273">
+                                            <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="obsidian_276">
+                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="obsidian_279">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="obsidian_282">
+                                        <field name="OP">LT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="obsidian_285">
+                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="obsidian_288">
+                                            <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_operation" id="obsidian_291">
+                                        <field name="OP">AND</field>
+                                        <value name="A">
+                                          <block type="logic_compare" id="obsidian_294">
+                                            <field name="OP">LTE</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="obsidian_297">
+                                                <field name="VAR" id="var_Stake">Stake</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="obsidian_300">
+                                                <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="logic_operation" id="obsidian_303">
+                                            <field name="OP">AND</field>
+                                            <value name="A">
+                                              <block type="logic_compare" id="obsidian_306">
+                                                <field name="OP">GT</field>
+                                                <value name="A">
+                                                  <block type="variables_get" id="obsidian_309">
+                                                    <field name="VAR" id="var_Stake">Stake</field>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="math_number" id="obsidian_312">
+                                                    <field name="NUM">0</field>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="logic_operation" id="obsidian_315">
+                                                <field name="OP">OR</field>
+                                                <value name="A">
+                                                  <block type="logic_compare" id="obsidian_318">
+                                                    <field name="OP">LT</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="obsidian_321">
+                                                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="variables_get" id="obsidian_324">
+                                                        <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="logic_compare" id="obsidian_327">
+                                                    <field name="OP">LTE</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="obsidian_330">
+                                                        <field name="VAR" id="var_Stake">Stake</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="math_arithmetic" id="obsidian_333">
+                                                        <field name="OP">MINUS</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="obsidian_336">
+                                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="math_arithmetic" id="obsidian_339">
+                                                            <field name="OP">MINUS</field>
+                                                            <value name="A">
+                                                              <block type="variables_get" id="obsidian_342">
+                                                                <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                              </block>
+                                                            </value>
+                                                            <value name="B">
+                                                              <block type="variables_get" id="obsidian_345">
+                                                                <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                              </block>
+                                                            </value>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="logic_operation" id="obsidian_348">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare" id="obsidian_351">
+                            <field name="OP">GTE</field>
+                            <value name="A">
+                              <block type="epoch" id="obsidian_354"></block>
+                            </value>
+                            <value name="B">
+                              <block type="variables_get" id="obsidian_356">
+                                <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="obsidian_359">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="obsidian_362">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="lists_length" id="obsidian_365">
+                                    <value name="VALUE">
+                                      <block type="lastDigitList" id="obsidian_367"></block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="obsidian_369">
+                                    <field name="VAR" id="var_Long_Window">Long Window</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="obsidian_372">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="obsidian_375">
+                                    <field name="OP">GTE</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="obsidian_378">
+                                        <field name="VAR" id="var_Short_Window">Short Window</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="obsidian_381">
+                                        <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="obsidian_384">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="obsidian_387">
+                                        <field name="OP">GT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="obsidian_390">
+                                            <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="math_number" id="obsidian_393">
+                                            <field name="NUM">0</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_compare" id="obsidian_396">
+                                        <field name="OP">GT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="obsidian_399">
+                                            <field name="VAR" id="var_Long_Window">Long Window</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="obsidian_402">
+                                            <field name="VAR" id="var_Short_Window">Short Window</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="controls_if" id="obsidian_405">
+                    <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1"></mutation>
+                    <value name="IF0">
+                      <block type="logic_operation" id="obsidian_408">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="last_digits_condition" id="obsidian_411">
+                            <field name="CONDITION">ALL_EVEN</field>
+                            <value name="N">
+                              <shadow type="math_number" id="VL!P+.I4F8pVYy0r-(RY">
+                                <field name="NUM">3</field>
+                              </shadow>
+                              <block type="variables_get" id="obsidian_414">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="obsidian_417">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="obsidian_420">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="even_odd_analysis" id="obsidian_423">
+                                    <field name="ANALYSIS_TYPE">EVEN_PERCENTAGE</field>
+                                    <value name="N">
+                                      <shadow type="math_number" id="^5Mvjz];8~MaJAOL0kj(">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="obsidian_426">
+                                        <field name="VAR" id="var_Short_Window">Short Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="obsidian_429">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="obsidian_432">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="obsidian_435">
+                                        <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_compare" id="obsidian_438">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="even_odd_analysis" id="obsidian_441">
+                                    <field name="ANALYSIS_TYPE">EVEN_PERCENTAGE</field>
+                                    <value name="N">
+                                      <shadow type="math_number" id="Y]:.%ccDC%?EQR(=/=3#">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="obsidian_444">
+                                        <field name="VAR" id="var_Long_Window">Long Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="obsidian_447">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="obsidian_450">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="obsidian_453">
+                                        <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="apollo_purchase2" id="obsidian_456">
+                        <field name="PURCHASE_LIST">DIGITEVEN</field>
+                      </block>
+                    </statement>
+                    <value name="IF1">
+                      <block type="logic_operation" id="obsidian_459">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="last_digits_condition" id="obsidian_462">
+                            <field name="CONDITION">ALL_ODD</field>
+                            <value name="N">
+                              <shadow type="math_number" id="$-+k2WI4#N0ON3Jq,Ts`">
+                                <field name="NUM">3</field>
+                              </shadow>
+                              <block type="variables_get" id="obsidian_465">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="obsidian_468">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="obsidian_471">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="even_odd_analysis" id="obsidian_474">
+                                    <field name="ANALYSIS_TYPE">ODD_PERCENTAGE</field>
+                                    <value name="N">
+                                      <shadow type="math_number" id="^^9K+0{j+XUYWP.|5|24">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="obsidian_477">
+                                        <field name="VAR" id="var_Short_Window">Short Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="obsidian_480">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="obsidian_483">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="obsidian_486">
+                                        <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_compare" id="obsidian_489">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="even_odd_analysis" id="obsidian_492">
+                                    <field name="ANALYSIS_TYPE">ODD_PERCENTAGE</field>
+                                    <value name="N">
+                                      <shadow type="math_number" id="+;J:x*kKfjq7rWTwwZ-+">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="obsidian_495">
+                                        <field name="VAR" id="var_Long_Window">Long Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="obsidian_498">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="obsidian_501">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="obsidian_504">
+                                        <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO1">
+                      <block type="apollo_purchase2" id="obsidian_507">
+                        <field name="PURCHASE_LIST">DIGITODD</field>
+                      </block>
+                    </statement>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

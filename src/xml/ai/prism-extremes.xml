@@ -1,0 +1,1276 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="var_Stake">Stake</variable>
+    <variable id="var_Trades_Completed">Trades Completed</variable>
+    <variable id="var_Maximum_Stake">Maximum Stake</variable>
+    <variable id="var_Starting_Profit">Starting Profit</variable>
+    <variable id="var_Session_Profit">Session Profit</variable>
+    <variable id="var_Take_Profit">Take Profit</variable>
+    <variable id="var_Session_Ready">Session Ready</variable>
+    <variable id="var_Stop_Loss">Stop Loss</variable>
+    <variable id="var_Peak_Profit">Peak Profit</variable>
+    <variable id="var_Maximum_Trades">Maximum Trades</variable>
+    <variable id="var_Loss_Streak">Loss Streak</variable>
+    <variable id="var_Maximum_Loss_Streak">Maximum Loss Streak</variable>
+    <variable id="var_Next_Entry_Time">Next Entry Time</variable>
+    <variable id="var_Confirmation_Ticks">Confirmation Ticks</variable>
+    <variable id="var_Short_Window">Short Window</variable>
+    <variable id="var_Long_Window">Long Window</variable>
+    <variable id="var_Win_Pause_Seconds">Win Pause Seconds</variable>
+    <variable id="var_Loss_Pause_Seconds">Loss Pause Seconds</variable>
+    <variable id="var_Short_Margin">Short Margin</variable>
+    <variable id="var_Long_Margin">Long Margin</variable>
+    <variable id="var_Trail_Activation">Trail Activation</variable>
+    <variable id="var_Trailing_Drawdown">Trailing Drawdown</variable>
+  </variables>
+  <block type="trade_definition" id="prism_24" deletable="false" x="0" y="60">
+    <comment pinned="false" h="140" w="360">Prism Extremes Premium: fixed stake; streak entry requires 40/120-tick frequency agreement. Margins are percentage points above uniform-digit frequency, not win probabilities. Pauses: 10 seconds after wins, 30 after losses. Trailing drawdown activates at 1 profit. The next stake must fit both loss budgets. Historical digit patterns do not guarantee the next digit. Limits reset on manual restart. Demo-test before live use.</comment>
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="prism_26" deletable="false" movable="false">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">random_index</field>
+        <field name="SYMBOL_LIST">R_10</field>
+        <field name="ALTERNATE_MARKETS">FALSE</field>
+        <field name="ALTERNATE_EVERY">1</field>
+        <field name="MULTI_MARKET">FALSE</field>
+        <field name="VH_ENABLED">FALSE</field>
+        <field name="VH_SETTINGS_BTN">VH Settings</field>
+        <next>
+          <block type="trade_definition_tradetype" id="prism_37" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">digits</field>
+            <field name="TRADETYPE_LIST">overunder</field>
+            <next>
+              <block type="trade_definition_contracttype" id="prism_41" deletable="false" movable="false">
+                <field name="TYPE_LIST">both</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="prism_44" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="prism_47" deletable="false" movable="false">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="prism_50" deletable="false" movable="false">
+                            <field name="RESTARTONERROR">FALSE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="prism_54">
+        <field name="VAR" id="var_Stake">Stake</field>
+        <value name="VALUE">
+          <block type="math_number" id="prism_57">
+            <field name="NUM">0.35</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="prism_60">
+            <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+            <value name="VALUE">
+              <block type="math_number" id="prism_63">
+                <field name="NUM">0.7</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="prism_66">
+                <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                <value name="VALUE">
+                  <block type="math_number" id="prism_69">
+                    <field name="NUM">2</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="prism_72">
+                    <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="prism_75">
+                        <field name="NUM">2</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="prism_78">
+                        <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="prism_81">
+                            <field name="NUM">25</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="prism_84">
+                            <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                            <value name="VALUE">
+                              <block type="math_number" id="prism_87">
+                                <field name="NUM">3</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="variables_set" id="prism_90">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                <value name="VALUE">
+                                  <block type="math_number" id="prism_93">
+                                    <field name="NUM">2</field>
+                                  </block>
+                                </value>
+                                <next>
+                                  <block type="variables_set" id="prism_96">
+                                    <field name="VAR" id="var_Short_Window">Short Window</field>
+                                    <value name="VALUE">
+                                      <block type="math_number" id="prism_99">
+                                        <field name="NUM">40</field>
+                                      </block>
+                                    </value>
+                                    <next>
+                                      <block type="variables_set" id="prism_102">
+                                        <field name="VAR" id="var_Long_Window">Long Window</field>
+                                        <value name="VALUE">
+                                          <block type="math_number" id="prism_105">
+                                            <field name="NUM">120</field>
+                                          </block>
+                                        </value>
+                                        <next>
+                                          <block type="variables_set" id="prism_108">
+                                            <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                            <value name="VALUE">
+                                              <block type="math_number" id="prism_111">
+                                                <field name="NUM">10</field>
+                                              </block>
+                                            </value>
+                                            <next>
+                                              <block type="variables_set" id="prism_114">
+                                                <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                                <value name="VALUE">
+                                                  <block type="math_number" id="prism_117">
+                                                    <field name="NUM">5</field>
+                                                  </block>
+                                                </value>
+                                                <next>
+                                                  <block type="variables_set" id="prism_120">
+                                                    <field name="VAR" id="var_Win_Pause_Seconds">Win Pause Seconds</field>
+                                                    <value name="VALUE">
+                                                      <block type="math_number" id="prism_123">
+                                                        <field name="NUM">10</field>
+                                                      </block>
+                                                    </value>
+                                                    <next>
+                                                      <block type="variables_set" id="prism_126">
+                                                        <field name="VAR" id="var_Loss_Pause_Seconds">Loss Pause Seconds</field>
+                                                        <value name="VALUE">
+                                                          <block type="math_number" id="prism_129">
+                                                            <field name="NUM">30</field>
+                                                          </block>
+                                                        </value>
+                                                        <next>
+                                                          <block type="variables_set" id="prism_132">
+                                                            <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                            <value name="VALUE">
+                                                              <block type="math_number" id="prism_135">
+                                                                <field name="NUM">1</field>
+                                                              </block>
+                                                            </value>
+                                                            <next>
+                                                              <block type="variables_set" id="prism_138">
+                                                                <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                                <value name="VALUE">
+                                                                  <block type="math_number" id="prism_141">
+                                                                    <field name="NUM">0.7</field>
+                                                                  </block>
+                                                                </value>
+                                                                <next>
+                                                                  <block type="variables_set" id="prism_144">
+                                                                    <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                                                    <value name="VALUE">
+                                                                      <block type="math_number" id="prism_147">
+                                                                        <field name="NUM">0</field>
+                                                                      </block>
+                                                                    </value>
+                                                                    <next>
+                                                                      <block type="variables_set" id="prism_150">
+                                                                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                                                                        <value name="VALUE">
+                                                                          <block type="math_number" id="prism_153">
+                                                                            <field name="NUM">0</field>
+                                                                          </block>
+                                                                        </value>
+                                                                        <next>
+                                                                          <block type="variables_set" id="prism_156">
+                                                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                                            <value name="VALUE">
+                                                                              <block type="math_number" id="prism_159">
+                                                                                <field name="NUM">0</field>
+                                                                              </block>
+                                                                            </value>
+                                                                            <next>
+                                                                              <block type="variables_set" id="prism_162">
+                                                                                <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                                                                                <value name="VALUE">
+                                                                                  <block type="math_number" id="prism_165">
+                                                                                    <field name="NUM">0</field>
+                                                                                  </block>
+                                                                                </value>
+                                                                                <next>
+                                                                                  <block type="variables_set" id="prism_168">
+                                                                                    <field name="VAR" id="var_Session_Ready">Session Ready</field>
+                                                                                    <value name="VALUE">
+                                                                                      <block type="math_number" id="prism_171">
+                                                                                        <field name="NUM">0</field>
+                                                                                      </block>
+                                                                                    </value>
+                                                                                    <next>
+                                                                                      <block type="variables_set" id="prism_174">
+                                                                                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                                                        <value name="VALUE">
+                                                                                          <block type="math_number" id="prism_177">
+                                                                                            <field name="NUM">0</field>
+                                                                                          </block>
+                                                                                        </value>
+                                                                                        <next>
+                                                                                          <block type="variables_set" id="prism_180">
+                                                                                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                                                                                            <value name="VALUE">
+                                                                                              <block type="math_number" id="prism_183">
+                                                                                                <field name="NUM">0</field>
+                                                                                              </block>
+                                                                                            </value>
+                                                                                          </block>
+                                                                                        </next>
+                                                                                      </block>
+                                                                                    </next>
+                                                                                  </block>
+                                                                                </next>
+                                                                              </block>
+                                                                            </next>
+                                                                          </block>
+                                                                        </next>
+                                                                      </block>
+                                                                    </next>
+                                                                  </block>
+                                                                </next>
+                                                              </block>
+                                                            </next>
+                                                          </block>
+                                                        </next>
+                                                      </block>
+                                                    </next>
+                                                  </block>
+                                                </next>
+                                              </block>
+                                            </next>
+                                          </block>
+                                        </next>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="trade_definition_tradeoptions" id="prism_186">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation>
+        <field name="DURATIONTYPE_LIST">t</field>
+        <value name="DURATION">
+          <block type="math_number" id="prism_190">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <value name="AMOUNT">
+          <block type="variables_get" id="prism_193">
+            <field name="VAR" id="var_Stake">Stake</field>
+          </block>
+        </value>
+        <value name="PREDICTION">
+          <shadow type="math_number_positive" id="VUxL^j2_K4Tkq,R,:UFq" inline="true">
+            <field name="NUM">1</field>
+          </shadow>
+          <block type="math_number" id="prism_196">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="after_purchase" id="prism_548" x="6622" y="60">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="variables_set" id="prism_550">
+        <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+        <value name="VALUE">
+          <block type="math_arithmetic" id="prism_553">
+            <field name="OP">ADD</field>
+            <value name="A">
+              <block type="variables_get" id="prism_556">
+                <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="prism_559">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="prism_562">
+            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="prism_565">
+                <field name="OP">MINUS</field>
+                <value name="A">
+                  <block type="total_profit" id="prism_568"></block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="prism_570">
+                    <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" id="prism_573">
+                <value name="IF0">
+                  <block type="logic_compare" id="prism_576">
+                    <field name="OP">GT</field>
+                    <value name="A">
+                      <block type="variables_get" id="prism_579">
+                        <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="variables_get" id="prism_582">
+                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="variables_set" id="prism_585">
+                    <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                    <value name="VALUE">
+                      <block type="variables_get" id="prism_588">
+                        <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                      </block>
+                    </value>
+                  </block>
+                </statement>
+                <next>
+                  <block type="controls_if" id="prism_591">
+                    <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                    <value name="IF0">
+                      <block type="contract_check_result" id="prism_594">
+                        <field name="CHECK_RESULT">win</field>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="variables_set" id="prism_597">
+                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="prism_600">
+                            <field name="NUM">0</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="prism_603">
+                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="prism_606">
+                                <field name="OP">ADD</field>
+                                <value name="A">
+                                  <block type="epoch" id="prism_609"></block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="prism_611">
+                                    <field name="VAR" id="var_Win_Pause_Seconds">Win Pause Seconds</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <statement name="ELSE">
+                      <block type="variables_set" id="prism_614">
+                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                        <value name="VALUE">
+                          <block type="math_arithmetic" id="prism_617">
+                            <field name="OP">ADD</field>
+                            <value name="A">
+                              <block type="variables_get" id="prism_620">
+                                <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number" id="prism_623">
+                                <field name="NUM">1</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="prism_626">
+                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="prism_629">
+                                <field name="OP">ADD</field>
+                                <value name="A">
+                                  <block type="epoch" id="prism_632"></block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="prism_634">
+                                    <field name="VAR" id="var_Loss_Pause_Seconds">Loss Pause Seconds</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="controls_if" id="prism_637">
+                        <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                        <value name="IF0">
+                          <block type="logic_operation" id="prism_640">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="prism_643">
+                                <field name="OP">LT</field>
+                                <value name="A">
+                                  <block type="variables_get" id="prism_646">
+                                    <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="prism_649">
+                                    <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="prism_652">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="prism_655">
+                                    <field name="OP">LT</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="prism_658">
+                                        <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="prism_661">
+                                        <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="prism_664">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="prism_667">
+                                        <field name="OP">LTE</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="prism_670">
+                                            <field name="VAR" id="var_Stake">Stake</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="math_arithmetic" id="prism_673">
+                                            <field name="OP">ADD</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="prism_676">
+                                                <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="prism_679">
+                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_operation" id="prism_682">
+                                        <field name="OP">AND</field>
+                                        <value name="A">
+                                          <block type="logic_compare" id="prism_685">
+                                            <field name="OP">LT</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="prism_688">
+                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="prism_691">
+                                                <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="logic_operation" id="prism_694">
+                                            <field name="OP">AND</field>
+                                            <value name="A">
+                                              <block type="logic_compare" id="prism_697">
+                                                <field name="OP">LTE</field>
+                                                <value name="A">
+                                                  <block type="variables_get" id="prism_700">
+                                                    <field name="VAR" id="var_Stake">Stake</field>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="variables_get" id="prism_703">
+                                                    <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="logic_operation" id="prism_706">
+                                                <field name="OP">AND</field>
+                                                <value name="A">
+                                                  <block type="logic_compare" id="prism_709">
+                                                    <field name="OP">GT</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="prism_712">
+                                                        <field name="VAR" id="var_Stake">Stake</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="math_number" id="prism_715">
+                                                        <field name="NUM">0</field>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="logic_operation" id="prism_718">
+                                                    <field name="OP">OR</field>
+                                                    <value name="A">
+                                                      <block type="logic_compare" id="prism_721">
+                                                        <field name="OP">LT</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="prism_724">
+                                                            <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="variables_get" id="prism_727">
+                                                            <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="logic_compare" id="prism_730">
+                                                        <field name="OP">LTE</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="prism_733">
+                                                            <field name="VAR" id="var_Stake">Stake</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="math_arithmetic" id="prism_736">
+                                                            <field name="OP">MINUS</field>
+                                                            <value name="A">
+                                                              <block type="variables_get" id="prism_739">
+                                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                              </block>
+                                                            </value>
+                                                            <value name="B">
+                                                              <block type="math_arithmetic" id="prism_742">
+                                                                <field name="OP">MINUS</field>
+                                                                <value name="A">
+                                                                  <block type="variables_get" id="prism_745">
+                                                                    <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                                  </block>
+                                                                </value>
+                                                                <value name="B">
+                                                                  <block type="variables_get" id="prism_748">
+                                                                    <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                                  </block>
+                                                                </value>
+                                                              </block>
+                                                            </value>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <statement name="DO0">
+                          <block type="trade_again" id="prism_751"></block>
+                        </statement>
+                        <statement name="ELSE">
+                          <block type="text_print" id="prism_753">
+                            <value name="TEXT">
+                              <block type="text" id="prism_755">
+                                <field name="TEXT">Prism Extremes Premium: session stopped. Check profit target, remaining loss/trailing budget, trade count, loss streak and stake cap.</field>
+                              </block>
+                            </value>
+                          </block>
+                        </statement>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="before_purchase" id="prism_198" deletable="false" x="0" y="1822">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="controls_if" id="prism_200">
+        <value name="IF0">
+          <block type="logic_compare" id="prism_203">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="variables_get" id="prism_206">
+                <field name="VAR" id="var_Session_Ready">Session Ready</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="prism_209">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="variables_set" id="prism_212">
+            <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+            <value name="VALUE">
+              <block type="total_profit" id="prism_215"></block>
+            </value>
+            <next>
+              <block type="variables_set" id="prism_217">
+                <field name="VAR" id="var_Session_Ready">Session Ready</field>
+                <value name="VALUE">
+                  <block type="math_number" id="prism_220">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <next>
+          <block type="variables_set" id="prism_223">
+            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="prism_226">
+                <field name="OP">MINUS</field>
+                <value name="A">
+                  <block type="total_profit" id="prism_229"></block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="prism_231">
+                    <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" id="prism_234">
+                <value name="IF0">
+                  <block type="logic_operation" id="prism_237">
+                    <field name="OP">AND</field>
+                    <value name="A">
+                      <block type="logic_operation" id="prism_240">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare" id="prism_243">
+                            <field name="OP">LT</field>
+                            <value name="A">
+                              <block type="variables_get" id="prism_246">
+                                <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="variables_get" id="prism_249">
+                                <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="prism_252">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="prism_255">
+                                <field name="OP">LT</field>
+                                <value name="A">
+                                  <block type="variables_get" id="prism_258">
+                                    <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="prism_261">
+                                    <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="prism_264">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="prism_267">
+                                    <field name="OP">LTE</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="prism_270">
+                                        <field name="VAR" id="var_Stake">Stake</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="math_arithmetic" id="prism_273">
+                                        <field name="OP">ADD</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="prism_276">
+                                            <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="prism_279">
+                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="prism_282">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="prism_285">
+                                        <field name="OP">LT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="prism_288">
+                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="prism_291">
+                                            <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_operation" id="prism_294">
+                                        <field name="OP">AND</field>
+                                        <value name="A">
+                                          <block type="logic_compare" id="prism_297">
+                                            <field name="OP">LTE</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="prism_300">
+                                                <field name="VAR" id="var_Stake">Stake</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="prism_303">
+                                                <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="logic_operation" id="prism_306">
+                                            <field name="OP">AND</field>
+                                            <value name="A">
+                                              <block type="logic_compare" id="prism_309">
+                                                <field name="OP">GT</field>
+                                                <value name="A">
+                                                  <block type="variables_get" id="prism_312">
+                                                    <field name="VAR" id="var_Stake">Stake</field>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="math_number" id="prism_315">
+                                                    <field name="NUM">0</field>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="logic_operation" id="prism_318">
+                                                <field name="OP">OR</field>
+                                                <value name="A">
+                                                  <block type="logic_compare" id="prism_321">
+                                                    <field name="OP">LT</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="prism_324">
+                                                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="variables_get" id="prism_327">
+                                                        <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="logic_compare" id="prism_330">
+                                                    <field name="OP">LTE</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="prism_333">
+                                                        <field name="VAR" id="var_Stake">Stake</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="math_arithmetic" id="prism_336">
+                                                        <field name="OP">MINUS</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="prism_339">
+                                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="math_arithmetic" id="prism_342">
+                                                            <field name="OP">MINUS</field>
+                                                            <value name="A">
+                                                              <block type="variables_get" id="prism_345">
+                                                                <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                              </block>
+                                                            </value>
+                                                            <value name="B">
+                                                              <block type="variables_get" id="prism_348">
+                                                                <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                              </block>
+                                                            </value>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="logic_operation" id="prism_351">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare" id="prism_354">
+                            <field name="OP">GTE</field>
+                            <value name="A">
+                              <block type="epoch" id="prism_357"></block>
+                            </value>
+                            <value name="B">
+                              <block type="variables_get" id="prism_359">
+                                <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="prism_362">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="prism_365">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="lists_length" id="prism_368">
+                                    <value name="VALUE">
+                                      <block type="lastDigitList" id="prism_370"></block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="prism_372">
+                                    <field name="VAR" id="var_Long_Window">Long Window</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="prism_375">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="prism_378">
+                                    <field name="OP">GTE</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="prism_381">
+                                        <field name="VAR" id="var_Short_Window">Short Window</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="prism_384">
+                                        <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="prism_387">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="prism_390">
+                                        <field name="OP">GT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="prism_393">
+                                            <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="math_number" id="prism_396">
+                                            <field name="NUM">0</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_compare" id="prism_399">
+                                        <field name="OP">GT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="prism_402">
+                                            <field name="VAR" id="var_Long_Window">Long Window</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="prism_405">
+                                            <field name="VAR" id="var_Short_Window">Short Window</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="controls_if" id="prism_408">
+                    <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1"></mutation>
+                    <value name="IF0">
+                      <block type="logic_operation" id="prism_411">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="last_digits_condition" id="prism_414">
+                            <field name="CONDITION">LESS_OR_EQUAL</field>
+                            <value name="N">
+                              <shadow type="math_number" id="y7hZIg9Fk9*pBETbnw7B">
+                                <field name="NUM">3</field>
+                              </shadow>
+                              <block type="variables_get" id="prism_417">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                              </block>
+                            </value>
+                            <value name="COMPARE_VALUE">
+                              <shadow type="math_number" id="akO7NX/(gjO;YRoPJ)~R">
+                                <field name="NUM">4</field>
+                              </shadow>
+                              <block type="math_number" id="prism_420">
+                                <field name="NUM">1</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="prism_423">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="prism_426">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="over_under_analysis" id="prism_429">
+                                    <field name="CONDITION_TYPE">OVER</field>
+                                    <value name="DIGIT">
+                                      <shadow type="math_number" id="KwNf]K/kaW8TV/Et9VFM">
+                                        <field name="NUM">4</field>
+                                      </shadow>
+                                      <block type="math_number" id="prism_432">
+                                        <field name="NUM">1</field>
+                                      </block>
+                                    </value>
+                                    <value name="N">
+                                      <shadow type="math_number" id="=_SKK8JiB6{HEG^*!e`}">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="prism_435">
+                                        <field name="VAR" id="var_Short_Window">Short Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="prism_438">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="prism_441">
+                                        <field name="NUM">80</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="prism_444">
+                                        <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_compare" id="prism_447">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="over_under_analysis" id="prism_450">
+                                    <field name="CONDITION_TYPE">OVER</field>
+                                    <value name="DIGIT">
+                                      <shadow type="math_number" id="m=)VZ3f[R=9|`%0wo*(B">
+                                        <field name="NUM">4</field>
+                                      </shadow>
+                                      <block type="math_number" id="prism_453">
+                                        <field name="NUM">1</field>
+                                      </block>
+                                    </value>
+                                    <value name="N">
+                                      <shadow type="math_number" id="}?/QDhK#75b{[XX+Y1nj">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="prism_456">
+                                        <field name="VAR" id="var_Long_Window">Long Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="prism_459">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="prism_462">
+                                        <field name="NUM">80</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="prism_465">
+                                        <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="apollo_purchase2" id="prism_468">
+                        <field name="PURCHASE_LIST">DIGITOVER</field>
+                        <value name="PREDICTION">
+                          <block type="math_number" id="prism_471">
+                            <field name="NUM">1</field>
+                          </block>
+                        </value>
+                      </block>
+                    </statement>
+                    <value name="IF1">
+                      <block type="logic_operation" id="prism_474">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="last_digits_condition" id="prism_477">
+                            <field name="CONDITION">GREATER_OR_EQUAL</field>
+                            <value name="N">
+                              <shadow type="math_number" id="q_MCD@Ji3.i|u,!:f+=:">
+                                <field name="NUM">3</field>
+                              </shadow>
+                              <block type="variables_get" id="prism_480">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                              </block>
+                            </value>
+                            <value name="COMPARE_VALUE">
+                              <shadow type="math_number" id="[ut;%6:H(t{`%zKvcOVl">
+                                <field name="NUM">4</field>
+                              </shadow>
+                              <block type="math_number" id="prism_483">
+                                <field name="NUM">8</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="prism_486">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="prism_489">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="math_arithmetic" id="prism_492">
+                                    <field name="OP">MINUS</field>
+                                    <value name="A">
+                                      <block type="math_number" id="prism_495">
+                                        <field name="NUM">100</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="over_under_analysis" id="prism_498">
+                                        <field name="CONDITION_TYPE">OVER</field>
+                                        <value name="DIGIT">
+                                          <shadow type="math_number" id="QS56Xh[fpE+f[91IqwlE">
+                                            <field name="NUM">4</field>
+                                          </shadow>
+                                          <block type="math_number" id="prism_501">
+                                            <field name="NUM">7</field>
+                                          </block>
+                                        </value>
+                                        <value name="N">
+                                          <shadow type="math_number" id="y!)YnQ67_2tdJckb]qdh">
+                                            <field name="NUM">1000</field>
+                                          </shadow>
+                                          <block type="variables_get" id="prism_504">
+                                            <field name="VAR" id="var_Short_Window">Short Window</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="prism_507">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="prism_510">
+                                        <field name="NUM">80</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="prism_513">
+                                        <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_compare" id="prism_516">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="math_arithmetic" id="prism_519">
+                                    <field name="OP">MINUS</field>
+                                    <value name="A">
+                                      <block type="math_number" id="prism_522">
+                                        <field name="NUM">100</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="over_under_analysis" id="prism_525">
+                                        <field name="CONDITION_TYPE">OVER</field>
+                                        <value name="DIGIT">
+                                          <shadow type="math_number" id=":R)A+SzdaJ^E#ybu/R$z">
+                                            <field name="NUM">4</field>
+                                          </shadow>
+                                          <block type="math_number" id="prism_528">
+                                            <field name="NUM">7</field>
+                                          </block>
+                                        </value>
+                                        <value name="N">
+                                          <shadow type="math_number" id="wQl!n7-^+3Kk;C*9Tm,(">
+                                            <field name="NUM">1000</field>
+                                          </shadow>
+                                          <block type="variables_get" id="prism_531">
+                                            <field name="VAR" id="var_Long_Window">Long Window</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="prism_534">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="prism_537">
+                                        <field name="NUM">80</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="prism_540">
+                                        <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO1">
+                      <block type="apollo_purchase2" id="prism_543">
+                        <field name="PURCHASE_LIST">DIGITUNDER</field>
+                        <value name="PREDICTION">
+                          <block type="math_number" id="prism_546">
+                            <field name="NUM">8</field>
+                          </block>
+                        </value>
+                      </block>
+                    </statement>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

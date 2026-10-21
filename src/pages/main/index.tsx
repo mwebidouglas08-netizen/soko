@@ -6,14 +6,15 @@ import AITradingHub from '@/pages/ai-trading-hub';
 import OUBotPage from '@/pages/ou-bot';
 import AISignalScannerPage from '@/pages/ai-signal-scanner';
 import BacktestPage from '@/pages/backtest';
+import BotsCatalog from '@/pages/bots-catalog';
 import Landing from '@/pages/landing';
 import BotDock from '@/components/bot-dock';
-import AIBotDock from '@/components/ai-bot';
+import AIBotDock from '@/components/ai-scanner';
 import VersionBanner from '@/components/version-banner';
 import AppWrapper from './main';
 import './main.scss';
 
-type HubView = 'dashboard' | 'ai-hub' | 'ai-scanner' | 'ou-bot' | 'backtest';
+type HubView = 'dashboard' | 'ai-hub' | 'ai-scanner' | 'ou-bot' | 'backtest' | 'bots';
 
 /** Compact stroke icons for the workspace nav (1.6 rem box, currentColor). */
 const HubIcon = ({ name }: { name: HubView }) => {
@@ -60,6 +61,14 @@ const HubIcon = ({ name }: { name: HubView }) => {
                     <path d='M8.2 14h7.6' opacity='0.55' />
                 </svg>
             );
+        case 'bots':
+            return (
+                <svg {...common}>
+                    <rect x='4' y='9' width='16' height='11' rx='2.5' />
+                    <path d='M12 9V5.5M9 14.5h.01M15 14.5h.01' />
+                    <path d='M2 13v3M22 13v3' opacity='0.55' />
+                </svg>
+            );
         default:
             return (
                 <svg {...common}>
@@ -76,6 +85,7 @@ const VIEWS: { id: HubView; label: string; hint: string }[] = [
     { id: 'ou-bot', label: 'Over / Under Bot', hint: 'Digit edge engine' },
     { id: 'ai-scanner', label: 'AI Signal Scanner', hint: 'Multi-family signals' },
     { id: 'backtest', label: 'Backtest', hint: 'Validate on history' },
+    { id: 'bots', label: 'Free Bots', hint: 'Load AI bot templates' },
     { id: 'dashboard', label: 'Bot Dashboard', hint: 'Blockly workspace' },
 ];
 
@@ -202,6 +212,13 @@ const Main = observer(() => {
                     aria-hidden={activeView !== 'backtest'}
                 >
                     <BacktestPage />
+                </div>
+                <div
+                    className='main-hub'
+                    style={{ display: activeView === 'bots' ? 'block' : 'none', ...enterAnim('bots') }}
+                    aria-hidden={activeView !== 'bots'}
+                >
+                    <BotsCatalog />
                 </div>
                 <div
                     className='main-dashboard__engine'

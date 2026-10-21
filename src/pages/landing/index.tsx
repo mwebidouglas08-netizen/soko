@@ -2,110 +2,140 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import './landing.scss';
 
 /**
- * First-visit cinematic landing (SmartFlip-class): hero with typewriter titles,
- * live-style stats, feature grid, rotating benefits, review marquee, trust
- * badges and a final CTA — all dismissing into the trading hub via onEnter.
+ * TraderScheme landing (lp__ structure): topbar nav, live market ticker, hero,
+ * 3-step get-started, 6-feature workspace grid, 12 verified reviews, free course,
+ * FAQ and footer — dismissing into the trading hub via onEnter.
  */
 
-const BRAND = 'Mwebifx';
-
-const HERO_TITLES = [
-    'Automate Your Trades',
-    'Scan Live Market Signals',
-    'Deploy AI-Powered Bots',
-    'Backtest Before You Risk',
-    `Trade Smarter with ${BRAND}`,
+const NAV = [
+    { label: 'How it works', href: '#lp-how' },
+    { label: 'Bots', href: '#lp-features' },
+    { label: 'Reviews', href: '#lp-reviews' },
+    { label: 'Course', href: '#lp-course-hero' },
+    { label: 'FAQ', href: '#lp-faq' },
 ];
 
-const STATS = [
-    { value: '28+', label: 'Live Markets' },
-    { value: '5', label: 'Signal Families' },
-    { value: '24/7', label: 'Bot Automation' },
-    { value: '2', label: 'Paper & Live Modes' },
+const TICKER = [
+    { name: 'Volatility 75', chg: '+2.34%', up: true },
+    { name: 'Boom 1000 Index', chg: '+1.82%', up: true },
+    { name: 'Crash 500 Index', chg: '-0.94%', up: false },
+    { name: 'Step Index', chg: '+0.41%', up: true },
+    { name: 'Range Break 100', chg: '+1.17%', up: true },
+    { name: 'Jump 100 Index', chg: '-0.63%', up: false },
+    { name: 'Volatility 25', chg: '+0.88%', up: true },
+    { name: 'Bear Market Index', chg: '+2.09%', up: true },
+    { name: 'Bull Market Index', chg: '-0.31%', up: false },
+    { name: 'Volatility 100', chg: '+3.14%', up: true },
+];
+
+const STEPS = [
+    {
+        n: '01',
+        title: 'Create your free account',
+        body: 'Sign in with your Deriv account in seconds. No card required, no commitment.',
+    },
+    {
+        n: '02',
+        title: 'Pick a bot or build your own',
+        body: 'Load a proven strategy from the free bot library, or use the visual bot builder — no coding needed.',
+    },
+    {
+        n: '03',
+        title: 'Trade with structure',
+        body: 'Run it manually, automate it, or copy a top strategy. Track everything from one workspace.',
+    },
 ];
 
 const FEATURES = [
     {
-        icon: '🤖',
-        title: 'AI-Powered Trading Bots',
-        tagline: 'Automate your success',
-        details: 'Deploy the Over/Under engine, the AI bot and the multi-family signal scanner. Configure risk, arm auto-trade, and let them work tick by tick.',
-    },
-    {
-        icon: '📊',
-        title: 'Real-Time Market Analysis',
-        tagline: 'Data-driven decisions',
-        details: 'Live synthetic and forex streams, RSI, digit distributions and confidence scores — every setup ranked before a single order is placed.',
+        icon: '📚',
+        title: 'Free Bot Library',
+        body: 'Dozens of proven strategies, ready to load in one click. No coding required.',
     },
     {
         icon: '🧠',
-        title: 'Signal Scanner Engine',
-        tagline: 'Five families, one loop',
-        details: 'Rise/Fall, Even/Odd, Over/Under, Match/Differ and mean-reversion signals scored continuously, with paper trades to prove the flow first.',
+        title: 'Smart AI Recovery',
+        body: 'AI-driven recovery selection that adapts to losing streaks and protects your session limits.',
     },
     {
-        icon: '🛡️',
-        title: 'Risk Management Tools',
-        tagline: 'Protect your capital',
-        details: 'Stake limits, max open positions, cooldowns, session stop-loss and martingale controls. Live trading stays behind an explicit confirm.',
+        icon: '📊',
+        title: 'Market Analysis',
+        body: 'Live digit distributions, momentum and confidence scores for every synthetic market.',
     },
-];
-
-const BENEFITS = [
-    'Paper-trade every signal before risking real funds',
-    'Confidence and expected-value gated entries',
-    'Risk limits, cooldowns and stop-loss built in',
-    'Backtest strategies on real historical ticks',
-    'Responsive workspace on desktop and mobile',
-    'Secured Deriv OAuth sessions — you hold the keys',
+    {
+        icon: '⚡',
+        title: 'Speedbot',
+        body: 'One-click automated trading that catches signals faster than you can click.',
+    },
+    {
+        icon: '📈',
+        title: 'Pro Charts',
+        body: 'Full technical indicators on live charts — read the market your way.',
+    },
+    {
+        icon: '🛠️',
+        title: 'Bot Builder',
+        body: 'A visual Blockly builder with quick strategies and custom blocks. No code, all control.',
+    },
 ];
 
 const REVIEWS = [
+    { name: 'James Ochieng', quote: 'This platform completely changed how I trade. The free bot library alone is worth it.' },
+    { name: 'Amina Hassan', quote: 'The Smart AI recovery bot is absolutely insane. It pulled me out of a bad streak twice.' },
+    { name: 'David Mwangi', quote: 'Copy Trader is a game changer. I copy the top performers and learn while I earn.' },
+    { name: 'Fatima Al-Rashid', quote: 'The analysis tools here are on another level. Dcircles alone changed my entries.' },
+    { name: 'Peter Kamau', quote: 'Speedbot is incredible. It catches signals faster than I can even spot them.' },
+    { name: 'Grace Njeri', quote: 'I was a complete beginner. The free course plus the bot builder tutorials got me trading.' },
+    { name: 'Emmanuel Owusu', quote: 'The Apex Bot 2026 is seriously on another level. It adapts to the market in real time.' },
+    { name: 'Mercy Wanjiku', quote: 'The live charts with full technical indicators make me feel like a professional.' },
+    { name: 'Ibrahim Diallo', quote: 'Bot Builder is so intuitive. I built a custom Martingale strategy in minutes.' },
+    { name: 'Stella Achieng', quote: 'What I love most is everything is in one place. No switching between apps.' },
+    { name: 'Kofi Asante', quote: 'The community channel on Telegram led me here and I have never looked back.' },
+    { name: 'Priya Sharma', quote: 'Customer support guided me through everything. Within a week I was confident.' },
+];
+
+const COURSE = [
+    { n: '01', t: 'Introduction to Deriv' },
+    { n: '02', t: 'Understanding synthetic indices' },
+    { n: '03', t: 'Setting up your workspace' },
+    { n: '04', t: 'Reading digit distributions' },
+    { n: '05', t: 'Your first bot strategy' },
+    { n: '06', t: 'Risk management basics' },
+];
+
+const FAQ = [
     {
-        name: 'Amina R.',
-        role: 'Synthetics day trader',
-        quote: 'The scanner surface finally made digit distributions readable. Paper mode proved the flow before I went live.',
+        q: 'Is TraderScheme free to use?',
+        a: 'Yes. The bot library, course and core trading tools are free. You only need a Deriv account to trade.',
     },
     {
-        name: 'Brian K.',
-        role: 'Bot strategy builder',
-        quote: 'I wired my Blockly strategy in minutes. The dashboard runs it while the AI pages handle my digit setups.',
+        q: 'Do I need to know how to code?',
+        a: 'No. Every free bot loads in one click, and the visual Bot Builder lets you build strategies without writing code.',
     },
     {
-        name: 'Chloe M.',
-        role: 'Risk-first trader',
-        quote: 'Cooldowns and session stop-loss are the reason I stayed. The bots refuse to revenge-trade my account.',
+        q: 'Can I trade on a demo account first?',
+        a: 'Absolutely. Start on a Deriv demo account, paper-trade the signals, and go live only when the edge is proven.',
     },
     {
-        name: 'Daniel O.',
-        role: 'Over/Under specialist',
-        quote: 'Confidence-gated entries changed everything — fewer trades, cleaner setups, and the hold reasons tell me why.',
+        q: 'What markets can I trade?',
+        a: 'Volatility, Boom/Crash, Step, Range Break and Jump indices — synthetic markets that trade 24/7.',
     },
     {
-        name: 'Elena V.',
-        role: 'Backtest devotee',
-        quote: 'I validate on history first, every time. Seeing out-of-sample splits before deploying is the real edge.',
+        q: 'How does the Smart AI recovery work?',
+        a: 'It analyzes recent outcomes and automatically selects a recovery path that respects your session stop-loss and take-profit.',
     },
     {
-        name: 'Frank T.',
-        role: 'Part-time trader',
-        quote: 'I check the hub on my phone between work. Signals, bots and equity in one glance — nothing else comes close.',
+        q: 'Is my Deriv account secure?',
+        a: 'Yes. We use Deriv OAuth — you log in on Deriv and never share your password with us.',
     },
 ];
 
-const TRUST = [
-    { icon: '✓', text: 'Paper & live modes' },
-    { icon: '✓', text: 'Risk controls built-in' },
-    { icon: '✓', text: 'Backtestable strategies' },
-];
-
-/** Reveal-on-scroll: adds `.in` when the element enters the viewport. */
 const useReveal = () => {
     const ref = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
         const el = ref.current;
         if (!el) return;
-        const targets = el.querySelectorAll('.animated-text, .animated-element');
+        const targets = el.querySelectorAll('[data-reveal]');
         const io = new IntersectionObserver(
             entries => {
                 entries.forEach(e => {
@@ -115,67 +145,12 @@ const useReveal = () => {
                     }
                 });
             },
-            { threshold: 0.15 }
+            { threshold: 0.12 }
         );
         targets.forEach(t => io.observe(t));
         return () => io.disconnect();
     }, []);
     return ref;
-};
-
-/** Rotating typewriter headline. */
-const TypewriterTitle = () => {
-    const [index, setIndex] = useState(0);
-    const [text, setText] = useState('');
-    const [deleting, setDeleting] = useState(false);
-
-    useEffect(() => {
-        const full = HERO_TITLES[index];
-        if (!deleting && text === full) {
-            const hold = setTimeout(() => setDeleting(true), 1800);
-            return () => clearTimeout(hold);
-        }
-        if (deleting && text === '') {
-            setDeleting(false);
-            setIndex(i => (i + 1) % HERO_TITLES.length);
-            return;
-        }
-        const tick = setTimeout(
-            () => {
-                setText(t => (deleting ? full.slice(0, t.length - 1) : full.slice(0, t.length + 1)));
-            },
-            deleting ? 34 : 62
-        );
-        return () => clearTimeout(tick);
-    }, [text, deleting, index]);
-
-    return (
-        <span className='landing__tw'>
-            {text}
-            <span className='landing__tw-caret' aria-hidden />
-        </span>
-    );
-};
-
-/** Endless review marquee (content duplicated for a seamless loop). */
-const ReviewMarquee = ({ compact = false }: { compact?: boolean }) => {
-    const cards = useMemo(() => [...REVIEWS, ...REVIEWS], []);
-    return (
-        <div className={`landing__marquee ${compact ? 'landing__marquee--compact' : ''}`} aria-hidden='true'>
-            <div className='landing__marquee-track'>
-                {cards.map((r, i) => (
-                    <div key={`${r.name}-${i}`} className='landing__review'>
-                        <div className='landing__review-stars'>★★★★★</div>
-                        <p className='landing__review-quote'>“{r.quote}”</p>
-                        <div className='landing__review-meta'>
-                            <span className='landing__review-name'>{r.name}</span>
-                            <span className='landing__review-role'>{r.role}</span>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
 };
 
 interface LandingProps {
@@ -184,16 +159,14 @@ interface LandingProps {
 
 const Landing = ({ onEnter }: LandingProps) => {
     const rootRef = useReveal();
-    const [benefit, setBenefit] = useState(0);
+    const [tickerIdx, setTickerIdx] = useState(0);
+    const ticker = useMemo(() => [...TICKER, ...TICKER], []);
 
     useEffect(() => {
-        const t = setInterval(() => setBenefit(v => (v + 1) % BENEFITS.length), 2600);
+        const t = setInterval(() => setTickerIdx(v => v + 1), 40);
         return () => clearInterval(t);
     }, []);
 
-    // Lock the page scroll while the landing overlay owns the viewport, and
-    // hide the layout's fixed footer — it lives outside .main-dashboard's
-    // isolation stacking context, so it would otherwise paint over the overlay.
     useEffect(() => {
         const prev = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
@@ -205,171 +178,176 @@ const Landing = ({ onEnter }: LandingProps) => {
     }, []);
 
     return (
-        <div className='landing' ref={rootRef} role='dialog' aria-label={`${BRAND} introduction`}>
-            <div className='landing__bg' aria-hidden='true' />
-
-            <header className='landing__header'>
-                <div className='landing__logo'>
-                    <span className='landing__logo-mark' aria-hidden>M</span>
-                    <span className='landing__logo-word'>{BRAND}</span>
+        <div className='lp' ref={rootRef}>
+            {/* Topbar */}
+            <header className='lp__topbar'>
+                <div className='lp__brand'>
+                    <span className='lp__brand-mark' aria-hidden>TS</span>
+                    <span className='lp__brand-word'>TraderScheme</span>
                 </div>
-                <button type='button' className='landing__login-btn' onClick={onEnter}>
-                    Login Now
-                    <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.2' strokeLinecap='round' strokeLinejoin='round' aria-hidden>
-                        <path d='M5 12h14M13 6l6 6-6 6' />
-                    </svg>
-                </button>
+                <nav className='lp__nav'>
+                    {NAV.map(n => (
+                        <a key={n.href} href={n.href} className='lp__nav-link'>{n.label}</a>
+                    ))}
+                </nav>
+                <div className='lp__topbar-actions'>
+                    <button type='button' className='lp__topbar-btn lp__topbar-btn--ghost' onClick={onEnter}>Log In</button>
+                    <button type='button' className='lp__topbar-btn lp__topbar-btn--primary' onClick={onEnter}>Get Started</button>
+                </div>
             </header>
 
-            <section className='landing__hero'>
-                <div className='landing__hero-inner'>
-                    <div className='landing__badge animated-text'>
-                        <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden>
-                            <path d='M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z' />
-                        </svg>
-                        Built for serious Deriv traders
-                    </div>
-                    <h1 className='landing__sr-only'>
-                        {BRAND} — AI trading bots, live signals and backtesting
+            {/* Market ticker */}
+            <div className='lp__ticker' aria-hidden='true'>
+                <div className='lp__ticker-track' style={{ transform: `translateX(-${tickerIdx * 220}px)` }}>
+                    {ticker.map((m, i) => (
+                        <span key={`${m.name}-${i}`} className='lp__ticker-item'>
+                            <span className='lp__ticker-name'>{m.name}</span>
+                            <span className={`lp__ticker-chg ${m.up ? 'up' : 'down'}`}>{m.chg}</span>
+                            <span className='lp__ticker-sep'>·</span>
+                        </span>
+                    ))}
+                </div>
+            </div>
+
+            {/* Hero */}
+            <section className='lp__hero' id='lp-top'>
+                <div className='lp__hero-inner'>
+                    <span className='lp__hero-eyebrow' data-reveal>FREE STRATEGIES. REAL MARKET TOOLS.</span>
+                    <h1 className='lp__hero-h1' data-reveal>
+                        Free<br />bots<br />ready<br />to<br />load
                     </h1>
-                    <p className='landing__title animated-text' aria-hidden='true'>
-                        <TypewriterTitle />
+                    <p className='lp__hero-sub' data-reveal>
+                        Search proven templates, open tutorial guides, and move directly into the bot builder when you are ready to test.
                     </p>
-                    <p className='landing__subtitle animated-text'>
-                        Your all-in-one workspace for automated trading, smart bots and real-time market insights —
-                        paper-trade first, go live when the edge is proven.
-                    </p>
-                    <div className='landing__cta animated-element'>
-                        <button type='button' className='landing__cta-primary' onClick={onEnter}>
-                            <span>Start Trading Now</span>
-                            <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.2' strokeLinecap='round' strokeLinejoin='round' aria-hidden>
-                                <path d='M5 12h14M13 6l6 6-6 6' />
-                            </svg>
-                        </button>
-                        <button type='button' className='landing__cta-ghost' onClick={onEnter}>
-                            No account yet? <span>Explore the demo</span>
-                        </button>
+                    <div className='lp__hero-cta' data-reveal>
+                        <button type='button' className='lp__hero-btn lp__hero-btn--primary' onClick={onEnter}>Log In and Trade</button>
+                        <button type='button' className='lp__hero-btn lp__hero-btn--outline' onClick={onEnter}>Create Free Account</button>
                     </div>
-                    <div className='landing__quick animated-element'>
-                        <span>✓ No credit card required</span>
-                        <span>✓ $10,000 virtual account on Deriv demo</span>
-                        <span>✓ Paper mode built in</span>
-                    </div>
-                    <div className='landing__stats animated-element'>
-                        {STATS.map(s => (
-                            <div key={s.label} className='landing__stat'>
-                                <div className='landing__stat-value'>{s.value}</div>
-                                <div className='landing__stat-label'>{s.label}</div>
-                            </div>
-                        ))}
+                    <a href='#lp-course-hero' className='lp__hero-link' data-reveal>Explore the course ↓</a>
+
+                    <div className='lp__hero-badges' data-reveal>
+                        <div className='lp__badge'>
+                            <strong>Free</strong>
+                            <span>BOT TEMPLATES</span>
+                        </div>
+                        <div className='lp__badge'>
+                            <strong>24/7</strong>
+                            <span>SYNTHETIC MARKET FOCUS</span>
+                        </div>
+                        <div className='lp__badge'>
+                            <strong>www.traderscheme.com</strong>
+                            <span>BRANDED WORKSPACE</span>
+                        </div>
+                        <div className='lp__badge'>
+                            <strong>Live</strong>
+                            <span>MARKET STATUS</span>
+                        </div>
                     </div>
                 </div>
-                <ReviewMarquee compact />
             </section>
 
-            <section className='landing__section landing__features'>
-                <div className='landing__section-head'>
-                    <span className='landing__eyebrow animated-text'>Platform</span>
-                    <h2 className='landing__section-title animated-text'>
-                        Everything you need for today's fast-paced synthetic markets
-                    </h2>
-                    <p className='landing__section-sub animated-text'>
-                        Manual analysis, automated bot execution and continuous scanning — {BRAND} keeps the whole
-                        workflow in one place, with risk controls everywhere.
-                    </p>
+            {/* Get started */}
+            <section className='lp__section' id='lp-how'>
+                <div className='lp__section-head' data-reveal>
+                    <span className='lp__eyebrow'>GET STARTED</span>
+                    <h2 className='lp__section-title'>From sign-up to your first trade</h2>
+                    <p className='lp__section-sub'>Three steps, no experience required.</p>
                 </div>
-                <div className='landing__features-grid'>
-                    {FEATURES.map((f, i) => (
-                        <div key={f.title} className='landing__feature-card animated-element' style={{ transitionDelay: `${i * 70}ms` }}>
-                            <span className='landing__feature-icon' aria-hidden>{f.icon}</span>
-                            <h3 className='landing__feature-title'>{f.title}</h3>
-                            <p className='landing__feature-tag'>{f.tagline}</p>
-                            <p className='landing__feature-details'>{f.details}</p>
+                <div className='lp__steps'>
+                    {STEPS.map((s, i) => (
+                        <div key={s.n} className='lp__step' data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
+                            <span className='lp__step-n'>{s.n}</span>
+                            <h3 className='lp__step-title'>{s.title}</h3>
+                            <p className='lp__step-body'>{s.body}</p>
                         </div>
                     ))}
                 </div>
             </section>
 
-            <section className='landing__section landing__benefits'>
-                <div className='landing__benefits-copy'>
-                    <span className='landing__eyebrow animated-text'>Why traders switch</span>
-                    <h2 className='landing__section-title animated-text'>Built to keep you disciplined</h2>
-                    <ul className='landing__benefits-list animated-element'>
-                        {BENEFITS.map((b, i) => (
-                            <li key={b} className={`landing__benefit ${i === benefit ? 'is-active' : ''}`}>
-                                {b}
-                            </li>
-                        ))}
-                    </ul>
+            {/* Features */}
+            <section className='lp__section lp__section--alt' id='lp-features'>
+                <div className='lp__section-head' data-reveal>
+                    <span className='lp__eyebrow'>FREE WORKSPACE</span>
+                    <h2 className='lp__section-title'>Everything in one place</h2>
+                    <p className='lp__section-sub'>No juggling apps — bots, charts, and analysis live together.</p>
                 </div>
-                <div className='landing__benefits-panel animated-element' aria-hidden='true'>
-                    <div className='landing__mini-card'>
-                        <div className='landing__mini-row'>
-                            <span>Scanner</span>
-                            <span className='landing__mini-live'>● auto-trade armed</span>
+                <div className='lp__features'>
+                    {FEATURES.map((f, i) => (
+                        <div key={f.title} className='lp__feature' data-reveal style={{ transitionDelay: `${i * 70}ms` }}>
+                            <span className='lp__feature-icon' aria-hidden>{f.icon}</span>
+                            <h3 className='lp__feature-title'>{f.title}</h3>
+                            <p className='lp__feature-body'>{f.body}</p>
                         </div>
-                        <div className='landing__mini-bar'><i style={{ width: '78%' }} /></div>
-                        <div className='landing__mini-row landing__mini-row--muted'>
-                            <span>Confidence 0.82</span>
-                            <span>EV +4.1%</span>
-                        </div>
-                    </div>
-                    <div className='landing__mini-card'>
-                        <div className='landing__mini-row'>
-                            <span>Risk gate</span>
-                            <span className='landing__mini-ok'>passed</span>
-                        </div>
-                        <div className='landing__mini-chips'>
-                            <span>max 1 open</span>
-                            <span>cooldown 2s</span>
-                            <span>stop-loss armed</span>
-                        </div>
-                    </div>
-                    <div className='landing__mini-card'>
-                        <div className='landing__mini-row'>
-                            <span>Backtest</span>
-                            <span className='landing__mini-ok'>out-of-sample ✓</span>
-                        </div>
-                        <div className='landing__mini-row landing__mini-row--muted'>
-                            <span>Train 70% · Test 30%</span>
-                            <span>Deterministic</span>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             </section>
 
-            <section className='landing__section landing__testimonials'>
-                <div className='landing__section-head'>
-                    <span className='landing__eyebrow animated-text'>Community</span>
-                    <h2 className='landing__section-title animated-text'>Traders who run the terminal daily</h2>
-                    <div className='landing__trust animated-element'>
-                        {TRUST.map(t => (
-                            <span key={t.text} className='landing__trust-badge'>
-                                <span className='landing__trust-icon' aria-hidden>{t.icon}</span>
-                                {t.text}
-                            </span>
-                        ))}
-                    </div>
+            {/* Reviews */}
+            <section className='lp__section' id='lp-reviews'>
+                <div className='lp__section-head' data-reveal>
+                    <span className='lp__eyebrow'>VERIFIED TRADERS</span>
+                    <h2 className='lp__section-title'>Loved by traders worldwide</h2>
                 </div>
-                <ReviewMarquee />
+                <div className='lp__reviews'>
+                    {REVIEWS.map((r, i) => (
+                        <article key={r.name} className={`lp__review-card ${i === 0 ? 'lp__review-card--active' : ''}`} data-reveal style={{ transitionDelay: `${(i % 6) * 60}ms` }}>
+                            <div className='lp__review-top'>
+                                <span className='lp__review-avatar'>{r.name.charAt(0)}</span>
+                                <div className='lp__review-meta'>
+                                    <strong>{r.name}</strong>
+                                    <span>Verified Trader ✓</span>
+                                </div>
+                            </div>
+                            <div className='lp__review-stars' aria-label='5 stars'>★★★★★</div>
+                            <p className='lp__review-quote'>“{r.quote}”</p>
+                        </article>
+                    ))}
+                </div>
             </section>
 
-            <section className='landing__final'>
-                <div className='landing__final-inner'>
-                    <span className='landing__eyebrow animated-text'>Get started</span>
-                    <h2 className='landing__section-title animated-text'>Ready to transform your trading?</h2>
-                    <p className='landing__final-text animated-text'>
-                        Open the terminal, paper-trade the signals, and arm the bots when the numbers agree.
-                    </p>
-                    <button type='button' className='landing__cta-primary animated-element' onClick={onEnter}>
-                        <span>Start Trading Now</span>
-                        <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.2' strokeLinecap='round' strokeLinejoin='round' aria-hidden>
-                            <path d='M5 12h14M13 6l6 6-6 6' />
-                        </svg>
-                    </button>
+            {/* Course */}
+            <section className='lp__section lp__section--alt' id='lp-course-hero'>
+                <div className='lp__section-head' data-reveal>
+                    <span className='lp__eyebrow'>FREE COURSE</span>
+                    <h2 className='lp__section-title'>Learn to trade, step by step</h2>
+                    <p className='lp__section-sub'>A structured path from complete beginner to confident bot trader.</p>
                 </div>
-                <footer className='landing__footer'>
-                    © 2026 {BRAND} · Powered by Deriv · Trading involves risk of loss
+                <div className='lp__course'>
+                    {COURSE.map((c, i) => (
+                        <div key={c.n} className='lp__course-item' data-reveal style={{ transitionDelay: `${i * 50}ms` }}>
+                            <span className='lp__course-n'>{c.n}</span>
+                            <span className='lp__course-t'>{c.t}</span>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* FAQ */}
+            <section className='lp__section' id='lp-faq'>
+                <div className='lp__section-head' data-reveal>
+                    <span className='lp__eyebrow'>FAQ</span>
+                    <h2 className='lp__section-title'>Questions, answered</h2>
+                </div>
+                <div className='lp__faq'>
+                    {FAQ.map(f => (
+                        <details key={f.q} className='lp__faq-item' data-reveal>
+                            <summary className='lp__faq-q'>{f.q}</summary>
+                            <p className='lp__faq-a'>{f.a}</p>
+                        </details>
+                    ))}
+                </div>
+            </section>
+
+            {/* Final CTA + footer */}
+            <section className='lp__final'>
+                <div className='lp__final-inner' data-reveal>
+                    <h2 className='lp__section-title'>Ready to transform your trading?</h2>
+                    <p className='lp__final-text'>Open the workspace, load a free bot, and trade with structure today.</p>
+                    <button type='button' className='lp__hero-btn lp__hero-btn--primary' onClick={onEnter}>Get Started Free</button>
+                </div>
+                <footer className='lp__footer'>
+                    <span>© 2026 TraderScheme · Powered by Deriv</span>
+                    <span>Trading involves risk of loss</span>
                 </footer>
             </section>
         </div>

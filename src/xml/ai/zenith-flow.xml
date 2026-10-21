@@ -1,0 +1,1276 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="var_Stake">Stake</variable>
+    <variable id="var_Trades_Completed">Trades Completed</variable>
+    <variable id="var_Maximum_Stake">Maximum Stake</variable>
+    <variable id="var_Starting_Profit">Starting Profit</variable>
+    <variable id="var_Session_Profit">Session Profit</variable>
+    <variable id="var_Take_Profit">Take Profit</variable>
+    <variable id="var_Session_Ready">Session Ready</variable>
+    <variable id="var_Stop_Loss">Stop Loss</variable>
+    <variable id="var_Peak_Profit">Peak Profit</variable>
+    <variable id="var_Maximum_Trades">Maximum Trades</variable>
+    <variable id="var_Loss_Streak">Loss Streak</variable>
+    <variable id="var_Maximum_Loss_Streak">Maximum Loss Streak</variable>
+    <variable id="var_Next_Entry_Time">Next Entry Time</variable>
+    <variable id="var_Confirmation_Ticks">Confirmation Ticks</variable>
+    <variable id="var_Short_Window">Short Window</variable>
+    <variable id="var_Long_Window">Long Window</variable>
+    <variable id="var_Win_Pause_Seconds">Win Pause Seconds</variable>
+    <variable id="var_Loss_Pause_Seconds">Loss Pause Seconds</variable>
+    <variable id="var_Short_Margin">Short Margin</variable>
+    <variable id="var_Long_Margin">Long Margin</variable>
+    <variable id="var_Trail_Activation">Trail Activation</variable>
+    <variable id="var_Trailing_Drawdown">Trailing Drawdown</variable>
+  </variables>
+  <block type="trade_definition" id="zenith_24" deletable="false" x="0" y="60">
+    <comment pinned="false" h="140" w="360">Zenith Flow Premium: fixed stake; streak entry requires 40/120-tick frequency agreement. Margins are percentage points above uniform-digit frequency, not win probabilities. Pauses: 10 seconds after wins, 30 after losses. Trailing drawdown activates at 1 profit. The next stake must fit both loss budgets. Historical digit patterns do not guarantee the next digit. Limits reset on manual restart. Demo-test before live use.</comment>
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="zenith_26" deletable="false" movable="false">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">random_index</field>
+        <field name="SYMBOL_LIST">R_100</field>
+        <field name="ALTERNATE_MARKETS">FALSE</field>
+        <field name="ALTERNATE_EVERY">1</field>
+        <field name="MULTI_MARKET">FALSE</field>
+        <field name="VH_ENABLED">FALSE</field>
+        <field name="VH_SETTINGS_BTN">VH Settings</field>
+        <next>
+          <block type="trade_definition_tradetype" id="zenith_37" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">digits</field>
+            <field name="TRADETYPE_LIST">overunder</field>
+            <next>
+              <block type="trade_definition_contracttype" id="zenith_41" deletable="false" movable="false">
+                <field name="TYPE_LIST">both</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="zenith_44" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="zenith_47" deletable="false" movable="false">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="zenith_50" deletable="false" movable="false">
+                            <field name="RESTARTONERROR">FALSE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="zenith_54">
+        <field name="VAR" id="var_Stake">Stake</field>
+        <value name="VALUE">
+          <block type="math_number" id="zenith_57">
+            <field name="NUM">0.35</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="zenith_60">
+            <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+            <value name="VALUE">
+              <block type="math_number" id="zenith_63">
+                <field name="NUM">0.7</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="zenith_66">
+                <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                <value name="VALUE">
+                  <block type="math_number" id="zenith_69">
+                    <field name="NUM">2</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="zenith_72">
+                    <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="zenith_75">
+                        <field name="NUM">2</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="zenith_78">
+                        <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="zenith_81">
+                            <field name="NUM">25</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="zenith_84">
+                            <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                            <value name="VALUE">
+                              <block type="math_number" id="zenith_87">
+                                <field name="NUM">3</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="variables_set" id="zenith_90">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                <value name="VALUE">
+                                  <block type="math_number" id="zenith_93">
+                                    <field name="NUM">4</field>
+                                  </block>
+                                </value>
+                                <next>
+                                  <block type="variables_set" id="zenith_96">
+                                    <field name="VAR" id="var_Short_Window">Short Window</field>
+                                    <value name="VALUE">
+                                      <block type="math_number" id="zenith_99">
+                                        <field name="NUM">40</field>
+                                      </block>
+                                    </value>
+                                    <next>
+                                      <block type="variables_set" id="zenith_102">
+                                        <field name="VAR" id="var_Long_Window">Long Window</field>
+                                        <value name="VALUE">
+                                          <block type="math_number" id="zenith_105">
+                                            <field name="NUM">120</field>
+                                          </block>
+                                        </value>
+                                        <next>
+                                          <block type="variables_set" id="zenith_108">
+                                            <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                            <value name="VALUE">
+                                              <block type="math_number" id="zenith_111">
+                                                <field name="NUM">10</field>
+                                              </block>
+                                            </value>
+                                            <next>
+                                              <block type="variables_set" id="zenith_114">
+                                                <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                                <value name="VALUE">
+                                                  <block type="math_number" id="zenith_117">
+                                                    <field name="NUM">5</field>
+                                                  </block>
+                                                </value>
+                                                <next>
+                                                  <block type="variables_set" id="zenith_120">
+                                                    <field name="VAR" id="var_Win_Pause_Seconds">Win Pause Seconds</field>
+                                                    <value name="VALUE">
+                                                      <block type="math_number" id="zenith_123">
+                                                        <field name="NUM">10</field>
+                                                      </block>
+                                                    </value>
+                                                    <next>
+                                                      <block type="variables_set" id="zenith_126">
+                                                        <field name="VAR" id="var_Loss_Pause_Seconds">Loss Pause Seconds</field>
+                                                        <value name="VALUE">
+                                                          <block type="math_number" id="zenith_129">
+                                                            <field name="NUM">30</field>
+                                                          </block>
+                                                        </value>
+                                                        <next>
+                                                          <block type="variables_set" id="zenith_132">
+                                                            <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                            <value name="VALUE">
+                                                              <block type="math_number" id="zenith_135">
+                                                                <field name="NUM">1</field>
+                                                              </block>
+                                                            </value>
+                                                            <next>
+                                                              <block type="variables_set" id="zenith_138">
+                                                                <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                                <value name="VALUE">
+                                                                  <block type="math_number" id="zenith_141">
+                                                                    <field name="NUM">0.7</field>
+                                                                  </block>
+                                                                </value>
+                                                                <next>
+                                                                  <block type="variables_set" id="zenith_144">
+                                                                    <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                                                    <value name="VALUE">
+                                                                      <block type="math_number" id="zenith_147">
+                                                                        <field name="NUM">0</field>
+                                                                      </block>
+                                                                    </value>
+                                                                    <next>
+                                                                      <block type="variables_set" id="zenith_150">
+                                                                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                                                                        <value name="VALUE">
+                                                                          <block type="math_number" id="zenith_153">
+                                                                            <field name="NUM">0</field>
+                                                                          </block>
+                                                                        </value>
+                                                                        <next>
+                                                                          <block type="variables_set" id="zenith_156">
+                                                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                                            <value name="VALUE">
+                                                                              <block type="math_number" id="zenith_159">
+                                                                                <field name="NUM">0</field>
+                                                                              </block>
+                                                                            </value>
+                                                                            <next>
+                                                                              <block type="variables_set" id="zenith_162">
+                                                                                <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                                                                                <value name="VALUE">
+                                                                                  <block type="math_number" id="zenith_165">
+                                                                                    <field name="NUM">0</field>
+                                                                                  </block>
+                                                                                </value>
+                                                                                <next>
+                                                                                  <block type="variables_set" id="zenith_168">
+                                                                                    <field name="VAR" id="var_Session_Ready">Session Ready</field>
+                                                                                    <value name="VALUE">
+                                                                                      <block type="math_number" id="zenith_171">
+                                                                                        <field name="NUM">0</field>
+                                                                                      </block>
+                                                                                    </value>
+                                                                                    <next>
+                                                                                      <block type="variables_set" id="zenith_174">
+                                                                                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                                                        <value name="VALUE">
+                                                                                          <block type="math_number" id="zenith_177">
+                                                                                            <field name="NUM">0</field>
+                                                                                          </block>
+                                                                                        </value>
+                                                                                        <next>
+                                                                                          <block type="variables_set" id="zenith_180">
+                                                                                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                                                                                            <value name="VALUE">
+                                                                                              <block type="math_number" id="zenith_183">
+                                                                                                <field name="NUM">0</field>
+                                                                                              </block>
+                                                                                            </value>
+                                                                                          </block>
+                                                                                        </next>
+                                                                                      </block>
+                                                                                    </next>
+                                                                                  </block>
+                                                                                </next>
+                                                                              </block>
+                                                                            </next>
+                                                                          </block>
+                                                                        </next>
+                                                                      </block>
+                                                                    </next>
+                                                                  </block>
+                                                                </next>
+                                                              </block>
+                                                            </next>
+                                                          </block>
+                                                        </next>
+                                                      </block>
+                                                    </next>
+                                                  </block>
+                                                </next>
+                                              </block>
+                                            </next>
+                                          </block>
+                                        </next>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="trade_definition_tradeoptions" id="zenith_186">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation>
+        <field name="DURATIONTYPE_LIST">t</field>
+        <value name="DURATION">
+          <block type="math_number" id="zenith_190">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <value name="AMOUNT">
+          <block type="variables_get" id="zenith_193">
+            <field name="VAR" id="var_Stake">Stake</field>
+          </block>
+        </value>
+        <value name="PREDICTION">
+          <shadow type="math_number_positive" id="}=i1}9RFzH{+b,##Ii?(" inline="true">
+            <field name="NUM">1</field>
+          </shadow>
+          <block type="math_number" id="zenith_196">
+            <field name="NUM">4</field>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="after_purchase" id="zenith_548" x="6622" y="60">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="variables_set" id="zenith_550">
+        <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+        <value name="VALUE">
+          <block type="math_arithmetic" id="zenith_553">
+            <field name="OP">ADD</field>
+            <value name="A">
+              <block type="variables_get" id="zenith_556">
+                <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="zenith_559">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="zenith_562">
+            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="zenith_565">
+                <field name="OP">MINUS</field>
+                <value name="A">
+                  <block type="total_profit" id="zenith_568"></block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="zenith_570">
+                    <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" id="zenith_573">
+                <value name="IF0">
+                  <block type="logic_compare" id="zenith_576">
+                    <field name="OP">GT</field>
+                    <value name="A">
+                      <block type="variables_get" id="zenith_579">
+                        <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="variables_get" id="zenith_582">
+                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="variables_set" id="zenith_585">
+                    <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                    <value name="VALUE">
+                      <block type="variables_get" id="zenith_588">
+                        <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                      </block>
+                    </value>
+                  </block>
+                </statement>
+                <next>
+                  <block type="controls_if" id="zenith_591">
+                    <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                    <value name="IF0">
+                      <block type="contract_check_result" id="zenith_594">
+                        <field name="CHECK_RESULT">win</field>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="variables_set" id="zenith_597">
+                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="zenith_600">
+                            <field name="NUM">0</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="zenith_603">
+                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="zenith_606">
+                                <field name="OP">ADD</field>
+                                <value name="A">
+                                  <block type="epoch" id="zenith_609"></block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="zenith_611">
+                                    <field name="VAR" id="var_Win_Pause_Seconds">Win Pause Seconds</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <statement name="ELSE">
+                      <block type="variables_set" id="zenith_614">
+                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                        <value name="VALUE">
+                          <block type="math_arithmetic" id="zenith_617">
+                            <field name="OP">ADD</field>
+                            <value name="A">
+                              <block type="variables_get" id="zenith_620">
+                                <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number" id="zenith_623">
+                                <field name="NUM">1</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="zenith_626">
+                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="zenith_629">
+                                <field name="OP">ADD</field>
+                                <value name="A">
+                                  <block type="epoch" id="zenith_632"></block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="zenith_634">
+                                    <field name="VAR" id="var_Loss_Pause_Seconds">Loss Pause Seconds</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="controls_if" id="zenith_637">
+                        <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                        <value name="IF0">
+                          <block type="logic_operation" id="zenith_640">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="zenith_643">
+                                <field name="OP">LT</field>
+                                <value name="A">
+                                  <block type="variables_get" id="zenith_646">
+                                    <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="zenith_649">
+                                    <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="zenith_652">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="zenith_655">
+                                    <field name="OP">LT</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="zenith_658">
+                                        <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="zenith_661">
+                                        <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="zenith_664">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="zenith_667">
+                                        <field name="OP">LTE</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="zenith_670">
+                                            <field name="VAR" id="var_Stake">Stake</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="math_arithmetic" id="zenith_673">
+                                            <field name="OP">ADD</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="zenith_676">
+                                                <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="zenith_679">
+                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_operation" id="zenith_682">
+                                        <field name="OP">AND</field>
+                                        <value name="A">
+                                          <block type="logic_compare" id="zenith_685">
+                                            <field name="OP">LT</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="zenith_688">
+                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="zenith_691">
+                                                <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="logic_operation" id="zenith_694">
+                                            <field name="OP">AND</field>
+                                            <value name="A">
+                                              <block type="logic_compare" id="zenith_697">
+                                                <field name="OP">LTE</field>
+                                                <value name="A">
+                                                  <block type="variables_get" id="zenith_700">
+                                                    <field name="VAR" id="var_Stake">Stake</field>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="variables_get" id="zenith_703">
+                                                    <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="logic_operation" id="zenith_706">
+                                                <field name="OP">AND</field>
+                                                <value name="A">
+                                                  <block type="logic_compare" id="zenith_709">
+                                                    <field name="OP">GT</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="zenith_712">
+                                                        <field name="VAR" id="var_Stake">Stake</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="math_number" id="zenith_715">
+                                                        <field name="NUM">0</field>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="logic_operation" id="zenith_718">
+                                                    <field name="OP">OR</field>
+                                                    <value name="A">
+                                                      <block type="logic_compare" id="zenith_721">
+                                                        <field name="OP">LT</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="zenith_724">
+                                                            <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="variables_get" id="zenith_727">
+                                                            <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="logic_compare" id="zenith_730">
+                                                        <field name="OP">LTE</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="zenith_733">
+                                                            <field name="VAR" id="var_Stake">Stake</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="math_arithmetic" id="zenith_736">
+                                                            <field name="OP">MINUS</field>
+                                                            <value name="A">
+                                                              <block type="variables_get" id="zenith_739">
+                                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                              </block>
+                                                            </value>
+                                                            <value name="B">
+                                                              <block type="math_arithmetic" id="zenith_742">
+                                                                <field name="OP">MINUS</field>
+                                                                <value name="A">
+                                                                  <block type="variables_get" id="zenith_745">
+                                                                    <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                                  </block>
+                                                                </value>
+                                                                <value name="B">
+                                                                  <block type="variables_get" id="zenith_748">
+                                                                    <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                                  </block>
+                                                                </value>
+                                                              </block>
+                                                            </value>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <statement name="DO0">
+                          <block type="trade_again" id="zenith_751"></block>
+                        </statement>
+                        <statement name="ELSE">
+                          <block type="text_print" id="zenith_753">
+                            <value name="TEXT">
+                              <block type="text" id="zenith_755">
+                                <field name="TEXT">Zenith Flow Premium: session stopped. Check profit target, remaining loss/trailing budget, trade count, loss streak and stake cap.</field>
+                              </block>
+                            </value>
+                          </block>
+                        </statement>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="before_purchase" id="zenith_198" deletable="false" x="0" y="1822">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="controls_if" id="zenith_200">
+        <value name="IF0">
+          <block type="logic_compare" id="zenith_203">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="variables_get" id="zenith_206">
+                <field name="VAR" id="var_Session_Ready">Session Ready</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="zenith_209">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="variables_set" id="zenith_212">
+            <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+            <value name="VALUE">
+              <block type="total_profit" id="zenith_215"></block>
+            </value>
+            <next>
+              <block type="variables_set" id="zenith_217">
+                <field name="VAR" id="var_Session_Ready">Session Ready</field>
+                <value name="VALUE">
+                  <block type="math_number" id="zenith_220">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <next>
+          <block type="variables_set" id="zenith_223">
+            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="zenith_226">
+                <field name="OP">MINUS</field>
+                <value name="A">
+                  <block type="total_profit" id="zenith_229"></block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="zenith_231">
+                    <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" id="zenith_234">
+                <value name="IF0">
+                  <block type="logic_operation" id="zenith_237">
+                    <field name="OP">AND</field>
+                    <value name="A">
+                      <block type="logic_operation" id="zenith_240">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare" id="zenith_243">
+                            <field name="OP">LT</field>
+                            <value name="A">
+                              <block type="variables_get" id="zenith_246">
+                                <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="variables_get" id="zenith_249">
+                                <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="zenith_252">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="zenith_255">
+                                <field name="OP">LT</field>
+                                <value name="A">
+                                  <block type="variables_get" id="zenith_258">
+                                    <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="zenith_261">
+                                    <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="zenith_264">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="zenith_267">
+                                    <field name="OP">LTE</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="zenith_270">
+                                        <field name="VAR" id="var_Stake">Stake</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="math_arithmetic" id="zenith_273">
+                                        <field name="OP">ADD</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="zenith_276">
+                                            <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="zenith_279">
+                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="zenith_282">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="zenith_285">
+                                        <field name="OP">LT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="zenith_288">
+                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="zenith_291">
+                                            <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_operation" id="zenith_294">
+                                        <field name="OP">AND</field>
+                                        <value name="A">
+                                          <block type="logic_compare" id="zenith_297">
+                                            <field name="OP">LTE</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="zenith_300">
+                                                <field name="VAR" id="var_Stake">Stake</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="zenith_303">
+                                                <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="logic_operation" id="zenith_306">
+                                            <field name="OP">AND</field>
+                                            <value name="A">
+                                              <block type="logic_compare" id="zenith_309">
+                                                <field name="OP">GT</field>
+                                                <value name="A">
+                                                  <block type="variables_get" id="zenith_312">
+                                                    <field name="VAR" id="var_Stake">Stake</field>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="math_number" id="zenith_315">
+                                                    <field name="NUM">0</field>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="logic_operation" id="zenith_318">
+                                                <field name="OP">OR</field>
+                                                <value name="A">
+                                                  <block type="logic_compare" id="zenith_321">
+                                                    <field name="OP">LT</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="zenith_324">
+                                                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="variables_get" id="zenith_327">
+                                                        <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="logic_compare" id="zenith_330">
+                                                    <field name="OP">LTE</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="zenith_333">
+                                                        <field name="VAR" id="var_Stake">Stake</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="math_arithmetic" id="zenith_336">
+                                                        <field name="OP">MINUS</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="zenith_339">
+                                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="math_arithmetic" id="zenith_342">
+                                                            <field name="OP">MINUS</field>
+                                                            <value name="A">
+                                                              <block type="variables_get" id="zenith_345">
+                                                                <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                              </block>
+                                                            </value>
+                                                            <value name="B">
+                                                              <block type="variables_get" id="zenith_348">
+                                                                <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                              </block>
+                                                            </value>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="logic_operation" id="zenith_351">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare" id="zenith_354">
+                            <field name="OP">GTE</field>
+                            <value name="A">
+                              <block type="epoch" id="zenith_357"></block>
+                            </value>
+                            <value name="B">
+                              <block type="variables_get" id="zenith_359">
+                                <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="zenith_362">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="zenith_365">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="lists_length" id="zenith_368">
+                                    <value name="VALUE">
+                                      <block type="lastDigitList" id="zenith_370"></block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="zenith_372">
+                                    <field name="VAR" id="var_Long_Window">Long Window</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="zenith_375">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="zenith_378">
+                                    <field name="OP">GTE</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="zenith_381">
+                                        <field name="VAR" id="var_Short_Window">Short Window</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="zenith_384">
+                                        <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="zenith_387">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="zenith_390">
+                                        <field name="OP">GT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="zenith_393">
+                                            <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="math_number" id="zenith_396">
+                                            <field name="NUM">0</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_compare" id="zenith_399">
+                                        <field name="OP">GT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="zenith_402">
+                                            <field name="VAR" id="var_Long_Window">Long Window</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="zenith_405">
+                                            <field name="VAR" id="var_Short_Window">Short Window</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="controls_if" id="zenith_408">
+                    <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1"></mutation>
+                    <value name="IF0">
+                      <block type="logic_operation" id="zenith_411">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="last_digits_condition" id="zenith_414">
+                            <field name="CONDITION">GREATER_OR_EQUAL</field>
+                            <value name="N">
+                              <shadow type="math_number" id="rhLmGf!Hq-9yZDXy~q2r">
+                                <field name="NUM">3</field>
+                              </shadow>
+                              <block type="variables_get" id="zenith_417">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                              </block>
+                            </value>
+                            <value name="COMPARE_VALUE">
+                              <shadow type="math_number" id="4%hRn?Cz]teOf3sFUy4l">
+                                <field name="NUM">4</field>
+                              </shadow>
+                              <block type="math_number" id="zenith_420">
+                                <field name="NUM">6</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="zenith_423">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="zenith_426">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="over_under_analysis" id="zenith_429">
+                                    <field name="CONDITION_TYPE">OVER</field>
+                                    <value name="DIGIT">
+                                      <shadow type="math_number" id="F!3a1#L@prrh;SP==_v[">
+                                        <field name="NUM">4</field>
+                                      </shadow>
+                                      <block type="math_number" id="zenith_432">
+                                        <field name="NUM">4</field>
+                                      </block>
+                                    </value>
+                                    <value name="N">
+                                      <shadow type="math_number" id="IV9U,s+6`=0c1XCy)NW;">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="zenith_435">
+                                        <field name="VAR" id="var_Short_Window">Short Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="zenith_438">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="zenith_441">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="zenith_444">
+                                        <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_compare" id="zenith_447">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="over_under_analysis" id="zenith_450">
+                                    <field name="CONDITION_TYPE">OVER</field>
+                                    <value name="DIGIT">
+                                      <shadow type="math_number" id="-tTs[~I$+I}eL2Xk@woC">
+                                        <field name="NUM">4</field>
+                                      </shadow>
+                                      <block type="math_number" id="zenith_453">
+                                        <field name="NUM">4</field>
+                                      </block>
+                                    </value>
+                                    <value name="N">
+                                      <shadow type="math_number" id="kyU@_24p;~9Ch5_kZ*9M">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="zenith_456">
+                                        <field name="VAR" id="var_Long_Window">Long Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="zenith_459">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="zenith_462">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="zenith_465">
+                                        <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="apollo_purchase2" id="zenith_468">
+                        <field name="PURCHASE_LIST">DIGITOVER</field>
+                        <value name="PREDICTION">
+                          <block type="math_number" id="zenith_471">
+                            <field name="NUM">4</field>
+                          </block>
+                        </value>
+                      </block>
+                    </statement>
+                    <value name="IF1">
+                      <block type="logic_operation" id="zenith_474">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="last_digits_condition" id="zenith_477">
+                            <field name="CONDITION">LESS_OR_EQUAL</field>
+                            <value name="N">
+                              <shadow type="math_number" id="aYKZaT(`?nc,{1z@que9">
+                                <field name="NUM">3</field>
+                              </shadow>
+                              <block type="variables_get" id="zenith_480">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                              </block>
+                            </value>
+                            <value name="COMPARE_VALUE">
+                              <shadow type="math_number" id="CF8h5S!4T,UfIoi0d6|1">
+                                <field name="NUM">4</field>
+                              </shadow>
+                              <block type="math_number" id="zenith_483">
+                                <field name="NUM">3</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="zenith_486">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="zenith_489">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="math_arithmetic" id="zenith_492">
+                                    <field name="OP">MINUS</field>
+                                    <value name="A">
+                                      <block type="math_number" id="zenith_495">
+                                        <field name="NUM">100</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="over_under_analysis" id="zenith_498">
+                                        <field name="CONDITION_TYPE">OVER</field>
+                                        <value name="DIGIT">
+                                          <shadow type="math_number" id="YENO7o=eb)gorg2EKGY/">
+                                            <field name="NUM">4</field>
+                                          </shadow>
+                                          <block type="math_number" id="zenith_501">
+                                            <field name="NUM">4</field>
+                                          </block>
+                                        </value>
+                                        <value name="N">
+                                          <shadow type="math_number" id="tA6d#5q2cYt5U*vO?`l|">
+                                            <field name="NUM">1000</field>
+                                          </shadow>
+                                          <block type="variables_get" id="zenith_504">
+                                            <field name="VAR" id="var_Short_Window">Short Window</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="zenith_507">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="zenith_510">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="zenith_513">
+                                        <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_compare" id="zenith_516">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="math_arithmetic" id="zenith_519">
+                                    <field name="OP">MINUS</field>
+                                    <value name="A">
+                                      <block type="math_number" id="zenith_522">
+                                        <field name="NUM">100</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="over_under_analysis" id="zenith_525">
+                                        <field name="CONDITION_TYPE">OVER</field>
+                                        <value name="DIGIT">
+                                          <shadow type="math_number" id="9OG5Ny$2GY6.^MR9i!{z">
+                                            <field name="NUM">4</field>
+                                          </shadow>
+                                          <block type="math_number" id="zenith_528">
+                                            <field name="NUM">4</field>
+                                          </block>
+                                        </value>
+                                        <value name="N">
+                                          <shadow type="math_number" id="e7j0VUeV[F9YD:QUvZs*">
+                                            <field name="NUM">1000</field>
+                                          </shadow>
+                                          <block type="variables_get" id="zenith_531">
+                                            <field name="VAR" id="var_Long_Window">Long Window</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="zenith_534">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="zenith_537">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="zenith_540">
+                                        <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO1">
+                      <block type="apollo_purchase2" id="zenith_543">
+                        <field name="PURCHASE_LIST">DIGITUNDER</field>
+                        <value name="PREDICTION">
+                          <block type="math_number" id="zenith_546">
+                            <field name="NUM">5</field>
+                          </block>
+                        </value>
+                      </block>
+                    </statement>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

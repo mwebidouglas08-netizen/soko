@@ -1,0 +1,1190 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="var_Stake">Stake</variable>
+    <variable id="var_Trades_Completed">Trades Completed</variable>
+    <variable id="var_Maximum_Stake">Maximum Stake</variable>
+    <variable id="var_Starting_Profit">Starting Profit</variable>
+    <variable id="var_Session_Profit">Session Profit</variable>
+    <variable id="var_Take_Profit">Take Profit</variable>
+    <variable id="var_Session_Ready">Session Ready</variable>
+    <variable id="var_Stop_Loss">Stop Loss</variable>
+    <variable id="var_Peak_Profit">Peak Profit</variable>
+    <variable id="var_Maximum_Trades">Maximum Trades</variable>
+    <variable id="var_Loss_Streak">Loss Streak</variable>
+    <variable id="var_Maximum_Loss_Streak">Maximum Loss Streak</variable>
+    <variable id="var_Next_Entry_Time">Next Entry Time</variable>
+    <variable id="var_Confirmation_Ticks">Confirmation Ticks</variable>
+    <variable id="var_Short_Window">Short Window</variable>
+    <variable id="var_Long_Window">Long Window</variable>
+    <variable id="var_Win_Pause_Seconds">Win Pause Seconds</variable>
+    <variable id="var_Loss_Pause_Seconds">Loss Pause Seconds</variable>
+    <variable id="var_Short_Margin">Short Margin</variable>
+    <variable id="var_Long_Margin">Long Margin</variable>
+    <variable id="var_Trail_Activation">Trail Activation</variable>
+    <variable id="var_Trailing_Drawdown">Trailing Drawdown</variable>
+  </variables>
+  <block type="trade_definition" id="aurora_24" deletable="false" x="0" y="60">
+    <comment pinned="false" h="140" w="360">Aurora Parity Premium: fixed stake; streak entry requires 40/120-tick frequency agreement. Margins are percentage points above uniform-digit frequency, not win probabilities. Pauses: 10 seconds after wins, 30 after losses. Trailing drawdown activates at 1 profit. The next stake must fit both loss budgets. Historical digit patterns do not guarantee the next digit. Limits reset on manual restart. Demo-test before live use.</comment>
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="aurora_26" deletable="false" movable="false">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">random_index</field>
+        <field name="SYMBOL_LIST">R_25</field>
+        <field name="ALTERNATE_MARKETS">FALSE</field>
+        <field name="ALTERNATE_EVERY">1</field>
+        <field name="MULTI_MARKET">FALSE</field>
+        <field name="VH_ENABLED">FALSE</field>
+        <field name="VH_SETTINGS_BTN">VH Settings</field>
+        <next>
+          <block type="trade_definition_tradetype" id="aurora_37" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">digits</field>
+            <field name="TRADETYPE_LIST">evenodd</field>
+            <next>
+              <block type="trade_definition_contracttype" id="aurora_41" deletable="false" movable="false">
+                <field name="TYPE_LIST">both</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="aurora_44" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="aurora_47" deletable="false" movable="false">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="aurora_50" deletable="false" movable="false">
+                            <field name="RESTARTONERROR">FALSE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="aurora_54">
+        <field name="VAR" id="var_Stake">Stake</field>
+        <value name="VALUE">
+          <block type="math_number" id="aurora_57">
+            <field name="NUM">0.35</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="aurora_60">
+            <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+            <value name="VALUE">
+              <block type="math_number" id="aurora_63">
+                <field name="NUM">0.7</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="aurora_66">
+                <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                <value name="VALUE">
+                  <block type="math_number" id="aurora_69">
+                    <field name="NUM">2</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="aurora_72">
+                    <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="aurora_75">
+                        <field name="NUM">2</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="aurora_78">
+                        <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="aurora_81">
+                            <field name="NUM">25</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="aurora_84">
+                            <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                            <value name="VALUE">
+                              <block type="math_number" id="aurora_87">
+                                <field name="NUM">3</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="variables_set" id="aurora_90">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                <value name="VALUE">
+                                  <block type="math_number" id="aurora_93">
+                                    <field name="NUM">3</field>
+                                  </block>
+                                </value>
+                                <next>
+                                  <block type="variables_set" id="aurora_96">
+                                    <field name="VAR" id="var_Short_Window">Short Window</field>
+                                    <value name="VALUE">
+                                      <block type="math_number" id="aurora_99">
+                                        <field name="NUM">40</field>
+                                      </block>
+                                    </value>
+                                    <next>
+                                      <block type="variables_set" id="aurora_102">
+                                        <field name="VAR" id="var_Long_Window">Long Window</field>
+                                        <value name="VALUE">
+                                          <block type="math_number" id="aurora_105">
+                                            <field name="NUM">120</field>
+                                          </block>
+                                        </value>
+                                        <next>
+                                          <block type="variables_set" id="aurora_108">
+                                            <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                            <value name="VALUE">
+                                              <block type="math_number" id="aurora_111">
+                                                <field name="NUM">10</field>
+                                              </block>
+                                            </value>
+                                            <next>
+                                              <block type="variables_set" id="aurora_114">
+                                                <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                                <value name="VALUE">
+                                                  <block type="math_number" id="aurora_117">
+                                                    <field name="NUM">5</field>
+                                                  </block>
+                                                </value>
+                                                <next>
+                                                  <block type="variables_set" id="aurora_120">
+                                                    <field name="VAR" id="var_Win_Pause_Seconds">Win Pause Seconds</field>
+                                                    <value name="VALUE">
+                                                      <block type="math_number" id="aurora_123">
+                                                        <field name="NUM">10</field>
+                                                      </block>
+                                                    </value>
+                                                    <next>
+                                                      <block type="variables_set" id="aurora_126">
+                                                        <field name="VAR" id="var_Loss_Pause_Seconds">Loss Pause Seconds</field>
+                                                        <value name="VALUE">
+                                                          <block type="math_number" id="aurora_129">
+                                                            <field name="NUM">30</field>
+                                                          </block>
+                                                        </value>
+                                                        <next>
+                                                          <block type="variables_set" id="aurora_132">
+                                                            <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                            <value name="VALUE">
+                                                              <block type="math_number" id="aurora_135">
+                                                                <field name="NUM">1</field>
+                                                              </block>
+                                                            </value>
+                                                            <next>
+                                                              <block type="variables_set" id="aurora_138">
+                                                                <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                                <value name="VALUE">
+                                                                  <block type="math_number" id="aurora_141">
+                                                                    <field name="NUM">0.7</field>
+                                                                  </block>
+                                                                </value>
+                                                                <next>
+                                                                  <block type="variables_set" id="aurora_144">
+                                                                    <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                                                    <value name="VALUE">
+                                                                      <block type="math_number" id="aurora_147">
+                                                                        <field name="NUM">0</field>
+                                                                      </block>
+                                                                    </value>
+                                                                    <next>
+                                                                      <block type="variables_set" id="aurora_150">
+                                                                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                                                                        <value name="VALUE">
+                                                                          <block type="math_number" id="aurora_153">
+                                                                            <field name="NUM">0</field>
+                                                                          </block>
+                                                                        </value>
+                                                                        <next>
+                                                                          <block type="variables_set" id="aurora_156">
+                                                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                                            <value name="VALUE">
+                                                                              <block type="math_number" id="aurora_159">
+                                                                                <field name="NUM">0</field>
+                                                                              </block>
+                                                                            </value>
+                                                                            <next>
+                                                                              <block type="variables_set" id="aurora_162">
+                                                                                <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                                                                                <value name="VALUE">
+                                                                                  <block type="math_number" id="aurora_165">
+                                                                                    <field name="NUM">0</field>
+                                                                                  </block>
+                                                                                </value>
+                                                                                <next>
+                                                                                  <block type="variables_set" id="aurora_168">
+                                                                                    <field name="VAR" id="var_Session_Ready">Session Ready</field>
+                                                                                    <value name="VALUE">
+                                                                                      <block type="math_number" id="aurora_171">
+                                                                                        <field name="NUM">0</field>
+                                                                                      </block>
+                                                                                    </value>
+                                                                                    <next>
+                                                                                      <block type="variables_set" id="aurora_174">
+                                                                                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                                                        <value name="VALUE">
+                                                                                          <block type="math_number" id="aurora_177">
+                                                                                            <field name="NUM">0</field>
+                                                                                          </block>
+                                                                                        </value>
+                                                                                        <next>
+                                                                                          <block type="variables_set" id="aurora_180">
+                                                                                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                                                                                            <value name="VALUE">
+                                                                                              <block type="math_number" id="aurora_183">
+                                                                                                <field name="NUM">0</field>
+                                                                                              </block>
+                                                                                            </value>
+                                                                                          </block>
+                                                                                        </next>
+                                                                                      </block>
+                                                                                    </next>
+                                                                                  </block>
+                                                                                </next>
+                                                                              </block>
+                                                                            </next>
+                                                                          </block>
+                                                                        </next>
+                                                                      </block>
+                                                                    </next>
+                                                                  </block>
+                                                                </next>
+                                                              </block>
+                                                            </next>
+                                                          </block>
+                                                        </next>
+                                                      </block>
+                                                    </next>
+                                                  </block>
+                                                </next>
+                                              </block>
+                                            </next>
+                                          </block>
+                                        </next>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="trade_definition_tradeoptions" id="aurora_186">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>
+        <field name="DURATIONTYPE_LIST">t</field>
+        <value name="DURATION">
+          <block type="math_number" id="aurora_190">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <value name="AMOUNT">
+          <block type="variables_get" id="aurora_193">
+            <field name="VAR" id="var_Stake">Stake</field>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="after_purchase" id="aurora_509" x="6622" y="60">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="variables_set" id="aurora_511">
+        <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+        <value name="VALUE">
+          <block type="math_arithmetic" id="aurora_514">
+            <field name="OP">ADD</field>
+            <value name="A">
+              <block type="variables_get" id="aurora_517">
+                <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="aurora_520">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="aurora_523">
+            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="aurora_526">
+                <field name="OP">MINUS</field>
+                <value name="A">
+                  <block type="total_profit" id="aurora_529"></block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="aurora_531">
+                    <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" id="aurora_534">
+                <value name="IF0">
+                  <block type="logic_compare" id="aurora_537">
+                    <field name="OP">GT</field>
+                    <value name="A">
+                      <block type="variables_get" id="aurora_540">
+                        <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="variables_get" id="aurora_543">
+                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="variables_set" id="aurora_546">
+                    <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                    <value name="VALUE">
+                      <block type="variables_get" id="aurora_549">
+                        <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                      </block>
+                    </value>
+                  </block>
+                </statement>
+                <next>
+                  <block type="controls_if" id="aurora_552">
+                    <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                    <value name="IF0">
+                      <block type="contract_check_result" id="aurora_555">
+                        <field name="CHECK_RESULT">win</field>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="variables_set" id="aurora_558">
+                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="aurora_561">
+                            <field name="NUM">0</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="aurora_564">
+                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="aurora_567">
+                                <field name="OP">ADD</field>
+                                <value name="A">
+                                  <block type="epoch" id="aurora_570"></block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="aurora_572">
+                                    <field name="VAR" id="var_Win_Pause_Seconds">Win Pause Seconds</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <statement name="ELSE">
+                      <block type="variables_set" id="aurora_575">
+                        <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                        <value name="VALUE">
+                          <block type="math_arithmetic" id="aurora_578">
+                            <field name="OP">ADD</field>
+                            <value name="A">
+                              <block type="variables_get" id="aurora_581">
+                                <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number" id="aurora_584">
+                                <field name="NUM">1</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="aurora_587">
+                            <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="aurora_590">
+                                <field name="OP">ADD</field>
+                                <value name="A">
+                                  <block type="epoch" id="aurora_593"></block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="aurora_595">
+                                    <field name="VAR" id="var_Loss_Pause_Seconds">Loss Pause Seconds</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="controls_if" id="aurora_598">
+                        <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                        <value name="IF0">
+                          <block type="logic_operation" id="aurora_601">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="aurora_604">
+                                <field name="OP">LT</field>
+                                <value name="A">
+                                  <block type="variables_get" id="aurora_607">
+                                    <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="aurora_610">
+                                    <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="aurora_613">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="aurora_616">
+                                    <field name="OP">LT</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="aurora_619">
+                                        <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="aurora_622">
+                                        <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="aurora_625">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="aurora_628">
+                                        <field name="OP">LTE</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="aurora_631">
+                                            <field name="VAR" id="var_Stake">Stake</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="math_arithmetic" id="aurora_634">
+                                            <field name="OP">ADD</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="aurora_637">
+                                                <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="aurora_640">
+                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_operation" id="aurora_643">
+                                        <field name="OP">AND</field>
+                                        <value name="A">
+                                          <block type="logic_compare" id="aurora_646">
+                                            <field name="OP">LT</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="aurora_649">
+                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="aurora_652">
+                                                <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="logic_operation" id="aurora_655">
+                                            <field name="OP">AND</field>
+                                            <value name="A">
+                                              <block type="logic_compare" id="aurora_658">
+                                                <field name="OP">LTE</field>
+                                                <value name="A">
+                                                  <block type="variables_get" id="aurora_661">
+                                                    <field name="VAR" id="var_Stake">Stake</field>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="variables_get" id="aurora_664">
+                                                    <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="logic_operation" id="aurora_667">
+                                                <field name="OP">AND</field>
+                                                <value name="A">
+                                                  <block type="logic_compare" id="aurora_670">
+                                                    <field name="OP">GT</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="aurora_673">
+                                                        <field name="VAR" id="var_Stake">Stake</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="math_number" id="aurora_676">
+                                                        <field name="NUM">0</field>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="logic_operation" id="aurora_679">
+                                                    <field name="OP">OR</field>
+                                                    <value name="A">
+                                                      <block type="logic_compare" id="aurora_682">
+                                                        <field name="OP">LT</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="aurora_685">
+                                                            <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="variables_get" id="aurora_688">
+                                                            <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="logic_compare" id="aurora_691">
+                                                        <field name="OP">LTE</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="aurora_694">
+                                                            <field name="VAR" id="var_Stake">Stake</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="math_arithmetic" id="aurora_697">
+                                                            <field name="OP">MINUS</field>
+                                                            <value name="A">
+                                                              <block type="variables_get" id="aurora_700">
+                                                                <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                              </block>
+                                                            </value>
+                                                            <value name="B">
+                                                              <block type="math_arithmetic" id="aurora_703">
+                                                                <field name="OP">MINUS</field>
+                                                                <value name="A">
+                                                                  <block type="variables_get" id="aurora_706">
+                                                                    <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                                  </block>
+                                                                </value>
+                                                                <value name="B">
+                                                                  <block type="variables_get" id="aurora_709">
+                                                                    <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                                  </block>
+                                                                </value>
+                                                              </block>
+                                                            </value>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <statement name="DO0">
+                          <block type="trade_again" id="aurora_712"></block>
+                        </statement>
+                        <statement name="ELSE">
+                          <block type="text_print" id="aurora_714">
+                            <value name="TEXT">
+                              <block type="text" id="aurora_716">
+                                <field name="TEXT">Aurora Parity Premium: session stopped. Check profit target, remaining loss/trailing budget, trade count, loss streak and stake cap.</field>
+                              </block>
+                            </value>
+                          </block>
+                        </statement>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="before_purchase" id="aurora_195" deletable="false" x="0" y="1822">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="controls_if" id="aurora_197">
+        <value name="IF0">
+          <block type="logic_compare" id="aurora_200">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="variables_get" id="aurora_203">
+                <field name="VAR" id="var_Session_Ready">Session Ready</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="aurora_206">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="variables_set" id="aurora_209">
+            <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+            <value name="VALUE">
+              <block type="total_profit" id="aurora_212"></block>
+            </value>
+            <next>
+              <block type="variables_set" id="aurora_214">
+                <field name="VAR" id="var_Session_Ready">Session Ready</field>
+                <value name="VALUE">
+                  <block type="math_number" id="aurora_217">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <next>
+          <block type="variables_set" id="aurora_220">
+            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="aurora_223">
+                <field name="OP">MINUS</field>
+                <value name="A">
+                  <block type="total_profit" id="aurora_226"></block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="aurora_228">
+                    <field name="VAR" id="var_Starting_Profit">Starting Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" id="aurora_231">
+                <value name="IF0">
+                  <block type="logic_operation" id="aurora_234">
+                    <field name="OP">AND</field>
+                    <value name="A">
+                      <block type="logic_operation" id="aurora_237">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare" id="aurora_240">
+                            <field name="OP">LT</field>
+                            <value name="A">
+                              <block type="variables_get" id="aurora_243">
+                                <field name="VAR" id="var_Loss_Streak">Loss Streak</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="variables_get" id="aurora_246">
+                                <field name="VAR" id="var_Maximum_Loss_Streak">Maximum Loss Streak</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="aurora_249">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="aurora_252">
+                                <field name="OP">LT</field>
+                                <value name="A">
+                                  <block type="variables_get" id="aurora_255">
+                                    <field name="VAR" id="var_Trades_Completed">Trades Completed</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="aurora_258">
+                                    <field name="VAR" id="var_Maximum_Trades">Maximum Trades</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="aurora_261">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="aurora_264">
+                                    <field name="OP">LTE</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="aurora_267">
+                                        <field name="VAR" id="var_Stake">Stake</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="math_arithmetic" id="aurora_270">
+                                        <field name="OP">ADD</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="aurora_273">
+                                            <field name="VAR" id="var_Stop_Loss">Stop Loss</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="aurora_276">
+                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="aurora_279">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="aurora_282">
+                                        <field name="OP">LT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="aurora_285">
+                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="aurora_288">
+                                            <field name="VAR" id="var_Take_Profit">Take Profit</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_operation" id="aurora_291">
+                                        <field name="OP">AND</field>
+                                        <value name="A">
+                                          <block type="logic_compare" id="aurora_294">
+                                            <field name="OP">LTE</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="aurora_297">
+                                                <field name="VAR" id="var_Stake">Stake</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="variables_get" id="aurora_300">
+                                                <field name="VAR" id="var_Maximum_Stake">Maximum Stake</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="logic_operation" id="aurora_303">
+                                            <field name="OP">AND</field>
+                                            <value name="A">
+                                              <block type="logic_compare" id="aurora_306">
+                                                <field name="OP">GT</field>
+                                                <value name="A">
+                                                  <block type="variables_get" id="aurora_309">
+                                                    <field name="VAR" id="var_Stake">Stake</field>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="math_number" id="aurora_312">
+                                                    <field name="NUM">0</field>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="logic_operation" id="aurora_315">
+                                                <field name="OP">OR</field>
+                                                <value name="A">
+                                                  <block type="logic_compare" id="aurora_318">
+                                                    <field name="OP">LT</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="aurora_321">
+                                                        <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="variables_get" id="aurora_324">
+                                                        <field name="VAR" id="var_Trail_Activation">Trail Activation</field>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="logic_compare" id="aurora_327">
+                                                    <field name="OP">LTE</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="aurora_330">
+                                                        <field name="VAR" id="var_Stake">Stake</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="math_arithmetic" id="aurora_333">
+                                                        <field name="OP">MINUS</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="aurora_336">
+                                                            <field name="VAR" id="var_Session_Profit">Session Profit</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="math_arithmetic" id="aurora_339">
+                                                            <field name="OP">MINUS</field>
+                                                            <value name="A">
+                                                              <block type="variables_get" id="aurora_342">
+                                                                <field name="VAR" id="var_Peak_Profit">Peak Profit</field>
+                                                              </block>
+                                                            </value>
+                                                            <value name="B">
+                                                              <block type="variables_get" id="aurora_345">
+                                                                <field name="VAR" id="var_Trailing_Drawdown">Trailing Drawdown</field>
+                                                              </block>
+                                                            </value>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="logic_operation" id="aurora_348">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare" id="aurora_351">
+                            <field name="OP">GTE</field>
+                            <value name="A">
+                              <block type="epoch" id="aurora_354"></block>
+                            </value>
+                            <value name="B">
+                              <block type="variables_get" id="aurora_356">
+                                <field name="VAR" id="var_Next_Entry_Time">Next Entry Time</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="aurora_359">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="aurora_362">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="lists_length" id="aurora_365">
+                                    <value name="VALUE">
+                                      <block type="lastDigitList" id="aurora_367"></block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="aurora_369">
+                                    <field name="VAR" id="var_Long_Window">Long Window</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_operation" id="aurora_372">
+                                <field name="OP">AND</field>
+                                <value name="A">
+                                  <block type="logic_compare" id="aurora_375">
+                                    <field name="OP">GTE</field>
+                                    <value name="A">
+                                      <block type="variables_get" id="aurora_378">
+                                        <field name="VAR" id="var_Short_Window">Short Window</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="aurora_381">
+                                        <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_operation" id="aurora_384">
+                                    <field name="OP">AND</field>
+                                    <value name="A">
+                                      <block type="logic_compare" id="aurora_387">
+                                        <field name="OP">GT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="aurora_390">
+                                            <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="math_number" id="aurora_393">
+                                            <field name="NUM">0</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_compare" id="aurora_396">
+                                        <field name="OP">GT</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="aurora_399">
+                                            <field name="VAR" id="var_Long_Window">Long Window</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="aurora_402">
+                                            <field name="VAR" id="var_Short_Window">Short Window</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="controls_if" id="aurora_405">
+                    <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1"></mutation>
+                    <value name="IF0">
+                      <block type="logic_operation" id="aurora_408">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="last_digits_condition" id="aurora_411">
+                            <field name="CONDITION">ALL_ODD</field>
+                            <value name="N">
+                              <shadow type="math_number" id="N%N5!:f;Y:)!_[5(Hv+=">
+                                <field name="NUM">3</field>
+                              </shadow>
+                              <block type="variables_get" id="aurora_414">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="aurora_417">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="aurora_420">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="even_odd_analysis" id="aurora_423">
+                                    <field name="ANALYSIS_TYPE">EVEN_PERCENTAGE</field>
+                                    <value name="N">
+                                      <shadow type="math_number" id="cp3+,Ay9sb-vBW3*]!j0">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="aurora_426">
+                                        <field name="VAR" id="var_Short_Window">Short Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="aurora_429">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="aurora_432">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="aurora_435">
+                                        <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_compare" id="aurora_438">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="even_odd_analysis" id="aurora_441">
+                                    <field name="ANALYSIS_TYPE">EVEN_PERCENTAGE</field>
+                                    <value name="N">
+                                      <shadow type="math_number" id="z+-PJ$vSd5z=@|%j5Dfk">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="aurora_444">
+                                        <field name="VAR" id="var_Long_Window">Long Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="aurora_447">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="aurora_450">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="aurora_453">
+                                        <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="apollo_purchase2" id="aurora_456">
+                        <field name="PURCHASE_LIST">DIGITEVEN</field>
+                      </block>
+                    </statement>
+                    <value name="IF1">
+                      <block type="logic_operation" id="aurora_459">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="last_digits_condition" id="aurora_462">
+                            <field name="CONDITION">ALL_EVEN</field>
+                            <value name="N">
+                              <shadow type="math_number" id="Lf-%i2`veqL@I^,M[z!X">
+                                <field name="NUM">3</field>
+                              </shadow>
+                              <block type="variables_get" id="aurora_465">
+                                <field name="VAR" id="var_Confirmation_Ticks">Confirmation Ticks</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_operation" id="aurora_468">
+                            <field name="OP">AND</field>
+                            <value name="A">
+                              <block type="logic_compare" id="aurora_471">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="even_odd_analysis" id="aurora_474">
+                                    <field name="ANALYSIS_TYPE">ODD_PERCENTAGE</field>
+                                    <value name="N">
+                                      <shadow type="math_number" id="F]g~iDPJ)9~?75$cao6!">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="aurora_477">
+                                        <field name="VAR" id="var_Short_Window">Short Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="aurora_480">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="aurora_483">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="aurora_486">
+                                        <field name="VAR" id="var_Short_Margin">Short Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_compare" id="aurora_489">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="even_odd_analysis" id="aurora_492">
+                                    <field name="ANALYSIS_TYPE">ODD_PERCENTAGE</field>
+                                    <value name="N">
+                                      <shadow type="math_number" id="$0=F6Q@;XN)ZP{:R3*Zv">
+                                        <field name="NUM">1000</field>
+                                      </shadow>
+                                      <block type="variables_get" id="aurora_495">
+                                        <field name="VAR" id="var_Long_Window">Long Window</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_arithmetic" id="aurora_498">
+                                    <field name="OP">ADD</field>
+                                    <value name="A">
+                                      <block type="math_number" id="aurora_501">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get" id="aurora_504">
+                                        <field name="VAR" id="var_Long_Margin">Long Margin</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO1">
+                      <block type="apollo_purchase2" id="aurora_507">
+                        <field name="PURCHASE_LIST">DIGITODD</field>
+                      </block>
+                    </statement>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

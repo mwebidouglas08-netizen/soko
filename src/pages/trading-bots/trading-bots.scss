@@ -1,0 +1,150 @@
+.bots-page {
+    .bots-search {
+        min-width: 22rem;
+    }
+
+    .bots-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .bots-count {
+        margin-left: auto;
+        color: var(--text-general);
+        font-size: 1.05rem;
+    }
+
+    .bots-error,
+    .bots-notice {
+        padding: 0.8rem 1rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+
+    .bots-error {
+        border: 1px solid color-mix(in srgb, var(--brand-danger, #e34444) 48%, transparent);
+        background: color-mix(in srgb, var(--brand-danger, #e34444) 12%, transparent);
+        color: var(--brand-danger, #e34444);
+    }
+
+    .bots-notice {
+        border: 1px solid color-mix(in srgb, var(--brand-success, #4bb4b3) 48%, transparent);
+        background: color-mix(in srgb, var(--brand-success, #4bb4b3) 12%, transparent);
+        color: var(--brand-success, #4bb4b3);
+    }
+
+    .bots-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+        gap: 1.1rem;
+    }
+
+    .bots-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1.2rem 1.3rem;
+        min-height: 250px;
+
+        h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            line-height: 1.3;
+            color: var(--text-prominent);
+        }
+
+        &__top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        &__tags {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        /* Reference Free Bots grid badges: teal QUICK/FREE, gold PREMIUM. */
+        &__badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.28rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.92rem;
+            font-weight: 800;
+            letter-spacing: 0.07em;
+            border: 1px solid transparent;
+
+            &--quick,
+            &--free {
+                border-color: rgb(20 184 166 / 55%);
+                background: rgb(20 184 166 / 14%);
+                color: var(--brand-success, #14b8a6);
+            }
+
+            &--premium {
+                border-color: rgb(245 158 11 / 55%);
+                background: rgb(245 158 11 / 14%);
+                color: var(--brand-warning, #f59e0b);
+            }
+        }
+
+        &__load {
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 800;
+        }
+
+        &__desc {
+            margin: 0;
+            flex: 1;
+            color: var(--text-general);
+            font-size: 1.1rem;
+            line-height: 1.55;
+        }
+
+        &__foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+
+            .hub-btn {
+                min-width: 9.5rem;
+            }
+        }
+    }
+
+    .bots-paper {
+        color: var(--text-general);
+        font-size: 1rem;
+        border-bottom: 1px dashed var(--border-normal);
+        cursor: help;
+    }
+
+    .bots-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+        padding: 2.4rem 1.6rem;
+        border: 1px dashed var(--card-border, rgb(148 163 184 / 26%));
+        border-radius: 16px;
+        background: var(--surface-glass, rgba(15, 23, 42, 0.72));
+        backdrop-filter: blur(10px);
+        color: var(--text-general);
+        font-size: 1.15rem;
+
+        strong {
+            color: var(--text-prominent);
+            font-size: 1.3rem;
+        }
+    }
+}

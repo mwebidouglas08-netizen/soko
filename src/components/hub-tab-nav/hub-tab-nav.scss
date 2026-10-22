@@ -1,0 +1,96 @@
+/* Always-dark reference tab strip — solid teal active state, IBM Plex Sans. */
+.hub-tabnav {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: stretch;
+    height: 4rem;
+    background: #010d21;
+    border-bottom: 1px solid rgb(255 255 255 / 6%);
+    z-index: 4;
+    font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+
+    &__filter {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 4rem;
+        border: 0;
+        border-right: 1px solid rgb(255 255 255 / 6%);
+        background: transparent;
+        cursor: pointer;
+    }
+
+    &__list {
+        display: flex;
+        align-items: stretch;
+        flex: 1 1 auto;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        flex: 0 0 auto;
+        padding: 0 2.2rem;
+        border: 0;
+        background: transparent;
+        color: #e8eef8;
+        font-family: inherit;
+        font-size: 1.35rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+
+        svg {
+            flex: 0 0 auto;
+            color: #35c8d4;
+        }
+
+        &:hover {
+            background: rgb(255 255 255 / 6%);
+        }
+
+        &--active {
+            background: #27b8c3;
+            color: #fff;
+
+            svg {
+                color: #fff;
+            }
+
+            &:hover {
+                background: #27b8c3;
+            }
+        }
+    }
+
+    &__label {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.35rem;
+    }
+
+    &__ai {
+        color: #2ee6d6;
+        font-family: 'Segoe Script', 'Bradley Hand', cursive;
+        font-size: 1.5rem;
+        font-style: italic;
+        font-weight: 700;
+        line-height: 1;
+
+        .hub-tabnav__item--active & {
+            color: #fff;
+        }
+    }
+}

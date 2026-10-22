@@ -14,14 +14,22 @@ import Button from '../shared_ui/button';
 import Tooltip from '../shared_ui/tooltip/tooltip';
 import CircularWrapper from './circular-wrapper';
 import ContractStageText from './contract-stage-text';
+import ExecutionFastToggle from '../execution-fast-toggle';
 import './run-panel-tooltip.scss';
 
 type TTradeAnimation = {
     className?: string;
     should_show_overlay?: boolean;
+    /** Reference footer status views render the container only (no Run/Stop). */
+    hide_run_control?: boolean;
+    /** Idle footer shows the Execution FAST toggle instead of the stage text. */
+    show_execution_toggle?: boolean;
+    /** Footer context never shows the "no bot created" tooltip. */
+    disable_tooltip?: boolean;
 };
 
-const TradeAnimation = observer(({ className, should_show_overlay }: TTradeAnimation) => {
+const TradeAnimation = observer(
+    ({ className, should_show_overlay, hide_run_control, show_execution_toggle, disable_tooltip }: TTradeAnimation) => {
     const { dashboard, run_panel, summary_card, blockly_store } = useStore();
     const { active_tab } = dashboard;
     const { has_active_bot, has_saved_bots } = blockly_store;
@@ -111,7 +119,8 @@ const TradeAnimation = observer(({ className, should_show_overlay }: TTradeAnima
     // Show the tooltip when:
     // 1. The user is NOT in the bot builder tab, AND
     // 2. There are no bots
-    const should_show_tooltip = !is_stop_button_visible && !is_bot_builder_tab && has_no_bots;
+    // 3. The context allows tooltips (the reference footer never shows one)
+    const should_show_tooltip = !disable_tooltip && !is_stop_button_visible && !is_bot_builder_tab && has_no_bots;
 
     const button_props = React.useMemo(() => {
         if (is_stop_button_visible && !is_stop_button_disabled) {
@@ -130,6 +139,10 @@ const TradeAnimation = observer(({ className, should_show_overlay }: TTradeAnima
         };
     }, [is_stop_button_visible, is_stop_button_disabled]);
     const show_overlay = should_show_overlay && is_contract_completed;
+    // Reference footer variants: status views drop the control (unless running),
+    // and idle run views swap the stage text for the Execution FAST toggle.
+    const hide_control = Boolean(hide_run_control) && !is_stop_button_visible;
+    const show_fast_toggle = Boolean(show_execution_toggle) && contract_stage === 0;
 
     // Fix TypeScript error by ensuring active_tab is a number
     // Use a fallback to dashboard if active_tab is undefined
@@ -166,22 +179,49 @@ const TradeAnimation = observer(({ className, should_show_overlay }: TTradeAnima
 
     return (
         <div className={classNames('animation__wrapper', className)}>
-            {should_show_tooltip ? (
-                <div className='run__button_wrapper'>
-                    <Tooltip
-                        alignment={determineTooltipAlignment()}
-                        message={localize('The Run button is disabled because no Bot has been created yet.')}
-                        icon='info'
-                        className='qs__tooltip'
-                    />
-                    <div style={{ opacity: 0.5, marginLeft: '8px' }}>
+            {!hide_control && (
+                <div className='animation__left-control'>
+                    {should_show_tooltip ? (
+                        <div className='run__button_wrapper'>
+                            <Tooltip
+                                alignment={determineTooltipAlignment()}
+                                message={localize('The Run button is disabled because no Bot has been created yet.')}
+                                icon='info'
+                                className='qs__tooltip'
+                            />
+                            <div style={{ opacity: 0.5, marginLeft: '8px' }}>
+                                <Button
+                                    is_disabled={true}
+                                    className={button_props.class}
+                                    id={button_props.id}
+                                    icon={button_props.icon}
+                                    onClick={() => {
+                                        // Disabled button, no action
+                                    }}
+                                    has_effect
+                                    {...(is_stop_button_visible || !is_unavailable_for_payment_agent
+                                        ? { primary: true }
+                                        : { green: true })}
+                                >
+                                    {button_props.text}
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
                         <Button
-                            is_disabled={true}
+                            is_disabled={(is_disabled && !is_unavailable_for_payment_agent) || contract_stage === 3}
                             className={button_props.class}
                             id={button_props.id}
                             icon={button_props.icon}
                             onClick={() => {
-                                // Disabled button, no action
+                                setShouldDisable(true);
+                                if (is_stop_button_visible) {
+                                    onStopBotClick();
+                                    return;
+                                }
+                                onRunButtonClick();
+                                /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */
+                                /* [/AI] */
                             }}
                             has_effect
                             {...(is_stop_button_visible || !is_unavailable_for_payment_agent
@@ -190,51 +230,35 @@ const TradeAnimation = observer(({ className, should_show_overlay }: TTradeAnima
                         >
                             {button_props.text}
                         </Button>
-                    </div>
+                    )}
                 </div>
-            ) : (
-                <Button
-                    is_disabled={(is_disabled && !is_unavailable_for_payment_agent) || contract_stage === 3}
-                    className={button_props.class}
-                    id={button_props.id}
-                    icon={button_props.icon}
-                    onClick={() => {
-                        setShouldDisable(true);
-                        if (is_stop_button_visible) {
-                            onStopBotClick();
-                            return;
-                        }
-                        onRunButtonClick();
-                        /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */
-                        /* [/AI] */
-                    }}
-                    has_effect
-                    {...(is_stop_button_visible || !is_unavailable_for_payment_agent
-                        ? { primary: true }
-                        : { green: true })}
-                >
-                    {button_props.text}
-                </Button>
             )}
             <div
                 className={classNames('animation__container', className, {
                     'animation--running': contract_stage > 0,
                     'animation--completed': show_overlay,
                     'animation--disabled': is_disabled,
+                    'animation__container--execution-mode': show_fast_toggle,
                 })}
             >
                 {show_overlay && <ContractResultOverlay profit={profit} />}
-                <span className='animation__text'>
-                    <ContractStageText contract_stage={contract_stage} />
-                </span>
-                <div className='animation__progress'>
-                    <div className='animation__progress-line'>
-                        <div className={`animation__progress-bar animation__progress-${contract_stage}`} />
-                    </div>
-                    {status_classes.map((status_class, i) => (
-                        <CircularWrapper key={`status_class-${status_class}-${i}`} className={status_class} />
-                    ))}
-                </div>
+                {show_fast_toggle ? (
+                    <ExecutionFastToggle />
+                ) : (
+                    <React.Fragment>
+                        <span className='animation__text'>
+                            <ContractStageText contract_stage={contract_stage} />
+                        </span>
+                        <div className='animation__progress'>
+                            <div className='animation__progress-line'>
+                                <div className={`animation__progress-bar animation__progress-${contract_stage}`} />
+                            </div>
+                            {status_classes.map((status_class, i) => (
+                                <CircularWrapper key={`status_class-${status_class}-${i}`} className={status_class} />
+                            ))}
+                        </div>
+                    </React.Fragment>
+                )}
             </div>
         </div>
     );

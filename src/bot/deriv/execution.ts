@@ -67,12 +67,22 @@ const sleep = (ms: number): Promise<void> => new Promise<void>(r => setTimeout(r
 // serialised through a pacing queue and retried once after a backoff when the
 // budget is hit, so scanning can never starve the buy/polling calls.
 const PROPOSAL_MIN_GAP_MS = 250;
+const PROPOSAL_MIN_GAP_FAST_MS = 150;
 const PROPOSAL_WINDOW_MS = 60000;
 const PROPOSAL_MAX_PER_WINDOW = 300;
 const RATE_LIMIT_BACKOFF_MS = 4000;
+// Footer "Execution FAST" switch: narrows the proposal pacing gap so a signal
+// reaches the quote/buy path sooner. The per-window cap above still keeps the
+// shared Deriv request budget safe.
+let proposalMinGapMs = PROPOSAL_MIN_GAP_FAST_MS;
 let lastProposalAt = 0;
 let proposalStamps: number[] = [];
 let proposalChain: Promise<unknown> = Promise.resolve();
+
+/** Footer Execution FAST toggle — fast pacing (150ms) vs normal (250ms). */
+export const setExecutionFast = (fast: boolean): void => {
+    proposalMinGapMs = fast ? PROPOSAL_MIN_GAP_FAST_MS : PROPOSAL_MIN_GAP_MS;
+};
 
 const errorText = (err?: { code?: string; message?: string }): string =>
     `${err?.code || ''} ${err?.message || ''}`;
@@ -99,7 +109,7 @@ const acquireProposalSlot = (): Promise<void> => {
             await sleep(Math.max(wait, 200));
             proposalStamps = proposalStamps.filter(t => Date.now() - t < PROPOSAL_WINDOW_MS);
         }
-        const gap = PROPOSAL_MIN_GAP_MS - (Date.now() - lastProposalAt);
+        const gap = proposalMinGapMs - (Date.now() - lastProposalAt);
         if (gap > 0) await sleep(gap);
         lastProposalAt = Date.now();
         proposalStamps.push(lastProposalAt);
@@ -183,6 +193,60 @@ const impossibleBarrierError = (params: Record<string, unknown>): string | null 
     return null;
 };
 
+const VALID_DURATION_UNITS = new Set(['t', 's', 'm', 'h', 'd']);
+
+/**
+ * Reject malformed proposals before they spend a request on the shared
+ * Deriv budget: stake must be positive, duration a whole number >= 1 in a
+ * supported unit, and a digit barrier (when present) an integer 0–9.
+ */
+const validateTradeParams = (params: Record<string, unknown>): string | null => {
+    const amount = Number(params.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+        return `Invalid stake: ${params.amount} — it must be a positive number`;
+    }
+    const duration = Number(params.duration);
+    if (!Number.isInteger(duration) || duration < 1) {
+        return `Invalid duration: ${params.duration} — it must be a whole number of at least 1`;
+    }
+    const unit = String(params.duration_unit ?? '');
+    if (!VALID_DURATION_UNITS.has(unit)) {
+        return `Invalid duration unit: "${params.duration_unit}" — use t (ticks), s, m, h or d`;
+    }
+    if (params.barrier !== undefined) {
+        const b = Number(params.barrier);
+        if (!Number.isInteger(b) || b < 0 || b > 9) {
+            return `Invalid digit barrier: ${params.barrier} — it must be a whole number 0–9`;
+        }
+    }
+    return null;
+};
+
+/**
+ * Wall-clock window to wait for a contract to settle, sized from its own
+ * duration plus head-room for polling. The old hard 60s default timed out
+ * (and risked a stuck open-position slot) on any contract longer than a
+ * minute — e.g. 5-minute or hourly durations.
+ */
+export const settlementTimeoutMs = (duration: number, durationUnit: string): number => {
+    const d = Number.isFinite(duration) && duration >= 1 ? Math.floor(duration) : 1;
+    const headRoom = 90000;
+    switch (durationUnit) {
+        case 's':
+            return d * 1000 + headRoom;
+        case 'm':
+            return d * 60000 + headRoom;
+        case 'h':
+            return d * 3600000 + headRoom;
+        case 'd':
+            return d * 86400000 + headRoom;
+        case 't':
+        default:
+            // Tick contracts: ~5s per tick is a safe upper bound across symbols.
+            return d * 5000 + headRoom;
+    }
+};
+
 /** Parse, stamp the issuing socket and drop quotes that cannot profit. */
 const finalizeQuote = (
     response: any,
@@ -217,6 +281,8 @@ const finalizeQuote = (
 const requestProposal = async (
     params: Record<string, unknown>
 ): Promise<{ quote?: ProposalQuote; error?: string }> => {
+    const invalid = validateTradeParams(params);
+    if (invalid) return { error: invalid };
     const blocked = impossibleBarrierError(params);
     if (blocked) return { error: blocked };
     const first = await sendProposal(params);
@@ -305,6 +371,9 @@ export interface BuyResult {
     contractId?: number;
     transactionId?: number;
     buyPrice?: number;
+    /** Contract payout confirmed by the buy response — after a stale-quote
+     *  retry this can differ from the payout on the original quote. */
+    payout?: number;
     error?: string;
 }
 export const executeBuy = async (quote: ProposalQuote, amount: number): Promise<BuyResult> => {
@@ -330,8 +399,11 @@ export const executeBuy = async (quote: ProposalQuote, amount: number): Promise<
     const contractId = Number(b.contract_id);
     const transactionId = Number(b.transaction_id);
     const buyPrice = Number(b.buy_price);
+    const payout = Number(b.payout);
     if (!Number.isFinite(contractId)) return { error: 'No contract_id in buy response' };
-    return { contractId, transactionId, buyPrice };
+    const result: BuyResult = { contractId, transactionId, buyPrice };
+    if (Number.isFinite(payout) && payout > 0) result.payout = payout;
+    return result;
 };
 
 const RETRYABLE_BUY_RE =
@@ -448,11 +520,21 @@ export interface Settlement {
     outcome?: string;
 }
 
-const settleFrom = (poc: any): Settlement => {
+const settleFrom = (poc: any): Settlement | { error: string } => {
     const sellPrice = Number(poc.sell_price ?? poc.bid_price ?? 0);
     const buyPrice = Number(poc.buy_price ?? 0);
-    const profit = Number(poc.profit ?? sellPrice - buyPrice);
-    const isWon = poc.is_won === 1 || poc.is_won === true || profit > 0;
+    const hasWinFlag = poc.is_won !== undefined && poc.is_won !== null;
+    const hasProfit = poc.profit !== undefined && poc.profit !== null;
+    const hasSellPrice = poc.sell_price !== undefined || poc.bid_price !== undefined;
+    // A sold contract with NO outcome data must become an unknown settlement —
+    // deriving profit 0 from absent prices used to fabricate a LOSS.
+    if (!hasWinFlag && !hasProfit && !hasSellPrice) {
+        return {
+            error: `Contract #${poc.contract_id ?? '?'} sold but the server sent no outcome (is_won/profit/sell_price missing) — not recorded`,
+        };
+    }
+    const profit = hasProfit ? Number(poc.profit) : sellPrice - buyPrice;
+    const isWon = hasWinFlag ? poc.is_won === 1 || poc.is_won === true : profit > 0;
     const exitTick = poc.exit_tick !== undefined ? Number(poc.exit_tick) : undefined;
     return {
         contractId: Number(poc.contract_id),
@@ -465,10 +547,7 @@ const settleFrom = (poc: any): Settlement => {
         exitTick,
         entryEpoch: poc.entry_tick_time !== undefined ? Number(poc.entry_tick_time) : undefined,
         exitEpoch: poc.exit_tick_time !== undefined ? Number(poc.exit_tick_time) : undefined,
-        exitDigit:
-            exitTick !== undefined && poc.exit_tick_time !== undefined
-                ? undefined
-                : undefined,
+        // exitDigit is derived by the caller via deriveExitDigit (pipSize-dependent).
         barrier: poc.barrier !== undefined ? Number(poc.barrier) : undefined,
         status: poc.status,
         outcome: poc.outcome,
@@ -505,6 +584,7 @@ export const monitorUntilSettled = async (
         onProgress?.(poc);
         if (poc.is_sold === 1 || poc.is_sold === true || poc.is_expired === 1) {
             const settlement = settleFrom(poc);
+            if ('error' in settlement) return settlement;
             settlement.exitDigit = deriveExitDigit(settlement, pipSize);
             return settlement;
         }
@@ -514,6 +594,7 @@ export const monitorUntilSettled = async (
         const sold = lastPoc.is_sold === 1 || lastPoc.is_sold === true || lastPoc.is_expired === 1;
         if (sold) {
             const settlement = settleFrom(lastPoc);
+            if ('error' in settlement) return settlement;
             settlement.exitDigit = deriveExitDigit(settlement, pipSize);
             return settlement;
         }

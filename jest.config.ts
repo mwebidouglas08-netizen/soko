@@ -105,9 +105,15 @@ const config: Config = {
         '^@/stores/(.*)$': '<rootDir>/src/stores/$1',
         '^@/pages/(.*)$': '<rootDir>/src/pages/$1',
         '^@/services/(.*)$': '<rootDir>/src/services/$1',
+        // Bare (no-slash) alias imports, mirroring the rsbuild '@' → src alias.
+        '^@/stores$': '<rootDir>/src/stores',
+        '^@/types$': '<rootDir>/src/types',
+        '^@/types/(.*)$': '<rootDir>/src/types/$1',
         // `@/` is mapped one directory at a time here, with no catch-all.
         '^@/translations$': '<rootDir>/src/translations',
-        // The footer and mobile menu escape the alias to reach brand.config.json.
+        // The footer and mobile menu import brand.config.json directly (rsbuild
+        // config.ts and tsconfig paths both resolve the same specifier).
+        '^@/brand\\.config\\.json$': '<rootDir>/brand.config.json',
         '^@/\\.\\./brand\\.config\\.json$': '<rootDir>/brand.config.json',
     },
 
@@ -198,8 +204,9 @@ const config: Config = {
     },
 
     // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-    // react-router@8 ships ESM-only; force babel-jest to transform it (and its cookie-es dep).
-    transformIgnorePatterns: ['/node_modules/(?!(@deriv-com/ui|react-router|cookie-es)/)'],
+    // react-router@8 and @remix-run/route-pattern ship ESM-only (and use `import.meta`);
+    // force babel-jest to transform them (and the cookie-es dep).
+    transformIgnorePatterns: ['/node_modules/(?!(@deriv-com/ui|react-router|cookie-es|@remix-run/route-pattern)/)'],
 
     // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
     // unmockedModulePathPatterns: undefined,

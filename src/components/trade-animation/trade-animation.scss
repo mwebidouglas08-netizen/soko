@@ -76,26 +76,56 @@
     }
 
     &__run-button {
-        width: fit-content;
-        height: 100% !important;
+        box-sizing: border-box;
+        width: 10.8rem;
+        min-height: 40px;
+        max-height: 40px;
+        height: 40px !important;
+        padding: 0 1.2rem !important;
         border-start-end-radius: 0 !important;
         border-end-end-radius: 0 !important;
-        background-color: var(--button-primary-default);
+        color: #fff;
+        /* Reference rest/disabled run button: light lavender with white content. */
+        background: linear-gradient(90deg, #b5bddf, #b9c1e0) !important;
+
+        .dc-btn__text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        &:not(:disabled) {
+            background: var(--purchase-main-1, #4bb4b3) !important;
+        }
 
         &:hover {
-            background-color: var(--button-primary-default) !important;
+            background: linear-gradient(90deg, #aab3d9, #aeb6da) !important;
+        }
+
+        &:not(:disabled):hover {
+            background: var(--purchase-main-1, #4bb4b3) !important;
         }
     }
 
     &__stop-button {
-        width: fit-content;
-        height: 100% !important;
+        box-sizing: border-box;
+        width: 10.8rem;
+        min-height: 40px;
+        max-height: 40px;
+        height: 40px !important;
+        padding: 0 1.2rem !important;
         border-start-end-radius: 0 !important;
         border-end-end-radius: 0 !important;
-        background-color: var(--button-primary-default);
+        background: var(--status-danger) !important;
+
+        .dc-btn__text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1;
+        }
 
         &:hover {
-            background-color: var(--button-primary-default) !important;
+            background: var(--status-danger) !important;
         }
     }
 

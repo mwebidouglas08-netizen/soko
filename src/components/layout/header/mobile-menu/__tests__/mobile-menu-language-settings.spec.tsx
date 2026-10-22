@@ -3,9 +3,14 @@ import MobileMenu from '../mobile-menu';
 
 /**
  * The mobile counterpart of the footer gating check: with
- * `platform.footer.enable_language_settings` false, the drawer offers no language
- * entry point even when the modal manager reports it open.
+ * `platform.footer.enable_language_settings` false (mocked below), the drawer
+ * offers no language entry point even when the modal manager reports it open.
+ * The committed value is `true` (reference shows the EN language control).
  */
+
+jest.mock('@/brand.config.json', () => ({
+    platform: { footer: { enable_language_settings: false, enable_theme_toggle: true } },
+}));
 
 // Built inside the factory: jest hoists jest.mock above module-scope consts.
 jest.mock('@deriv-com/ui', () => {

@@ -5,7 +5,7 @@
     height: 3.6rem;
     display: flex;
     flex-direction: row-reverse;
-    padding: 0 1rem;
+    padding: 0 0.8rem;
     align-items: center;
     position: fixed;
     bottom: 0;
@@ -16,8 +16,74 @@
     background: var(--general-main-1);
     z-index: 2;
 
+    &__center {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        height: 100%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        z-index: 3;
+
+        .toolbar__section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0.8);
+        }
+    }
+
+    &__copyright {
+        cursor: help;
+        margin-inline-start: auto;
+        padding: 4px;
+        white-space: nowrap;
+        color: var(--text-less-prominent);
+        font-size: 1.2rem;
+        line-height: 1.5;
+
+        @media (max-width: 1279px) {
+            display: none;
+        }
+    }
+
+    /* Reference footer widget sizing: the wrapper spans 35rem, the container
+       flex-fills it, and the whole section renders at 80% (see __center). */
+    .toolbar__animation {
+        width: 35rem;
+    }
+
+    /* Reference footer run button: light lavender with white content. */
+    .animation__run-button {
+        background: linear-gradient(90deg, #b5bddf, #b9c1e0) !important;
+
+        &:hover {
+            background: linear-gradient(90deg, #aab3d9, #aeb6da) !important;
+        }
+    }
+
+    .animation__container {
+        flex: auto;
+    }
+
+    .animation__container.toolbar__animation {
+        width: auto;
+    }
+
+    .animation__container--execution-mode {
+        padding: 0;
+    }
+
+    .animation__left-control {
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
+
     &__icon {
-        padding: 0.8rem;
+        height: 3rem;
+        padding: 0 0.5rem;
 
         svg > g > path,
         svg > path {
@@ -30,16 +96,21 @@
     }
 
     &__vertical-line {
-        width: 0.1rem;
-        height: 1.6rem;
+        width: 1px;
+        height: 1.4rem;
         background-color: var(--general-section-1);
-        margin: 0 0.8rem;
+        margin: 0 0.5rem;
     }
 
     &__language {
         display: flex;
         align-items: center;
-        padding: 0.8rem;
+        height: 3rem;
+        padding: 0 0.5rem;
+
+        & svg {
+            border-radius: 0.15rem;
+        }
 
         & span {
             margin-inline-start: 0.4rem;

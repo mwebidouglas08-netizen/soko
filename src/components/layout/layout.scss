@@ -6,8 +6,12 @@
     height: 100vh;
 
     .deriv-header {
+        // Reference `--app-header-height: 48px`; sits above the dashboard aurora
+        // (the `.main-dashboard` isolate paints over non-positioned siblings).
+        position: relative;
+        z-index: 10;
         background: var(--general-main-1);
-        height: 5.6rem;
+        height: 4.8rem;
     }
 
     &.quick-strategy-active {

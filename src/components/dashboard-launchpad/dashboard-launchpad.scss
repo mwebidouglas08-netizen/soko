@@ -1,0 +1,348 @@
+/* Reference dashboard hero: navy tab bg with the dashboard-blue-background
+   image (50%/cover), centered welcome block (kicker, typewriter greeting,
+   quote) and the four glass launcher cards with per-card nav-color accents. */
+.launchpad {
+    margin: -1.4rem -1.6rem 0;
+    max-width: 100vw;
+    overflow-x: clip;
+    padding-bottom: 2.8rem;
+    isolation: isolate;
+    background: #020a16 url('../../assets/dashboard-bg.png') 50% / cover no-repeat;
+    animation: launchIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    &__hero {
+        position: relative;
+        text-align: center;
+        padding: 3.2rem 1.6rem 0;
+        background: radial-gradient(at top, rgb(2 10 22 / 25%), transparent 70%);
+        color: #e8eefc;
+    }
+
+    &__sweep {
+        position: absolute;
+        inset: -20% -10% auto -10%;
+        height: 70%;
+        z-index: 0;
+        pointer-events: none;
+        background: radial-gradient(55% 45% at 50% 55%, rgb(34 211 238 / 8%), transparent 75%);
+    }
+
+    &__kicker {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #8aaaca;
+
+        span[aria-hidden] {
+            color: #4b628c;
+        }
+    }
+
+    &__kicker-dot {
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: #5ae3c4;
+        box-shadow: 0 0 10px rgb(90 227 196 / 70%);
+    }
+
+    &__greeting {
+        position: relative;
+        z-index: 1;
+        margin: 1rem 0 0;
+        font-size: max(2.5rem, min(2.6vw, 3.8rem));
+        font-weight: 750;
+        line-height: 1.35;
+        color: #64e1f3;
+        overflow-wrap: anywhere;
+    }
+
+    &__caret {
+        display: inline-block;
+        width: 2px;
+        height: 0.9em;
+        margin-left: 2px;
+        vertical-align: baseline;
+        background: #64e1f3;
+        animation: caretBlink 1s steps(2, start) infinite;
+    }
+
+    &__divider {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.2rem;
+        margin: 1.6rem 0 0;
+
+        &::before,
+        &::after {
+            content: '';
+            width: 5.8rem;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgb(148 163 184 / 55%), transparent);
+        }
+
+        span {
+            width: 0.7rem;
+            height: 0.7rem;
+            background: #5ae3c4;
+            transform: rotate(45deg);
+            box-shadow: 0 0 8px rgb(90 227 196 / 60%);
+        }
+    }
+
+    &__quote {
+        position: relative;
+        z-index: 1;
+        min-height: 3.2rem;
+        margin: 1.8rem 0 0;
+        font-size: 2.3rem;
+        font-style: italic;
+        line-height: 1.5;
+        color: #9bb4cf;
+    }
+
+    &__caret--quote {
+        background: #9bb4cf;
+    }
+
+    &__cards {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1.4rem;
+        max-width: 126rem;
+        margin: 2rem auto 0;
+
+        @media (max-width: 1100px) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            padding: 0 1.6rem;
+        }
+
+        @media (max-width: 560px) {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    &__card {
+        --nav-color: #5fa4f8;
+
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        min-height: 19.4rem;
+        padding: 1.8rem;
+        border: 1px solid rgb(156 190 222 / 24%);
+        border-radius: 1.8rem;
+        background: linear-gradient(150deg, rgb(14 31 51 / 40%), rgb(4 13 28 / 22%));
+        backdrop-filter: blur(10px);
+        color: #eef3ff;
+        text-align: start;
+        cursor: pointer;
+        overflow: hidden;
+        transition: transform 0.25s, border-color 0.25s, background 0.25s;
+        animation: launchIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 2.4rem;
+            left: 0;
+            width: 0.3rem;
+            height: 3rem;
+            border-radius: 0 3px 3px 0;
+            background: color-mix(in srgb, var(--nav-color) 55%, transparent);
+            box-shadow: 0 0 1.8rem color-mix(in srgb, var(--nav-color) 35%, transparent);
+        }
+
+        /* Bright per-card top edge line, peaking at center (reference parity) */
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--nav-color) 50%, transparent);
+            pointer-events: none;
+        }
+
+        &:nth-child(2) {
+            animation-delay: 0.06s;
+        }
+
+        &:nth-child(3) {
+            animation-delay: 0.12s;
+        }
+
+        &:nth-child(4) {
+            animation-delay: 0.18s;
+        }
+
+        &:hover {
+            transform: translateY(-5px);
+            border-color: color-mix(in srgb, var(--nav-color) 55%, transparent);
+            background: linear-gradient(150deg, rgb(20 43 67 / 52%), rgb(4 13 28 / 28%));
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--nav-color);
+            outline-offset: 4px;
+        }
+
+        &--gold {
+            --nav-color: #fed700;
+        }
+
+        &--cyan {
+            --nav-color: #00e4fd;
+        }
+
+        &--violet {
+            --nav-color: #a489f7;
+        }
+    }
+
+    &__card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 1.6rem;
+    }
+
+    &__card-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.6rem;
+        height: 1.9rem;
+        padding: 0 0.6rem;
+        border: 1px solid rgb(156 177 200 / 28%);
+        border-radius: 0.5rem;
+        background: rgb(156 177 200 / 10%);
+        font-family: var(--brand-font-monospace, monospace);
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: #9cb1c8;
+    }
+
+    &__card-icon {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 5.6rem;
+        height: 5.6rem;
+        border: 1px solid color-mix(in srgb, var(--nav-color) 30%, transparent);
+        border-radius: 50%;
+        background: radial-gradient(circle, color-mix(in srgb, var(--nav-color) 9%, transparent), transparent 70%);
+        color: var(--nav-color);
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: -0.5rem;
+            border: 1px dashed color-mix(in srgb, var(--nav-color) 22%, transparent);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        svg {
+            width: 2.6rem;
+            height: 2.6rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__card-title {
+        font-size: 2rem;
+        font-weight: 650;
+        letter-spacing: -0.04px;
+        line-height: 1.35;
+    }
+
+    &__card-subtitle {
+        display: block;
+        margin: 0.8rem 0 1.6rem;
+        font-size: 1.3rem;
+        line-height: 1.65;
+        color: #b5c6d9;
+    }
+
+    &__card-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-top: auto;
+    }
+
+    &__card-cta {
+        font-size: 1.1rem;
+        font-weight: 650;
+        letter-spacing: 0.06em;
+        color: var(--nav-color);
+    }
+
+    &__card-arrow {
+        display: grid;
+        place-items: center;
+        width: 3.2rem;
+        height: 3.2rem;
+        border: 1px solid color-mix(in srgb, var(--nav-color) 30%, transparent);
+        border-radius: 50%;
+        color: var(--nav-color);
+        transition: transform 0.25s;
+    }
+
+    &__card:hover &__card-arrow {
+        transform: translate(2px, -2px);
+    }
+
+    @media (max-width: 859px) {
+        padding-bottom: 2.4rem;
+
+        &__hero {
+            padding-top: 2.4rem;
+        }
+
+        &__greeting {
+            font-size: 2.5rem;
+        }
+
+        &__quote {
+            font-size: 1.7rem;
+        }
+    }
+}
+
+@keyframes launchIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes caretBlink {
+    50% {
+        opacity: 0;
+    }
+}

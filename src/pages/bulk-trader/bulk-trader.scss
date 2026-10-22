@@ -1,0 +1,63 @@
+.bulk-page {
+    .bulk-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .bulk-toggles {
+        display: flex;
+        align-items: center;
+        gap: 1.4rem;
+        flex-wrap: wrap;
+    }
+
+    .bulk-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.15rem;
+        cursor: pointer;
+
+        input {
+            width: 1.4rem;
+            height: 1.4rem;
+            accent-color: var(--accent-teal, #14b8a6);
+            cursor: pointer;
+
+            &:disabled {
+                cursor: not-allowed;
+                opacity: 0.55;
+            }
+        }
+
+        &:has(input:disabled) {
+            color: var(--text-general);
+            cursor: not-allowed;
+        }
+    }
+
+    .bulk-msg {
+        margin: 0;
+        min-height: 1.3em;
+        color: var(--text-general);
+        font-size: 1.1rem;
+    }
+
+    .bulk-progress {
+        height: 10px;
+        border-radius: 999px;
+        background: var(--general-main-1);
+        border: 1px solid var(--border-normal);
+        overflow: hidden;
+        margin-bottom: 0.8rem;
+
+        span {
+            display: block;
+            height: 100%;
+            background: var(--brand-gradient);
+            transition: width 0.3s ease;
+        }
+    }
+}

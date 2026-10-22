@@ -2,9 +2,31 @@ import { render, screen } from '@testing-library/react';
 import Footer from '../index';
 
 /**
- * With `platform.footer.enable_language_settings` false — the committed value — the
- * footer shows no language control, even when the modal manager reports it open.
+ * The brand-config gate: with `platform.footer.enable_language_settings` false
+ * (mocked below) the footer shows no language control, even when the modal
+ * manager reports it open. The committed value is `true` (reference footer
+ * shows the EN language control).
  */
+
+jest.mock('@/brand.config.json', () => {
+    const actual = jest.requireActual('@/brand.config.json');
+    return {
+        ...actual,
+        platform: {
+            ...actual.platform,
+            footer: { ...actual.platform.footer, enable_language_settings: false, enable_theme_toggle: true },
+        },
+    };
+});
+
+jest.mock('@/hooks/useStore', () => ({
+    useStore: () => ({ ui: { active_view: 'dashboard' } }),
+}));
+
+jest.mock('@/components/trade-animation', () => ({
+    __esModule: true,
+    default: () => <div data-testid='run-widget' />,
+}));
 
 jest.mock('@/hooks/useApiBase', () => ({
     useApiBase: () => ({ isAuthorized: false }),

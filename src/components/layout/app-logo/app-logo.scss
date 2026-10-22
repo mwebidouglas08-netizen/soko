@@ -1,11 +1,51 @@
 .app-header {
+    // Logo lockup: wordmark + teal chat bubble (reference `.d-apollo-logo`).
+    &__brand {
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
+
     &__logo {
-        padding-inline-start: 1.6rem;
-        padding-inline-end: 1.6rem;
+        padding-inline-start: 1.2rem;
+        padding-inline-end: 2rem;
+        border-inline-end: 1px solid var(--general-section-1);
         height: 32px;
         display: flex;
         align-items: center;
         text-decoration: none;
+    }
+
+    // Reference chat bubble: teal rounded square with a white chat glyph that
+    // opens the live-chat widget.
+    &__chat {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.6rem;
+        height: 2.6rem;
+        margin-inline: 0 1.2rem;
+        padding: 0;
+        border: 0;
+        border-radius: 0.6rem;
+        background: var(--site-accent, #02c0ce);
+        color: #fff;
+        cursor: pointer;
+
+        svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            display: block;
+        }
+
+        &:hover {
+            filter: brightness(1.06);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--text-general);
+            outline-offset: 2px;
+        }
     }
 
     // Logo + app name mark (shared by the header and the mobile drawer).

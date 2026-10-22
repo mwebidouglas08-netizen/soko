@@ -32,9 +32,9 @@
     },
     "typography": {
         "font_family": {
-            "primary": "Source Sans 3",
+            "primary": "'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif",
             "secondary": "Georgia, 'Times New Roman', Times, serif",
-            "monospace": "'Courier New', Courier, monospace"
+            "monospace": "'IBM Plex Mono', 'Courier New', monospace"
         },
         "font_sizes": {
             "xs": "0.75rem",
@@ -79,12 +79,12 @@
         "css_variable_prefix": "--brand"
     },
     "platform": {
-        "name": "Mwebifx",
+        "name": "TraderScheme",
         "i18n": {
             "default_language": "EN"
         },
         "footer": {
-            "enable_language_settings": false,
+            "enable_language_settings": true,
             "enable_theme_toggle": true
         },
         "hostname": {
@@ -110,6 +110,6 @@
             }
         },
         "show_name": false,
-        "logo_path": null
+        "logo_path": "/logo.svg"
     }
 }

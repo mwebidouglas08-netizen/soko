@@ -1,0 +1,130 @@
+/* Reference CSS extracted for apex-bot\apex-bot.scss (selector: /(?:^|[\s,{>+~(.]|@media\s*\(max-width:\s*\d+px\)\s*)(?:(christmas-|cg-|markets?-|market-|control-group|martingale-|toggle-|combined-bots-|history-list|stat-card|btn-start|indicator))/). */
+.market-name-cell{align-items:center;gap:8px;display:flex}
+.combined-bots-shell{--cg-accent:var(--text-info-blue);--cg-accent-bg:var(--transparent-info);--cg-success:var(--status-success);--cg-success-bg:var(--transparent-success);--cg-danger:var(--status-danger);--cg-danger-bg:var(--transparent-danger);--cg-warning:var(--status-warning);--cg-bg:var(--general-main-1);--cg-panel:var(--general-section-1);--cg-panel-alt:var(--general-section-2);--cg-panel-muted:var(--general-section-3);--cg-border:var(--border-normal);--cg-border-strong:var(--border-normal-2);--cg-text:var(--text-general);--cg-text-muted:var(--text-less-prominent);--cg-text-strong:var(--text-prominent);--cg-radius-sm:.4rem;--cg-radius-md:.8rem;--cg-shadow-sm:0 .2rem .8rem var(--shadow-menu);--cg-shadow-md:0 .8rem 2rem var(--shadow-drop);--cg-transition:.16s ease;background:var(--cg-bg);color:var(--cg-text);min-height:80vh;padding:.45rem;font-family:inherit}
+.combined-bots-shell__content,.christmas-gift-container{width:100%}
+.christmas-gift-container{gap:.45rem;margin:0 auto;display:grid}
+.cg-hero{background:var(--cg-panel);border:.1rem solid var(--cg-border);border-radius:var(--cg-radius-md);box-shadow:var(--cg-shadow-sm);grid-template-columns:minmax(0,1fr) minmax(12rem,16rem);align-items:stretch;gap:.8rem;padding:.8rem 1rem;display:grid}
+.cg-hero__copy{align-content:center;gap:.35rem;min-width:0;display:grid}
+.cg-hero h1{color:var(--cg-text-strong);font-size:var(--text-size-s);font-weight:var(--text-weight-bold);line-height:var(--text-lh-xs);margin:0}
+.cg-hero p{color:var(--cg-text-muted);font-size:var(--text-size-xxs);line-height:var(--text-lh-m);max-width:72rem;margin:0}
+.cg-hero__action{align-items:center;display:flex}
+.cg-status-pill{background:var(--cg-panel-alt);border:.1rem solid var(--cg-border);color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-weight:var(--text-weight-bold);text-transform:uppercase;border-radius:999rem;align-items:center;gap:.6rem;width:-moz-fit-content;width:fit-content;min-height:2.2rem;padding:.25rem .7rem;display:inline-flex}
+.cg-status-pill__dot{background:var(--status-default);border-radius:50%;width:.8rem;height:.8rem}
+.cg-status-pill--running{background:var(--cg-success-bg);border-color:var(--cg-success);color:var(--cg-success)}
+.cg-status-pill--running .cg-status-pill__dot{background:var(--cg-success)}
+.cg-top-grid{grid-template-columns:1fr;align-items:stretch;gap:.45rem;width:100%;display:grid}
+.christmas-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:.45rem;display:grid}
+.stat-card,.cg-panel,.recovery-mode-banner,.error-banner,.christmas-info,.trade-history,.christmas-markets{background:var(--cg-panel);border:.1rem solid var(--cg-border);border-radius:var(--cg-radius-md);box-shadow:var(--cg-shadow-sm)}
+.stat-card{gap:.15rem;min-height:5.2rem;padding:.55rem .65rem;display:grid}
+.stat-card h3{color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-weight:var(--text-weight-bold);line-height:var(--text-lh-xs);text-transform:uppercase;margin:0}
+.stat-card p{color:var(--cg-text-strong);font-size:var(--text-size-m);font-variant-numeric:tabular-nums;font-weight:var(--text-weight-bold);line-height:var(--text-lh-xs);margin:0}
+.stat-card.total{border-color:var(--cg-accent)}
+.stat-card.win,.stat-card.rate{border-color:var(--cg-success)}
+.stat-card.loss{border-color:var(--cg-danger)}
+.stat-card .positive,.stat-card.win p,.stat-card.rate p,.history-profit.positive{color:var(--cg-success)}
+.stat-card .negative,.stat-card.loss p,.history-profit.negative{color:var(--cg-danger)}
+.cg-dashboard-grid{grid-template-columns:1fr;gap:.45rem;width:100%;display:grid}
+.cg-panel{gap:.5rem;padding:.6rem;display:grid}
+.cg-panel__header,.christmas-markets h3,.trade-history h3,.christmas-info h3{justify-content:space-between;align-items:baseline;gap:.8rem;margin:0;display:flex}
+.cg-panel__header h2,.christmas-markets h3,.trade-history h3,.christmas-info h3{color:var(--cg-text-strong);font-size:var(--text-size-xs);font-weight:var(--text-weight-bold);line-height:var(--text-lh-xs)}
+.cg-panel__header span{color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-weight:var(--text-weight-bold);text-transform:uppercase}
+.cg-signal-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;display:grid}
+.cg-signal-card{background:var(--cg-panel-alt);border:.1rem solid var(--cg-border);border-radius:var(--cg-radius-sm);gap:.25rem;min-height:5.8rem;padding:.7rem;display:grid}
+.cg-signal-card--over{border-color:var(--cg-success)}
+.cg-signal-card--under{border-color:var(--cg-danger)}
+.cg-signal-card span{color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-weight:var(--text-weight-bold);text-transform:uppercase}
+.cg-signal-card strong{color:var(--cg-text-strong);font-size:var(--text-size-xs);line-height:var(--text-lh-xs)}
+.cg-signal-card small{color:var(--cg-text-muted);font-size:var(--text-size-xxs);line-height:var(--text-lh-s)}
+.christmas-info{display:none}
+.cg-trade-options,.christmas-controls,.martingale-controls{gap:.45rem;display:grid}
+.cg-trade-options,.martingale-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+.christmas-controls{grid-template-columns:repeat(3,minmax(0,1fr))}
+.control-group,.martingale-toggle{background:var(--cg-panel-alt);border:.1rem solid var(--cg-border);border-radius:var(--cg-radius-sm);gap:.2rem;min-width:0;padding:.45rem .55rem;display:grid}
+.control-group label,.toggle-text{color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-weight:var(--text-weight-bold);line-height:var(--text-lh-xs);text-transform:uppercase}
+.control-group input,.control-group select,.markets-toolbar__search input{background:var(--cg-bg);border:.1rem solid var(--cg-border-strong);border-radius:var(--cg-radius-sm);color:var(--cg-text-strong);font-family:inherit;font-size:var(--text-size-xs);transition:border-color var(--cg-transition),box-shadow var(--cg-transition);width:100%;min-width:0;height:2.9rem;padding:0 .65rem}
+.control-group input:focus,.control-group select:focus,.markets-toolbar__search input:focus{border-color:var(--cg-accent);box-shadow:0 0 0 .3rem var(--cg-accent-bg);outline:none}
+.control-group input:disabled,.control-group select:disabled{background:var(--general-disabled);border-color:var(--border-disabled);color:var(--text-disabled);cursor:not-allowed}
+.toggle-label{justify-content:space-between;align-items:center;gap:1rem;display:flex}
+.toggle-switch-row{flex:none;width:4.6rem;height:2.4rem;position:relative}
+.toggle-switch-row input{opacity:0;width:0;height:0}
+.toggle-slider{background:var(--cg-border-strong);cursor:pointer;transition:background var(--cg-transition);border-radius:999rem;position:absolute;top:0;bottom:0;left:0;right:0}
+.toggle-slider:before{background:var(--cg-text-muted);content:"";transition:transform var(--cg-transition),background var(--cg-transition);border-radius:50%;width:1.8rem;height:1.8rem;position:absolute;top:.3rem;left:.3rem}
+.toggle-switch-row input:checked+.toggle-slider{background:var(--cg-accent-bg);border:.1rem solid var(--cg-accent)}
+.toggle-switch-row input:checked+.toggle-slider:before{background:var(--cg-accent);transform:translate(2.2rem)}
+.btn-start,.cg-primary-button{background:var(--button-primary-default);border:.1rem solid var(--button-primary-default);border-radius:var(--cg-radius-sm);color:var(--text-colored-background);cursor:pointer;font-family:inherit;font-size:var(--text-size-xs);font-weight:var(--text-weight-bold);text-transform:uppercase;transition:background var(--cg-transition),border-color var(--cg-transition),transform var(--cg-transition);justify-content:center;align-items:center;width:100%;min-height:3.2rem;padding:0 .8rem;display:inline-flex}
+.christmas-actions{width:100%}
+.btn-start:hover,.cg-primary-button:hover{background:var(--button-primary-hover);border-color:var(--button-primary-hover);transform:translateY(-.1rem)}
+.btn-start.running{background:var(--cg-danger);border-color:var(--cg-danger)}
+.christmas-info,.trade-history,.christmas-markets{gap:.5rem;width:100%;padding:.6rem;display:grid}
+.christmas-info ul{gap:.25rem;margin:0;padding-left:1.8rem;display:grid}
+.christmas-info li{color:var(--cg-text);font-size:var(--text-size-xs);line-height:var(--text-lh-m)}
+.history-list{border:.1rem solid var(--cg-border);border-radius:var(--cg-radius-sm);width:100%;max-height:28rem;display:grid;overflow:auto}
+.history-row{border-bottom:.1rem solid var(--cg-border);border-left:.3rem solid #0000;grid-template-columns:minmax(18rem,1.8fr) minmax(8rem,.6fr) minmax(13rem,1fr) minmax(10rem,.8fr) minmax(9rem,.7fr);align-items:center;gap:.55rem;min-height:3.4rem;padding:.35rem .6rem .35rem .5rem;display:grid}
+.history-row:last-child{border-bottom:0}
+.history-row:hover{background:var(--general-hover)}
+.history-row--head{background:var(--cg-panel-alt);color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-weight:var(--text-weight-bold);text-transform:uppercase;z-index:1;border-left-color:#0000;min-height:2.8rem;position:sticky;top:0}
+.history-row.win{border-left-color:var(--cg-success)}
+.history-row.loss{border-left-color:var(--cg-danger)}
+.history-market,.history-spots{gap:.18rem;min-width:0;display:grid}
+.history-symbol{color:var(--cg-text-strong);font-size:var(--text-size-xxs);font-weight:var(--text-weight-bold);text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+.history-time,.history-stake,.history-type,.market-price,.market-digits,.market-condition,.market-parity{color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-variant-numeric:tabular-nums}
+.history-spot,.indicator,.market-parity,.markets-stat-chip{font-weight:var(--text-weight-bold);border-radius:999rem;align-items:center;width:-moz-fit-content;width:fit-content;display:inline-flex}
+.history-spot{background:var(--cg-bg);border:.1rem solid var(--cg-border);color:var(--cg-text-muted);padding:.15rem .55rem}
+.history-spot--entry{color:var(--cg-success)}
+.history-spot--exit{color:var(--cg-danger)}
+.history-profit{font-size:var(--text-size-xs);font-variant-numeric:tabular-nums;font-weight:var(--text-weight-bold)}
+.history-time,.history-stake,.history-type,.market-price,.market-digits,.market-condition,.market-parity{color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-variant-numeric:tabular-nums}
+.history-spot,.indicator,.market-parity,.markets-stat-chip{font-weight:var(--text-weight-bold);border-radius:999rem;align-items:center;width:-moz-fit-content;width:fit-content;display:inline-flex}
+.cg-empty-state{color:var(--cg-text-muted);font-size:var(--text-size-xs);text-align:center;padding:1.2rem}
+.markets-toolbar{grid-template-columns:minmax(0,1fr) minmax(20rem,34rem);align-items:center;gap:.55rem;display:grid}
+.markets-toolbar__stats{flex-wrap:wrap;gap:.6rem;min-width:0;display:flex}
+.markets-stat-chip{background:var(--cg-panel-alt);border:.1rem solid var(--cg-border);color:var(--cg-text-muted);font-size:var(--text-size-xxs);min-height:2.8rem;padding:.35rem .85rem}
+.markets-stat-chip--live{background:var(--cg-success-bg);border-color:var(--cg-success);color:var(--cg-success)}
+.markets-toolbar__search{min-width:0}
+.markets-toolbar__search input::placeholder{color:var(--text-disabled)}
+.markets-list{border:.1rem solid var(--cg-border);border-radius:var(--cg-radius-sm);max-height:44rem;overflow:auto}
+.market-row{border-bottom:.1rem solid var(--cg-border);align-items:center;gap:.8rem;min-height:4.2rem;padding:.55rem .8rem;display:grid}
+.market-row:last-child{border-bottom:0}
+.market-row:hover{background:var(--general-hover)}
+.market-row--recovery{grid-template-columns:minmax(18rem,1.5fr) .8fr .8fr minmax(16rem,1.3fr) .8fr .8fr}
+.market-row--head{background:var(--cg-panel-alt);color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-weight:var(--text-weight-bold);text-transform:uppercase;z-index:1;min-height:3.4rem;position:sticky;top:0}
+.market-name-wrap{gap:.25rem;min-width:0;display:grid}
+.market-name{color:var(--cg-text-strong);font-size:var(--text-size-xs);font-weight:var(--text-weight-bold);text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+.market-meta{color:var(--cg-text-muted);font-size:var(--text-size-xxxs);align-items:center;gap:.4rem;display:inline-flex}
+.market-status-dot{background:var(--status-default);border-radius:50%;flex:none;width:.8rem;height:.8rem}
+.market-status-dot--live{background:var(--cg-success)}
+.market-parity{background:var(--cg-panel-alt);border:.1rem solid var(--cg-border);color:var(--cg-text);padding:.35rem .75rem}
+.market-parity--match{background:var(--cg-success-bg);border-color:var(--cg-success);color:var(--cg-success)}
+.market-condition{align-items:center;gap:.45rem;display:inline-flex}
+.indicator{font-size:var(--text-size-xxxs);justify-content:center;min-width:3.4rem;padding:.25rem .65rem}
+.indicator.met{background:var(--cg-success-bg);color:var(--cg-success)}
+.indicator.not-met{background:var(--cg-danger-bg);color:var(--cg-danger)}
+.markets-loading{color:var(--cg-text-muted);font-size:var(--text-size-xs);flex-direction:column;justify-content:center;align-items:center;gap:.8rem;min-height:16rem;padding:1.2rem;display:flex}
+.cg-modal-backdrop{-webkit-backdrop-filter:blur(.6rem);backdrop-filter:blur(.6rem);background:var(--overlay-outside-dialog);z-index:1200;justify-content:center;align-items:center;padding:1.2rem;display:flex;position:fixed;top:0;bottom:0;left:0;right:0}
+.cg-modal{background:var(--cg-panel);border:.1rem solid var(--cg-border);border-radius:var(--cg-radius-md);box-shadow:var(--cg-shadow-md);width:100%;max-width:42rem;overflow:hidden}
+.cg-modal-header,.cg-modal-actions{align-items:center;padding:1rem 1.2rem;display:flex}
+.cg-modal-header{border-bottom:.1rem solid var(--cg-border);justify-content:space-between}
+.cg-modal-header h3{color:var(--cg-text-strong);font-size:var(--text-size-s);margin:0}
+.cg-modal-close{background:var(--cg-panel-alt);border:.1rem solid var(--cg-border);color:var(--cg-text-muted);cursor:pointer;font-size:var(--text-size-xsm);border-radius:50%;justify-content:center;align-items:center;width:3.6rem;height:3.6rem;display:flex}
+.cg-modal-close:hover{border-color:var(--cg-accent);color:var(--cg-accent)}
+.cg-modal-body{padding:1.2rem}
+.cg-hit-banner{border-radius:var(--cg-radius-sm);text-align:center;gap:.6rem;padding:1.2rem;display:grid}
+.cg-hit-banner--tp{background:var(--cg-success-bg);border:.1rem solid var(--cg-success);color:var(--cg-success)}
+.cg-hit-banner--sl{background:var(--cg-danger-bg);border:.1rem solid var(--cg-danger);color:var(--cg-danger)}
+.cg-hit-emoji{font-size:var(--text-size-m);font-weight:var(--text-weight-bold)}
+.cg-hit-title{font-size:var(--text-size-s);font-weight:var(--text-weight-bold)}
+.cg-hit-subtitle{font-size:var(--text-size-xs);line-height:var(--text-lh-m)}
+.cg-modal-actions{border-top:.1rem solid var(--cg-border);justify-content:flex-end}
+.cg-primary-button{width:auto}
+.history-list::-webkit-scrollbar{width:.8rem;height:.8rem}
+.markets-list::-webkit-scrollbar{width:.8rem;height:.8rem}
+.history-list::-webkit-scrollbar-track{background:var(--cg-bg)}
+.markets-list::-webkit-scrollbar-track{background:var(--cg-bg)}
+.history-list::-webkit-scrollbar-thumb{background:var(--cg-border-strong);border-radius:999rem}
+.markets-list::-webkit-scrollbar-thumb{background:var(--cg-border-strong);border-radius:999rem}
+@keyframes cg-spin{to{transform:rotate(360deg)}}
+@media (max-width:640px) { .market-card{background:#fff;border-radius:12px;margin-bottom:16px;padding:20px;box-shadow:0 2px 4px #0000001a}.market-header{border-bottom:1px solid #e2e8f0;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;display:flex}.market-name{color:#1e293b;font-size:16px;font-weight:600}.market-price{color:#059669;font-family:monospace;font-size:18px;font-weight:700}.market-name-cell{gap:6px} }
+@media (max-width:1100px) { .cg-top-grid,.cg-dashboard-grid,.markets-toolbar{grid-template-columns:1fr}.christmas-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.christmas-actions{display:grid} }
+@media (max-width:760px) { .combined-bots-shell{padding:.35rem}.cg-panel,.christmas-info,.trade-history,.christmas-markets{border-radius:var(--cg-radius-sm);padding:.45rem}.cg-signal-grid,.cg-trade-options{grid-template-columns:1fr}.christmas-stats,.martingale-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.christmas-controls{grid-template-columns:repeat(3,minmax(0,1fr))}.stat-card{min-height:4.6rem;padding:.45rem .5rem}.stat-card h3,.control-group label,.toggle-text{font-size:1rem}.stat-card p{font-size:var(--text-size-s)}.control-group,.martingale-toggle{padding:.4rem .45rem}.control-group input,.control-group select,.markets-toolbar__search input{height:2.7rem;padding:0 .45rem}.history-list{border:0;max-height:24rem;display:block;overflow:hidden auto}.history-row--head{display:none}.history-row{background:var(--cg-panel-alt);border:.1rem solid var(--cg-border);border-bottom:.1rem solid var(--cg-border);border-left-width:.3rem;border-radius:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"market market""stake profit";gap:.2rem .65rem;min-width:0;min-height:4.4rem;padding:.35rem .55rem}.history-row:first-of-type{border-radius:var(--cg-radius-sm)var(--cg-radius-sm)0 0}.history-row:last-child{border-bottom:.1rem solid var(--cg-border);border-radius:0 0 var(--cg-radius-sm)var(--cg-radius-sm);margin-bottom:0}.history-row:hover{background:var(--cg-panel-alt)}.history-market{grid-area:market;grid-template-columns:minmax(0,1fr) auto;align-items:start}.history-time{text-align:right}.history-spots{display:none}.history-stake,.history-profit{color:var(--cg-text);line-height:var(--text-lh-s);white-space:nowrap;justify-self:start}.history-stake{grid-area:stake}.history-type{display:none}.history-profit{grid-area:profit;justify-self:end}.history-stake:before{color:var(--cg-text-muted);content:"Stake "}.history-profit:before{color:var(--cg-text-muted);content:"P/L "}.history-spot{padding:.1rem .4rem}.markets-list{overflow-x:auto}.market-row--recovery{grid-template-columns:18rem 10rem 8rem 18rem 9rem 9rem;min-width:78rem} }
+@media (max-width:420px) { .history-row{grid-template-columns:1fr;grid-template-areas:"market""stake""profit";min-height:5.4rem}.history-market{grid-template-columns:1fr}.history-time,.history-stake,.history-profit{text-align:left;justify-self:start} }
+@media (max-width:420px) { .combined-bots-shell,.christmas-gift-container,.christmas-stats,.christmas-controls,.martingale-controls{gap:.35rem}.christmas-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.christmas-controls .control-group:first-child{grid-column:1/-1} }

@@ -1,0 +1,84 @@
+/* Reference footer Execution FAST switch: label + status on the left,
+   pill track with a teal thumb on the right. */
+.execution-mode-toggle {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 13.6rem;
+    width: 100%;
+    height: 4rem;
+    padding: 0.5rem 0.8rem 0.5rem 1rem;
+    border: 1px solid var(--border-normal);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: 800;
+    line-height: 1;
+    transition: transform 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
+    background: transparent;
+
+    &__text {
+        text-align: left;
+        white-space: nowrap;
+        gap: 0.25rem;
+        display: grid;
+    }
+
+    &__label {
+        color: var(--text-less-prominent);
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    &__status {
+        color: var(--text-prominent);
+        text-transform: uppercase;
+        font-size: 1.2rem;
+        font-weight: 800;
+    }
+
+    &__track {
+        background: var(--general-section-2);
+        border: 1px solid var(--border-normal);
+        border-radius: 999px;
+        align-items: center;
+        width: 3.8rem;
+        height: 2rem;
+        padding: 0.2rem;
+        display: inline-flex;
+    }
+
+    &__thumb {
+        background: var(--text-less-prominent);
+        border-radius: 50%;
+        width: 1.4rem;
+        height: 1.4rem;
+        transition: transform 0.2s, background-color 0.2s;
+        display: block;
+    }
+
+    &:hover {
+        transform: translateY(-1px);
+    }
+
+    &--fast {
+        background: rgb(46 204 113 / 10%);
+        border-color: rgb(46 204 113 / 34%);
+    }
+
+    &--fast &__thumb {
+        background: var(--status-success);
+        transform: translate(1.8rem);
+    }
+
+    &--slow {
+        background: rgb(255 193 7 / 10%);
+        border-color: rgb(255 193 7 / 34%);
+    }
+
+    &:focus-visible {
+        outline: 2px solid #27b8c3;
+        outline-offset: 2px;
+    }
+}

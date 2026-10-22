@@ -1,4 +1,5 @@
 import { api_base } from '@/external/bot-skeleton/services/api/api-base';
+import { observer as globalObserver } from '@/external/bot-skeleton/utils/observer';
 
 export interface ApiResult<T = any> {
     data?: T;
@@ -25,6 +26,31 @@ export const accountBalance = (): number => {
 export const accountCurrency = (): string => {
     const info = api_base.account_info as any;
     return info?.currency || 'USD';
+};
+
+/** Push a fresh `balance` request through the socket and mirror it into the
+ * client store (used after settlements so the header balance is immediate). */
+export const refreshBalance = async (): Promise<number | null> => {
+    try {
+        const { data, error } = await request<any>({ balance: 1 }, 8000);
+        if (error) return null;
+        const value = data?.balance?.balance;
+        if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+        try {
+            const store = globalObserver.getState?.('client.store') as
+                | { setBalance?: (b: string) => void }
+                | null
+                | undefined;
+            store?.setBalance?.(String(value));
+        } catch {
+            /* store not registered yet — the stream will carry it */
+        }
+        const info = api_base.account_info as any;
+        if (info && typeof info === 'object') info.balance = value;
+        return value;
+    } catch {
+        return null;
+    }
 };
 
 const stringifyError = (value: unknown): string => {

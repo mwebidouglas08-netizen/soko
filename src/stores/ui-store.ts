@@ -4,14 +4,19 @@ import { isTouchDevice } from '@/components/shared/utils/screen/responsive';
 /**
  * The initial dark-mode state. An explicit stored `theme` (set once the user
  * toggles) always wins; with no stored choice the app defaults to the light
- * cinematic theme (SmartFlip-class look) rather than forcing dark or chasing
- * the OS preference.
+ * theme — matching the reference app's `theme--light` body state — rather than
+ * chasing the OS preference.
  */
 function getInitialDarkMode(): boolean {
     const stored = localStorage.getItem('theme');
     if (stored === 'dark') return true;
     if (stored === 'light') return false;
     return false;
+}
+
+/** Footer Execution FAST switch — persisted; fast is the reference default. */
+function getInitialExecutionFast(): boolean {
+    return localStorage.getItem('execution_fast') !== 'normal';
 }
 
 export default class UiStore {
@@ -27,6 +32,9 @@ export default class UiStore {
      * particular — needs this to know when to stay out of the way.
      */
     active_hub_view: 'ai-hub' | 'dashboard' = 'ai-hub';
+    /** Which hub view the shell is showing (bot-builder, volt-ai, ...). */
+    active_view = 'dashboard';
+    execution_fast = getInitialExecutionFast();
     account_switcher_disabled_message = '';
     current_focus = null;
     show_prompt = false;
@@ -40,7 +48,9 @@ export default class UiStore {
         makeObservable(this, {
             account_switcher_disabled_message: observable,
             active_hub_view: observable,
+            active_view: observable,
             current_focus: observable,
+            execution_fast: observable,
             is_accounts_switcher_on: observable,
             is_dark_mode_on: observable,
             is_desktop: observable,
@@ -50,6 +60,8 @@ export default class UiStore {
             show_prompt: observable,
             setAccountSwitcherDisabledMessage: action.bound,
             setActiveHubView: action.bound,
+            setActiveView: action.bound,
+            setExecutionFast: action.bound,
             setCurrentFocus: action.bound,
             setDarkMode: action.bound,
             setDevice: action.bound,
@@ -81,6 +93,15 @@ export default class UiStore {
 
     setActiveHubView = (view: 'ai-hub' | 'dashboard') => {
         this.active_hub_view = view;
+    };
+
+    setActiveView = (view: string) => {
+        this.active_view = view;
+    };
+
+    setExecutionFast = (value: boolean) => {
+        this.execution_fast = value;
+        localStorage.setItem('execution_fast', value ? 'fast' : 'normal');
     };
 
     setDevice = (value: 'mobile' | 'desktop' | 'tablet') => {

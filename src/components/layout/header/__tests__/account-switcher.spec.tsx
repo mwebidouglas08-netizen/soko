@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import AccountSwitcher from '../account-switcher';
 
 const mockCheckAndRegenerateWebSocket = jest.fn();
@@ -86,10 +86,11 @@ describe('AccountSwitcher', () => {
         expect(container).toBeEmptyDOMElement();
     });
 
-    it('renders active account type and balance', () => {
+    it('renders balance and display-currency select (reference: no type label in trigger)', () => {
         render(<AccountSwitcher activeAccount={mockActiveAccount} />);
-        expect(screen.getByText('Real account')).toBeInTheDocument();
         expect(screen.getByTestId('dt_balance')).toHaveTextContent('100.00 USD');
+        expect(screen.getByTestId('dt_currency_select')).toBeInTheDocument();
+        expect(screen.queryByText('Real account')).not.toBeInTheDocument();
     });
 
     it('opens dropdown on click when multiple accounts exist', () => {
@@ -116,7 +117,7 @@ describe('AccountSwitcher', () => {
         expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
     });
 
-    it('does not open dropdown with a single account', () => {
+    it('opens the dropdown with a single account (Trader\'s Hub link + Logout live there)', () => {
         const { useApiBase } = require('@/hooks/useApiBase');
         useApiBase.mockReturnValue({
             accountList: [{ loginid: 'CR123', currency: 'USD', balance: 100, is_virtual: 0 }],
@@ -124,7 +125,8 @@ describe('AccountSwitcher', () => {
         });
         render(<AccountSwitcher activeAccount={mockActiveAccount} />);
         fireEvent.click(screen.getByTestId('dt_acc_info'));
-        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+        expect(screen.getByRole('listbox')).toBeInTheDocument();
+        expect(screen.getByText('Logout')).toBeInTheDocument();
     });
 
     it('closes dropdown on outside click', () => {
@@ -147,7 +149,10 @@ describe('AccountSwitcher', () => {
         const setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
         render(<AccountSwitcher activeAccount={mockActiveAccount} />);
         fireEvent.click(screen.getByTestId('dt_acc_info'));
-        const options = screen.getAllByRole('option');
+        // The demo account is behind the Demo tab (reference Real|Demo tabs).
+        fireEvent.click(screen.getByRole('tab', { name: 'Demo' }));
+        // Scoped to the listbox — the currency <select>'s native options also match role=option.
+        const options = within(screen.getByRole('listbox')).getAllByRole('option');
         const inactiveOption = options.find(o => o.getAttribute('aria-selected') === 'false');
         if (inactiveOption) fireEvent.click(inactiveOption);
         expect(setItemSpy).toHaveBeenCalledWith('active_loginid', 'VRTC456');
@@ -158,7 +163,7 @@ describe('AccountSwitcher', () => {
     it('does not call checkAndRegenerateWebSocket when clicking the already-active account', () => {
         render(<AccountSwitcher activeAccount={mockActiveAccount} />);
         fireEvent.click(screen.getByTestId('dt_acc_info'));
-        const options = screen.getAllByRole('option');
+        const options = within(screen.getByRole('listbox')).getAllByRole('option');
         const activeOption = options.find(o => o.getAttribute('aria-selected') === 'true');
         if (activeOption) fireEvent.click(activeOption);
         expect(mockCheckAndRegenerateWebSocket).not.toHaveBeenCalled();
@@ -175,7 +180,7 @@ describe('AccountSwitcher', () => {
         });
         render(<AccountSwitcher activeAccount={mockActiveAccount} />);
         fireEvent.click(screen.getByTestId('dt_acc_info'));
-        const options = screen.getAllByRole('option');
+        const options = within(screen.getByRole('listbox')).getAllByRole('option');
         expect(options[0].getAttribute('aria-selected')).toBe('true');
     });
 

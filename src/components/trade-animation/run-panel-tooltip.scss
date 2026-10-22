@@ -101,12 +101,14 @@
 // Adjust the button to match the right side height
 .animation__run-button {
     height: 40px !important;
-    padding: 8px 16px !important;
+    padding: 0 1.2rem !important;
     line-height: 24px !important;
 
     &:disabled {
+        opacity: 1;
+
         .right-side {
-            opacity: 0.32; // Reduced opacity for disabled state
+            opacity: 0.32;
         }
     }
 }
@@ -167,5 +169,5 @@
 }
 
 .animation--disabled {
-    opacity: 0.32;
+    opacity: 1;
 }

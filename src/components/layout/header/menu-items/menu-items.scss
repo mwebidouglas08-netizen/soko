@@ -1,8 +1,30 @@
+/* Reference header menu entry (Reports): doc icon + label on the white bar. */
 .app-header__menu {
-    gap: 0.8rem;
-    padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 1.25rem 1.5rem;
+    color: var(--text-general);
+    font-size: var(--text-size-xs);
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 0;
+    background: transparent;
 
     &:hover {
         background-color: transparent;
+        color: var(--text-prominent);
+    }
+
+    &-icon {
+        flex: none;
+        color: currentColor;
+    }
+
+    &-text {
+        color: currentColor;
+        font-weight: 400;
     }
 }

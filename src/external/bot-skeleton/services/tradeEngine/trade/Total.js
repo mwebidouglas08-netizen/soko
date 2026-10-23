@@ -1,5 +1,7 @@
 import { getRoundedNumber } from '@/components/shared';
 import { getLocalizedErrorMessage } from '@/constants/backend-error-messages';
+import { soundService } from '@/services/sound-service';
+import { voiceService } from '@/services/voice-service';
 import { LogTypes } from '../../../constants/messages';
 import { createError } from '../../../utils/error';
 import { observer as globalObserver } from '../../../utils/observer';
@@ -67,6 +69,20 @@ export default Engine =>
             });
 
             log(win ? LogTypes.PROFIT : LogTypes.LOST, { currency, profit });
+
+            // Win/loss fanfare + voice — audio must never break trading.
+            try {
+                soundService.play(win ? 'win' : 'loss');
+                voiceService.announceSettlement({
+                    bot: 'Dollarvault Bot',
+                    won: win,
+                    profit: Number(profit),
+                    contractType: contract.contract_type,
+                    market: contract.underlying || contract.short_name,
+                });
+            } catch {
+                // ignore audio errors
+            }
         }
 
         updateAndReturnTotalRuns() {

@@ -1,4 +1,6 @@
 import { TickFeed, SymbolSeries } from '../deriv/ticks';
+import { soundService } from '@/services/sound-service';
+import { voiceService } from '@/services/voice-service';
 import {
     requestSimpleQuote,
     executeBuy,
@@ -280,6 +282,13 @@ export class HubSession {
                 this.snap.rows = [row, ...this.snap.rows].slice(0, 100);
                 this.log(`${result === 'win' ? 'Contract won' : 'Contract lost'}: ${profit >= 0 ? '+' : ''}${profit.toFixed(2)} USD`);
             }
+            soundService.play(result === 'win' ? 'win' : 'loss');
+            voiceService.announceSettlement({
+                bot: 'AI Trading Hub',
+                won: result === 'win',
+                profit,
+                market: name,
+            });
             return row;
         } finally {
             this.inFlight = false;

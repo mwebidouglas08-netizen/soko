@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import AudioBoot from '@/components/audio/AudioBoot';
+import AudioToggle from '@/components/audio/AudioToggle';
 import ErrorBoundary from '@/components/error-component/error-boundary';
 import ErrorComponent from '@/components/error-component/error-component';
 import ChunkLoader from '@/components/loader/chunk-loader';
@@ -76,6 +78,8 @@ const AppRoot = () => {
     return (
         <>
             {!booted && <BootSplash onDone={() => setBooted(true)} />}
+            <AudioBoot />
+            <AudioToggle />
             <ErrorBoundary root_store={store}>
                 <ErrorComponentWrapper />
                 <AppContent />

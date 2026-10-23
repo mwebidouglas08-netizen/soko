@@ -548,6 +548,7 @@ export class BulkTraderEngine {
                 // Live settlement (paper never reaches monitorLive) — pull a
                 // fresh balance so the header reflects the result immediately.
                 void refreshBalance?.();
+                soundService.play(won ? 'win' : 'loss');
                 voiceService.announceSettlement({
                     bot: 'Bulk Trader',
                     won,
@@ -607,6 +608,14 @@ export class BulkTraderEngine {
                     `PAPER ${won ? 'WIN' : 'LOSS'}: ${cfg.symbol} ${cfg.contractType} — exit digit ${digit} — ${profit >= 0 ? '+' : ''}${profit.toFixed(2)} (simulated)`,
                     { result: won ? 'win' : 'loss', profit }
                 );
+                soundService.play(won ? 'win' : 'loss');
+                voiceService.announceSettlement({
+                    bot: 'Bulk Trader',
+                    won,
+                    profit,
+                    contractType: cfg.contractType,
+                    market: cfg.symbol,
+                });
             })
             .catch((e: any) => {
                 // Bought but never settled — count as failed so the run's

@@ -16,6 +16,8 @@ import {
 } from '../core/ai-bot-types';
 import { buildMarketAnalysis, firstMatch } from '../core/ai-bot-rules';
 import { ContractFamily } from '../core/signal-types';
+import { soundService } from '@/services/sound-service';
+import { voiceService } from '@/services/voice-service';
 import {
     DEFAULT_RISK_LIMITS,
     applySettlement,
@@ -707,6 +709,14 @@ export class AIBotEngine {
             `${won ? 'WIN' : 'LOSS'}: #${buy.contractId} ${analysis.displayName} ${ct} — ${settled.profit >= 0 ? '+' : ''}${settled.profit.toFixed(2)}`,
             { symbol: analysis.symbol, contractId: buy.contractId, contractType: ct, result: settled.result, profit: settled.profit }
         );
+        soundService.play(won ? 'win' : 'loss');
+        voiceService.announceSettlement({
+            bot: 'Volt AI',
+            won,
+            profit: settled.profit,
+            contractType: ct,
+            market: analysis.displayName,
+        });
 
         // Never let a late settlement overwrite the stopped status (ghost
         // 'scanning' with no timer disables Start until a reload).

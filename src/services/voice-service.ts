@@ -127,9 +127,9 @@ const DETECTION_GLOBAL_MS = 6000;
 
 /** Spoken once when the app opens (or refreshes) — intense, inviting, short. */
 const WELCOME_TEXT =
-    'Welcome to Dollarvault — your AI trading terminal is live. ' +
+    'Welcome to Dollarvault. Your AI trading terminal is live. ' +
     'The markets are moving, the engines are armed, and the next strong signal is already forming. ' +
-    'Let\u2019s trade.';
+    'Trade smart. Trade with confidence.';
 
 const synth = (): SpeechSynthesis | null =>
     typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
@@ -342,6 +342,18 @@ class VoiceService {
             ? `Win${where}. Profit ${amount} dollars. ${a.bot}.`
             : `Loss${where}. Down ${amount} dollars. ${a.bot}.`;
         return this.speak(text);
+    }
+
+    /**
+     * Announce a high-confidence hit from an AI scanner (Signal AI, Entry
+     * Scanner, …). Confidence is clamped to 99 so raw score counts can never
+     * produce an odd "two hundred percent" line.
+     */
+    announceScannerHit(a: { market: string; signal: string; confidence: number; bot?: string }): boolean {
+        if (!this.isEnabled()) return false;
+        const bot = a.bot ?? 'AI Scanner';
+        const pct = Math.min(99, Math.max(1, Math.round(Number(a.confidence) || 0)));
+        return this.speak(`High confidence signal detected. ${a.signal} on ${a.market}, at ${pct} percent confidence. ${bot}.`);
     }
 
     /** Announce a session guard (take-profit / stop-loss / win target). */

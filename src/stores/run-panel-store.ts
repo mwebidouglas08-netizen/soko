@@ -7,6 +7,8 @@ import { contract_stages, TContractStage } from '@/constants/contract-stage';
 import { run_panel } from '@/constants/run-panel';
 import { ErrorTypes, MessageTypes, observer, unrecoverable_errors } from '@/external/bot-skeleton';
 import { getSelectedTradeType } from '@/external/bot-skeleton/scratch/utils';
+import { soundService } from '@/services/sound-service';
+import { voiceService } from '@/services/voice-service';
 import { handleBackendError, isBackendError } from '@/utils/error-handler';
 // import { journalError, switch_account_notification } from '@/utils/bot-notifications';
 import GTM from '@/utils/gtm';
@@ -181,6 +183,8 @@ export default class RunPanelStore {
         this.dbot.saveRecentWorkspace();
         this.dbot.unHighlightAllBlocks();
         if (!client.is_logged_in) {
+            soundService.play('error');
+            voiceService.announceStatus('Please log in to run the bot.');
             this.showLoginDialog();
             return;
         }
@@ -199,6 +203,7 @@ export default class RunPanelStore {
             // This used to return silently, so pressing Run on an incomplete
             // workspace did nothing at all with no explanation. The Journal is
             // the app's error surface, so record why the run was rejected.
+            soundService.play('error');
             this.showErrorMessage(
                 'Your strategy is incomplete. Open the Bot Dashboard and choose a market, a trade type, a duration and a purchase block before running.'
             );
@@ -221,6 +226,8 @@ export default class RunPanelStore {
             this.dbot.runBot();
         });
         this.setShowBotStopMessage(false);
+        soundService.play('botStart');
+        voiceService.announceStatus('Bot started. The engine is live.');
     };
 
     onStopButtonClick = () => {
@@ -283,6 +290,8 @@ export default class RunPanelStore {
             window.sendRequestsStatistic(true);
             performance.clearMeasures();
         }
+        soundService.play('botStop');
+        voiceService.announceStatus('Bot stopped.');
     };
 
     onClearStatClick = () => {

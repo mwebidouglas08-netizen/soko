@@ -1045,6 +1045,7 @@ export class CopyTradingEngine {
             `${copier.label}: ${won ? 'WIN' : 'LOSS'} #${contractId}${symbol ? ` ${symbol}` : ''} — ${profit >= 0 ? '+' : ''}${profit.toFixed(2)}`,
             { contractId, result: won ? 'win' : 'loss', profit }
         );
+        soundService.play(won ? 'win' : 'loss');
         voiceService.announceSettlement({ bot: 'Copy Trading', won, profit, market: symbol || undefined });
     }
 }

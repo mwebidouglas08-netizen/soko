@@ -6,6 +6,8 @@ import {
     SyntheticSymbol,
     TradeRecord,
 } from '../core/types';
+import { soundService } from '@/services/sound-service';
+import { voiceService } from '@/services/voice-service';
 import {
     ACTION_LABEL,
     ACTION_CONTRACT_TYPE,
@@ -861,6 +863,13 @@ export class SignalScannerEngine {
         };
         const risk = applySettlement(this.state.risk, settled, equity, limits);
         this.update({ trades: [settled, ...remaining], openTrade: null, equity, risk });
+        soundService.play(won ? 'win' : 'loss');
+        voiceService.announceSettlement({
+            bot: 'Signal Scanner',
+            won,
+            profit,
+            market: signal.displayName,
+        });
         if (cfg.martingale) {
             if (settled.result === 'loss') this.martingaleStep = Math.min(this.martingaleStep + 1, cfg.martingaleMaxSteps);
             else this.martingaleStep = 0;

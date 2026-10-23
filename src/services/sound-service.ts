@@ -14,7 +14,7 @@
 
 import { getSetting, storeSetting } from '@/utils/settings';
 
-export type SoundName = 'welcome' | 'click' | 'botStart' | 'botStop' | 'signal' | 'win' | 'error';
+export type SoundName = 'welcome' | 'click' | 'botStart' | 'botStop' | 'signal' | 'win' | 'loss' | 'error';
 
 export interface SoundSettings {
     enabled: boolean;
@@ -112,6 +112,11 @@ const PATTERNS: Record<SoundName, Note[]> = {
         { freq: 784, at: 0, dur: 0.12 },
         { freq: 987.77, at: 0.1, dur: 0.12 },
         { freq: 1318.51, at: 0.2, dur: 0.35 },
+    ],
+    // Soft, respectful descent for a loss — never harsh, never punishing.
+    loss: [
+        { freq: 392, at: 0, dur: 0.16, gain: 0.45 },
+        { freq: 311.13, at: 0.14, dur: 0.38, gain: 0.38 },
     ],
     error: [
         { freq: 233.08, at: 0, dur: 0.22, type: 'sawtooth', gain: 0.5 },

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from '@/hooks/useStore';
 import { navigateToHubView } from '@/services/hub-navigation';
+import { voiceService } from '@/services/voice-service';
 import { request } from '@/bot/deriv/api';
 import { api_base } from '@/external/bot-skeleton/services/api/api-base';
 import templateXml from '@/xml/ai-signal-scanner.xml';
@@ -219,7 +220,20 @@ const AISignalScannerPage = () => {
                 );
             }
             setResults(found.slice(0, 10));
-            if (found.length > 0) playScanChime();
+            if (found.length > 0) {
+                playScanChime();
+                // High-confidence top hit gets a spoken announcement so the
+                // trader hears the opportunity even with the panel minimized.
+                const top = found[0];
+                if (typeof top.finalScore === 'number' && top.finalScore >= 65) {
+                    voiceService.announceScannerHit({
+                        bot: 'AI Signal Scanner',
+                        market: top.marketName,
+                        signal: top.profile.label,
+                        confidence: top.finalScore,
+                    });
+                }
+            }
         } finally {
             clearTimers();
             setAnalysing(false);

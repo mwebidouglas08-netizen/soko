@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAIBot, useOUBotEngine } from '@/bot/use-engine';
 import { aiBot } from '@/bot/engine/ai-bot';
 import { ouBotEngine } from '@/bot/engine/engine';
+import { soundService } from '@/services/sound-service';
+import { voiceService } from '@/services/voice-service';
 import './ai-scanner.scss';
 
 type View = 'chooser' | 'entry' | 'pro';
@@ -135,8 +137,19 @@ const EntryScanner = ({ onBack, onLoadBot }: { onBack: () => void; onLoadBot: (x
             } else {
                 const name = NAME_OVERRIDES[best.symbol?.symbol] ?? best.symbol?.symbol ?? 'Unknown';
                 const tradeType = active.over[0] <= 3 ? `Over ${active.over[0]}` : `Under ${active.under[0]}`;
-                setResult({ symbol: best.symbol?.symbol, name, tradeType, confidence: Math.round(best.score) });
+                const confidence = Math.round(best.score);
+                setResult({ symbol: best.symbol?.symbol, name, tradeType, confidence });
                 setStatus({ tone: 'ready', text: `Best market found: ${name}` });
+                // Strong hit — ping + spoken announcement.
+                if (confidence >= 60) {
+                    soundService.play('signal');
+                    voiceService.announceScannerHit({
+                        bot: 'Entry Scanner',
+                        market: name,
+                        signal: tradeType,
+                        confidence,
+                    });
+                }
             }
         } catch {
             setStatus({ tone: 'warning', text: 'Scan failed — check your connection.' });

@@ -7,6 +7,8 @@ import './get_ohlc';
 import './check_direction';
 import './tick_analysis';
 import './last_digit';
+import './last_digits_condition';
 import './lastDigitList';
+import './analysis-blocks';
 import './stat';
 import './stat_list';

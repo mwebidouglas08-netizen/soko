@@ -19,6 +19,23 @@ function getInitialExecutionFast(): boolean {
     return localStorage.getItem('execution_fast') !== 'normal';
 }
 
+/**
+ * Reference "Arrange navigation tabs" prefs: drag-reorder, rename and hide
+ * entries for the hub tab strip. Persisted so the arrangement survives reloads.
+ */
+export type HubTabPrefs = {
+    order?: string[];
+    hidden?: string[];
+    labels?: Record<string, string>;
+};
+function getInitialTabPrefs(): HubTabPrefs {
+    try {
+        return JSON.parse(localStorage.getItem('hub_tab_prefs') || '{}') as HubTabPrefs;
+    } catch {
+        return {};
+    }
+}
+
 export default class UiStore {
     is_mobile = true;
     is_desktop = true;
@@ -35,6 +52,8 @@ export default class UiStore {
     /** Which hub view the shell is showing (bot-builder, volt-ai, ...). */
     active_view = 'dashboard';
     execution_fast = getInitialExecutionFast();
+    hub_tab_prefs: HubTabPrefs = getInitialTabPrefs();
+    is_tab_organizer_open = false;
     account_switcher_disabled_message = '';
     current_focus = null;
     show_prompt = false;
@@ -51,6 +70,10 @@ export default class UiStore {
             active_view: observable,
             current_focus: observable,
             execution_fast: observable,
+            hub_tab_prefs: observable,
+            is_tab_organizer_open: observable,
+            setHubTabPrefs: action.bound,
+            setTabOrganizerOpen: action.bound,
             is_accounts_switcher_on: observable,
             is_dark_mode_on: observable,
             is_desktop: observable,
@@ -102,6 +125,19 @@ export default class UiStore {
     setExecutionFast = (value: boolean) => {
         this.execution_fast = value;
         localStorage.setItem('execution_fast', value ? 'fast' : 'normal');
+    };
+
+    setHubTabPrefs = (prefs: HubTabPrefs) => {
+        this.hub_tab_prefs = prefs;
+        try {
+            localStorage.setItem('hub_tab_prefs', JSON.stringify(prefs));
+        } catch {
+            /* ignore quota/blocked storage */
+        }
+    };
+
+    setTabOrganizerOpen = (open: boolean) => {
+        this.is_tab_organizer_open = open;
     };
 
     setDevice = (value: 'mobile' | 'desktop' | 'tablet') => {

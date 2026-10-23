@@ -61,8 +61,11 @@ const Main = observer(() => {
 
     useEffect(() => {
         ui?.setActiveHubView?.(activeView === 'dashboard' ? 'dashboard' : 'ai-hub');
-        const isHub = activeView !== 'dashboard';
-        document.body.classList.toggle('hub-view', isHub);
+        // The fixed-height shell (`.layout` 100vh, `.bot-dashboard` height:100%,
+        // `.main-content` scroll container) must apply on every hub view —
+        // without it the dashboard's `.main-dashboard` collapses to content
+        // height and leaves the page background showing below the hero.
+        document.body.classList.add('hub-view');
         return () => document.body.classList.remove('hub-view');
     }, [activeView, ui]);
 

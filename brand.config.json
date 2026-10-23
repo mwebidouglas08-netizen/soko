@@ -1,11 +1,11 @@
 {
-    "brand_name": "YourBrand",
-    "brand_domain": "yourbrand.com",
+    "brand_name": "Dollarvault",
+    "brand_domain": "Dollarvault.com",
     "brand_hostname": {
-        "staging": "staging.yourbrand.com/dashboard",
-        "production": "yourbrand.com/dashboard"
+        "staging": "staging.Dollarvault.com/dashboard",
+        "production": "Dollarvault.com/dashboard"
     },
-    "domain_name": "YourBrand.com",
+    "domain_name": "Dollarvault.com",
     "colors": {
         "primary": "#03054f",
         "secondary": "#64748b",
@@ -79,7 +79,7 @@
         "css_variable_prefix": "--brand"
     },
     "platform": {
-        "name": "TraderScheme",
+        "name": "Dollarvault",
         "i18n": {
             "default_language": "EN"
         },
@@ -89,10 +89,10 @@
         },
         "hostname": {
             "production": {
-                "com": "bot.yourbrand.com"
+                "com": "bot.Dollarvault.com"
             },
             "staging": {
-                "com": "staging-bot.yourbrand.com"
+                "com": "staging-bot.Dollarvault.com"
             }
         },
         "auth2_url": {

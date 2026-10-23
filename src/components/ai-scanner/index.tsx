@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAIBot, useOUBotEngine } from '@/bot/use-engine';
 import { aiBot } from '@/bot/engine/ai-bot';
 import { ouBotEngine } from '@/bot/engine/engine';
@@ -56,15 +56,6 @@ const SparklesIcon = ({ size = 14 }: { size?: number }) => (
 const CloseIcon = () => (
     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' width='20px' height='20px' fill='currentColor'>
         <path d='M3.854 3.146 8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8 3.146 3.854a.5.5 0 1 1 .708-.708' />
-    </svg>
-);
-const RobotGlyph = () => (
-    <svg viewBox='0 0 48 48' width='34' height='34' aria-hidden='true'>
-        <rect x='10' y='14' width='28' height='22' rx='6' fill='none' stroke='currentColor' strokeWidth='2.5' />
-        <circle cx='19' cy='25' r='3' fill='currentColor' />
-        <circle cx='29' cy='25' r='3' fill='currentColor' />
-        <path d='M24 8v6M16 36l-3 4M32 36l3 4' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' />
-        <circle cx='24' cy='7' r='2.5' fill='currentColor' />
     </svg>
 );
 
@@ -336,33 +327,13 @@ const AIBotDock = () => {
     const ai = useAIBot();
     const [view, setView] = useState<View | null>(null);
     const [hovered, setHovered] = useState(false);
-    const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
-    const [dragging, setDragging] = useState(false);
-    const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
-    const movedRef = useRef(false);
+    const [selected, setSelected] = useState<'entry' | 'pro'>('entry');
+    const [showStart, setShowStart] = useState(false);
 
     const running = ['starting', 'scanning', 'proposing', 'buying', 'monitoring'].includes(ai.status);
 
-    const onPointerDown = (e: React.PointerEvent) => {
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        dragRef.current = { startX: e.clientX, startY: e.clientY, origX: rect.left, origY: rect.top };
-        movedRef.current = false;
-        setDragging(true);
-        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    };
-    const onPointerMove = (e: React.PointerEvent) => {
-        if (!dragRef.current) return;
-        const dx = e.clientX - dragRef.current.startX;
-        const dy = e.clientY - dragRef.current.startY;
-        if (!movedRef.current && Math.hypot(dx, dy) > 4) movedRef.current = true;
-        setPos({ x: dragRef.current.origX + dx, y: dragRef.current.origY + dy });
-    };
-    const onPointerUp = (e: React.PointerEvent) => {
-        setDragging(false);
-        dragRef.current = null;
-        (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
-        if (!movedRef.current) setView(v => (v ? null : 'chooser'));
-    };
+    // Reference behaviour: the floating button toggles the chooser on release.
+    const toggle = () => setView(v => (v ? null : 'chooser'));
 
     // Close on Escape.
     useEffect(() => {
@@ -388,40 +359,33 @@ const AIBotDock = () => {
         (window as any).__loadScannerBot?.(xml, name);
     }, []);
 
-    const style = pos ? { left: pos.x, top: pos.y } : undefined;
-
     return (
         <>
             <div
-                className={`ai-scanner-button ai-scanner-button--pulsing ${hovered ? 'ai-scanner-button--hovered' : ''} ${dragging ? 'ai-scanner-button--dragging' : ''}`}
-                style={style}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerUp}
+                className={`ai-scanner-button ai-scanner-button--pulsing ${hovered ? 'ai-scanner-button--hovered' : ''}`}
+                onClick={toggle}
+                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), toggle())}
                 onPointerEnter={() => setHovered(true)}
                 onPointerLeave={() => setHovered(false)}
                 role='button'
                 tabIndex={0}
                 aria-label='Open AI Scanner'
             >
-                <span className='ai-scanner-button__ring ai-scanner-button__ring--1' />
-                <span className='ai-scanner-button__ring ai-scanner-button__ring--2' />
-                <span className='ai-scanner-button__ring ai-scanner-button__ring--3' />
-                <div className='ai-scanner-button__particles'>
-                    {[0, 0.4, 0.8, 1.2, 1.6, 2].map((d, i) => (
-                        <span
-                            key={i}
-                            className='ai-scanner-button__particle'
-                            style={{ animationDelay: `${d}s`, marginLeft: `${(i % 3) * 6 - 6}px`, marginTop: `${Math.floor(i / 3) * 6 - 6}px` }}
-                        />
-                    ))}
-                </div>
                 <div className='ai-scanner-button__main'>
                     <div className='ai-scanner-button__radar'>
                         <div className='ai-scanner-button__radar-beam' />
                     </div>
-                    <span className='ai-scanner-button__icon'>
-                        <RobotGlyph />
+                    <span className='ai-scanner-button__icon' aria-hidden='true'>
+                        <svg viewBox='0 0 64 64' width='64' height='64'>
+                            <text x='32' y='42' textAnchor='middle' fontSize='25' fontWeight='800' fill='currentColor' fontFamily='Arial, sans-serif'>
+                                AI
+                            </text>
+                        </svg>
+                    </span>
+                    <span className='ai-scanner-button__scan-lines' aria-hidden='true'>
+                        <svg viewBox='0 0 52 52' width='52' height='52' fill='none' stroke='currentColor' strokeWidth='1.6' strokeLinecap='round'>
+                            <path d='M12 19h16M24 33h16' />
+                        </svg>
                     </span>
                     <span className='ai-scanner-button__status'>
                         <span className='ai-scanner-button__status-dot' />
@@ -431,18 +395,6 @@ const AIBotDock = () => {
                     <span className='ai-scanner-button__label-text'>AI</span>
                     <span className='ai-scanner-button__label-subtext'>AI Scanner</span>
                 </div>
-                {hovered && (
-                    <div className='ai-scanner-button__tooltip'>
-                        <div className='ai-scanner-button__tooltip-content'>
-                            <span className='ai-scanner-button__tooltip-icon'>🤖</span>
-                            <div className='ai-scanner-button__tooltip-text'>
-                                <strong>AI Scanner</strong>
-                                <p>Click to analyze</p>
-                            </div>
-                        </div>
-                        <div className='ai-scanner-button__tooltip-arrow' />
-                    </div>
-                )}
             </div>
 
             {view && (
@@ -462,30 +414,54 @@ const AIBotDock = () => {
                         <div className='ai-scan-modal__body'>
                             {view === 'chooser' && (
                                 <div className='scanner-hub'>
-                                    <button type='button' className='scanner-path scanner-path--entry' onClick={() => setView('entry')}>
-                                        <span className='scanner-path__icon' aria-hidden='true'>
-                                            <ScanSearchIcon />
-                                            <small>01</small>
+                                    <button
+                                        type='button'
+                                        className={`scanner-path scanner-path--entry ${selected === 'entry' ? 'is-selected' : ''}`}
+                                        onClick={() => setView('entry')}
+                                        onMouseEnter={() => { setSelected('entry'); setShowStart(true); }}
+                                        onFocus={() => { setSelected('entry'); setShowStart(true); }}
+                                    >
+                                        <span className='scanner-path__top'>
+                                            <span className='scanner-path__icon' aria-hidden='true'>
+                                                <ScanSearchIcon />
+                                                <small>01</small>
+                                            </span>
+                                            <span className='scanner-path__help' title='Find a market and load its settings into your bot.'>?</span>
                                         </span>
                                         <span className='scanner-path__copy'>
                                             <strong>Entry Scanner</strong>
                                             <span>Find a market and load its settings into your bot.</span>
                                             <span className='scanner-path__tags'><b>MARKET SCAN</b><b>BOT SETUP</b></span>
                                         </span>
-                                        <span className='scanner-path__arrow' aria-hidden='true'>›</span>
                                     </button>
-                                    <button type='button' className='scanner-path scanner-path--pro' onClick={() => setView('pro')}>
-                                        <span className='scanner-path__icon' aria-hidden='true'>
-                                            <BrainCircuitIcon />
-                                            <small>02</small>
+                                    <button
+                                        type='button'
+                                        className={`scanner-path scanner-path--pro ${selected === 'pro' ? 'is-selected' : ''}`}
+                                        onClick={() => setView('pro')}
+                                        onMouseEnter={() => { setSelected('pro'); setShowStart(true); }}
+                                        onFocus={() => { setSelected('pro'); setShowStart(true); }}
+                                    >
+                                        <span className='scanner-path__top'>
+                                            <span className='scanner-path__icon' aria-hidden='true'>
+                                                <BrainCircuitIcon />
+                                                <small>02</small>
+                                            </span>
+                                            <span className='scanner-path__help' title='Scan eligible markets and execute trades with automatic recovery selection.'>?</span>
                                         </span>
                                         <span className='scanner-path__copy'>
                                             <strong>Pro AI</strong>
                                             <span>Scan eligible markets and execute trades with automatic recovery selection.</span>
                                             <span className='scanner-path__tags'><b>AUTO TRADE</b><b>SESSION LIMITS</b></span>
                                         </span>
-                                        <span className='scanner-path__arrow' aria-hidden='true'>›</span>
                                     </button>
+                                    {showStart && (
+                                        <div className='scanner-hub__foot'>
+                                            <button type='button' className='scanner-hub__start' onClick={() => setView(selected)}>
+                                                <span>Start Scanner</span>
+                                                <span aria-hidden='true'>→</span>
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             {view === 'entry' && <EntryScanner onBack={() => setView('chooser')} onLoadBot={loadBot} />}

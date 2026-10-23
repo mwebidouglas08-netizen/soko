@@ -1,4 +1,4 @@
-/* Reference Premium AI Bots page styles (traderscheme `.ai-bots`), ported verbatim. */
+/* Reference Premium AI Bots page styles (reference `.ai-bots`), ported verbatim. */
 .ai-bots{--panel:#120e0680;--panel-muted:#120e065c;--line:#b8923f52;--text-general:#fbf6ea;--text-less-prominent:#cdc3ac;--gold:#b8923f;--gold-bright:#d9b463;--gold-deep:#8f6f2c;--gold-soft:#b8923f29;--gold-soft-strong:#b8923f66;color:var(--text-general,#fbf6ea);text-shadow:0 1px 5px #0009;background:linear-gradient(#120e0680,#120e06a6),#14100a url('./robot-background.png') 50% 40%/cover;width:100%;min-height:calc(100vh - 11rem);padding:1rem 1.2rem 8rem;overflow-y:auto}
 .ai-bots__workspace-bar{background:var(--panel);-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);border:1px solid var(--line);border-radius:.8rem;justify-content:space-between;align-items:center;margin-bottom:.8rem;padding:.75rem .9rem;display:flex}
 .ai-bots__workspace-bar>div:first-child{gap:.2rem;display:grid}

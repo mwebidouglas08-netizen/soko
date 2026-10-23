@@ -1,5 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { observer } from 'mobx-react-lite';
 import { HUB_TAB_ORDER, HUB_VIEW_LABELS, type HubViewId } from '@/components/hub-sidebar';
+import { useStore } from '@/hooks/useStore';
+import TabOrganizer from './TabOrganizer';
 import './hub-tab-nav.scss';
 
 interface HubTabNavProps {
@@ -144,8 +147,21 @@ const TabIcon = ({ view }: { view: HubViewId }) => {
     }
 };
 
-const HubTabNav = ({ activeView, onSelect }: HubTabNavProps) => {
+const HubTabNav = observer(({ activeView, onSelect }: HubTabNavProps) => {
     const listRef = useRef<HTMLDivElement>(null);
+    const { ui } = useStore();
+    const prefs = ui.hub_tab_prefs;
+
+    // Reference organizer: user order minus hidden entries, with renamed labels.
+    const tabs = useMemo(() => {
+        const known = HUB_TAB_ORDER as readonly string[];
+        const order = (prefs.order ?? []).filter(v => (known as readonly string[]).includes(v));
+        for (const v of HUB_TAB_ORDER) if (!order.includes(v)) order.push(v);
+        const hidden = new Set(prefs.hidden ?? []);
+        return order.filter(v => !hidden.has(v)) as HubViewId[];
+    }, [prefs.order, prefs.hidden]);
+
+    const labelFor = (view: HubViewId) => prefs.labels?.[view] || HUB_VIEW_LABELS[view];
 
     useEffect(() => {
         const node = listRef.current?.querySelector<HTMLElement>('[data-active="true"]');
@@ -154,13 +170,19 @@ const HubTabNav = ({ activeView, onSelect }: HubTabNavProps) => {
 
     return (
         <nav className='hub-tabnav' role='tablist' aria-label='Sections'>
-            <button type='button' className='hub-tabnav__filter' aria-label='Filters' title='Filters'>
+            <button
+                type='button'
+                className='hub-tabnav__filter'
+                aria-label='Arrange navigation tabs'
+                title='Arrange navigation tabs'
+                onClick={() => ui.setTabOrganizerOpen(true)}
+            >
                 <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='#ff5a5a' strokeWidth='2' strokeLinecap='round'>
                     <path d='M4 6h16M7 12h10M10 18h4' />
                 </svg>
             </button>
             <div className='hub-tabnav__list' ref={listRef}>
-                {HUB_TAB_ORDER.map(view => {
+                {tabs.map(view => {
                     const active = activeView === view;
                     return (
                         <button
@@ -171,11 +193,11 @@ const HubTabNav = ({ activeView, onSelect }: HubTabNavProps) => {
                             data-active={active}
                             className={`hub-tabnav__item ${active ? 'hub-tabnav__item--active' : ''}`}
                             onClick={() => onSelect(view)}
-                            title={HUB_VIEW_LABELS[view]}
+                            title={labelFor(view)}
                         >
                             <TabIcon view={view} />
                             <span className='hub-tabnav__label'>
-                                {HUB_VIEW_LABELS[view]}
+                                {labelFor(view)}
                                 {(view === 'volt-ai' || view === 'auto-ai') && (
                                     <em className='hub-tabnav__ai' aria-hidden='true'>
                                         AI
@@ -186,8 +208,9 @@ const HubTabNav = ({ activeView, onSelect }: HubTabNavProps) => {
                     );
                 })}
             </div>
+            <TabOrganizer />
         </nav>
     );
-};
+});
 
 export default HubTabNav;

@@ -75,25 +75,27 @@
         </script>
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;700&display=swap"
+            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Orbitron:wght@400;700;900&display=swap"
             rel="stylesheet"
         />
         <link rel="manifest" href="/manifest.webmanifest" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/icon-180.png" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="TraderScheme" />
+        <meta name="apple-mobile-web-app-title" content="Dollarvault" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <meta name="theme-color" content="#f2f3f4" />
-        <meta name="title" content="TraderScheme - Free Deriv Bots, Smart Trading Tools and Automation" />
-        <meta name="description" content="TraderScheme is a trusted, premium third-party Deriv trading platform offering free bots, an AI market scanner, automated and manual trading tools, and in-depth analysis - built to help beginners and pros trade smarter and grow their profits." />
-        <meta property="og:title" content="TraderScheme Trading Workspace" />
-        <meta property="og:description" content="TraderScheme is a trusted, premium third-party Deriv trading platform offering free bots, an AI market scanner, automated and manual trading tools, and in-depth analysis - built to help beginners and pros trade smarter and grow their profits." />
-        <title>TraderScheme - Free Deriv Bots, Smart Trading Tools and Automation</title>
+        <meta name="title" content="Dollarvault - Free Deriv Bots, Smart Trading Tools and Automation" />
+        <meta name="description" content="Dollarvault is a trusted, premium third-party Deriv trading platform offering free bots, an AI market scanner, automated and manual trading tools, and in-depth analysis - built to help beginners and pros trade smarter and grow their profits." />
+        <meta property="og:title" content="Dollarvault Trading Workspace" />
+        <meta property="og:description" content="Dollarvault is a trusted, premium third-party Deriv trading platform offering free bots, an AI market scanner, automated and manual trading tools, and in-depth analysis - built to help beginners and pros trade smarter and grow their profits." />
+        <title>Dollarvault - Free Deriv Bots, Smart Trading Tools and Automation</title>
         <style>
             :root {
                 font-size: 62.5%;
@@ -120,7 +122,7 @@
                 min-height: 100vh;
             }
 
-            /* Boot splash â€” cinematic startup while the bundle parses.
+            /* Boot splash Ã¢â‚¬â€ cinematic startup while the bundle parses.
                Adapts to the resolved theme (light by default, dark on request). */
             #boot-splash {
                 position: fixed;
@@ -311,12 +313,12 @@
         <div id="modal_root" class="modal-root"></div>
         <div id="popup_root" class="popup-root"></div>
         <div id="root"></div>
-        <div id="boot-splash" role="status" aria-label="Loading TraderScheme">
+        <div id="boot-splash" role="status" aria-label="Loading Dollarvault">
             <div class="boot-splash__glow"></div>
-            <div class="boot-splash__mark"><span>T</span></div>
-            <div class="boot-splash__word">TRADERSCHEME</div>
+            <div class="boot-splash__mark"><span>D</span></div>
+            <div class="boot-splash__word">DOLLARVAULT</div>
             <div class="boot-splash__tag">AI Trading Terminal</div>
-            <div class="boot-splash__status" id="boot-splash-status">Warming up the bot engineâ€¦</div>
+            <div class="boot-splash__status" id="boot-splash-status">Warming up the bot engineÃ¢â‚¬Â¦</div>
             <div class="boot-splash__bar"><i></i></div>
         </div>
         <script>
@@ -339,10 +341,10 @@
                 window.__hideBootSplash = hide;
                 // Rotating boot copy (SmartFlip-style loader, richer cadence).
                 var lines = [
-                    'Warming up the bot engineâ€¦',
-                    'Preparing your dashboardâ€¦',
-                    'Loading AI enginesâ€¦',
-                    'Connecting marketsâ€¦'
+                    'Warming up the bot engineÃ¢â‚¬Â¦',
+                    'Preparing your dashboardÃ¢â‚¬Â¦',
+                    'Loading AI enginesÃ¢â‚¬Â¦',
+                    'Connecting marketsÃ¢â‚¬Â¦'
                 ];
                 var idx = 0;
                 var el = document.getElementById('boot-splash-status');

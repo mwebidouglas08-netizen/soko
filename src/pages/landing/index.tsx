@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import './landing.scss';
 
 /**
- * TraderScheme landing (lp__ structure): topbar nav, live market ticker, hero,
+ * Dollarvault landing (lp__ structure): topbar nav, live market ticker, hero,
  * 3-step get-started, 6-feature workspace grid, 12 verified reviews, free course,
  * FAQ and footer — dismissing into the trading hub via onEnter.
  */
@@ -105,7 +105,7 @@ const COURSE = [
 
 const FAQ = [
     {
-        q: 'Is TraderScheme free to use?',
+        q: 'Is Dollarvault free to use?',
         a: 'Yes. The bot library, course and core trading tools are free. You only need a Deriv account to trade.',
     },
     {
@@ -159,13 +159,7 @@ interface LandingProps {
 
 const Landing = ({ onEnter }: LandingProps) => {
     const rootRef = useReveal();
-    const [tickerIdx, setTickerIdx] = useState(0);
     const ticker = useMemo(() => [...TICKER, ...TICKER], []);
-
-    useEffect(() => {
-        const t = setInterval(() => setTickerIdx(v => v + 1), 40);
-        return () => clearInterval(t);
-    }, []);
 
     useEffect(() => {
         const prev = document.body.style.overflow;
@@ -182,8 +176,8 @@ const Landing = ({ onEnter }: LandingProps) => {
             {/* Topbar */}
             <header className='lp__topbar'>
                 <div className='lp__brand'>
-                    <span className='lp__brand-mark' aria-hidden>TS</span>
-                    <span className='lp__brand-word'>TraderScheme</span>
+                    <span className='lp__brand-mark' aria-hidden>DV</span>
+                    <span className='lp__brand-word'>Dollarvault</span>
                 </div>
                 <nav className='lp__nav'>
                     {NAV.map(n => (
@@ -191,6 +185,10 @@ const Landing = ({ onEnter }: LandingProps) => {
                     ))}
                 </nav>
                 <div className='lp__topbar-actions'>
+                    <span className='lp__topbar-status'>
+                        <i className='lp__topbar-pulse' aria-hidden='true' />
+                        Live markets
+                    </span>
                     <button type='button' className='lp__topbar-btn lp__topbar-btn--ghost' onClick={onEnter}>Log In</button>
                     <button type='button' className='lp__topbar-btn lp__topbar-btn--primary' onClick={onEnter}>Get Started</button>
                 </div>
@@ -198,7 +196,7 @@ const Landing = ({ onEnter }: LandingProps) => {
 
             {/* Market ticker */}
             <div className='lp__ticker' aria-hidden='true'>
-                <div className='lp__ticker-track' style={{ transform: `translateX(-${tickerIdx * 220}px)` }}>
+                <div className='lp__ticker-track'>
                     {ticker.map((m, i) => (
                         <span key={`${m.name}-${i}`} className='lp__ticker-item'>
                             <span className='lp__ticker-name'>{m.name}</span>
@@ -211,6 +209,11 @@ const Landing = ({ onEnter }: LandingProps) => {
 
             {/* Hero */}
             <section className='lp__hero' id='lp-top'>
+                <div className='lp__hero-bg' aria-hidden='true'>
+                    <span className='lp__hero-orb lp__hero-orb--1' />
+                    <span className='lp__hero-orb lp__hero-orb--2' />
+                    <span className='lp__hero-orb lp__hero-orb--3' />
+                </div>
                 <div className='lp__hero-inner'>
                     <span className='lp__hero-eyebrow' data-reveal>FREE STRATEGIES. REAL MARKET TOOLS.</span>
                     <h1 className='lp__hero-h1' data-reveal>
@@ -235,7 +238,7 @@ const Landing = ({ onEnter }: LandingProps) => {
                             <span>SYNTHETIC MARKET FOCUS</span>
                         </div>
                         <div className='lp__badge'>
-                            <strong>www.traderscheme.com</strong>
+                            <strong>www.dollarvault.com</strong>
                             <span>BRANDED WORKSPACE</span>
                         </div>
                         <div className='lp__badge'>
@@ -346,7 +349,7 @@ const Landing = ({ onEnter }: LandingProps) => {
                     <button type='button' className='lp__hero-btn lp__hero-btn--primary' onClick={onEnter}>Get Started Free</button>
                 </div>
                 <footer className='lp__footer'>
-                    <span>© 2026 TraderScheme · Powered by Deriv</span>
+                    <span>© 2026 Dollarvault · Powered by Deriv</span>
                     <span>Trading involves risk of loss</span>
                 </footer>
             </section>

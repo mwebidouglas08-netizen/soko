@@ -320,7 +320,7 @@ export const signalFromStrategy = (
 };
 
 // ---------------------------------------------------------------------------
-// NEUTRADE AI — exact port of traderscheme.com's Neutrade bot regime gates
+// NEUTRADE AI — exact port of the reference site's Neutrade bot regime gates
 // (loaded blockly blocks: 6 normal elseif gates + 4 recovery elseif gates,
 //  percentages measured over the last 60 digits, last-2 entry conditions)
 // ---------------------------------------------------------------------------

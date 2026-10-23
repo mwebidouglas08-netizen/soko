@@ -10,11 +10,17 @@ let purchase_reference;
 
 export default Engine =>
     class Purchase extends Engine {
-        purchase(contract_type) {
+        purchase(contract_type, prediction) {
             // Prevent calling purchase twice
             if (this.store.getState().scope !== BEFORE_PURCHASE) {
                 return Promise.resolve();
             }
+
+            const has_prediction_override =
+                prediction !== undefined &&
+                prediction !== null &&
+                (!this.tradeOptions || Number(prediction) !== Number(this.tradeOptions.prediction));
+            const trade_options = has_prediction_override ? { ...this.tradeOptions, prediction } : this.tradeOptions;
 
             const onSuccess = response => {
                 // Don't unnecessarily send a forget request for a purchased contract.
@@ -44,7 +50,7 @@ export default Engine =>
                 });
             };
 
-            if (this.is_proposal_subscription_required) {
+            if (this.is_proposal_subscription_required && !has_prediction_override) {
                 const { id, askPrice } = this.selectProposal(contract_type);
 
                 const action = () => api_base.api.send({ buy: id, price: askPrice });
@@ -82,14 +88,14 @@ export default Engine =>
                     delayIndex++
                 ).then(onSuccess);
             }
-            const trade_option = tradeOptionToBuy(contract_type, this.tradeOptions);
+            const trade_option = tradeOptionToBuy(contract_type, trade_options);
             const action = () => api_base.api.send(trade_option);
 
             this.isSold = false;
 
             contractStatus({
                 id: 'contract.purchase_sent',
-                data: this.tradeOptions.amount,
+                data: trade_options.amount,
             });
 
             if (!this.options.timeMachineEnabled) {

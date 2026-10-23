@@ -293,3 +293,30 @@
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
 }
+
+// Narrow phones (<=440px): the Deriv `Header` wrapper's left block (menu +
+// logo + wordmark + chat) plus the auth buttons overflow the 390px viewport
+// and clip "Sign up". Shrink to fit: hide the wordmark and chat bubble, tighten
+// the auth-button margins, and let the left block shrink instead of overflowing.
+@media (max-width: 440px) {
+    .deriv-wrapper {
+        .deriv-wrapper__left {
+            min-width: 0;
+            overflow: hidden;
+        }
+    }
+
+    .app-header__chat {
+        display: none;
+    }
+
+    .app-header__logo-text {
+        display: none;
+    }
+
+    .auth-actions {
+        button {
+            margin-inline-end: 0.8rem;
+        }
+    }
+}

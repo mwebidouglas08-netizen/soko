@@ -4,6 +4,9 @@
 .launchpad {
     margin: -1.4rem -1.6rem 0;
     max-width: 100vw;
+    min-height: calc(100dvh - 12.4rem);
+    display: flex;
+    flex-direction: column;
     overflow-x: clip;
     padding-bottom: 2.8rem;
     isolation: isolate;
@@ -12,8 +15,12 @@
 
     &__hero {
         position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         text-align: center;
-        padding: 3.2rem 1.6rem 0;
+        padding: 3.2rem 1.6rem;
         background: radial-gradient(at top, rgb(2 10 22 / 25%), transparent 70%);
         color: #e8eefc;
     }

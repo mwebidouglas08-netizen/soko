@@ -1,4 +1,4 @@
-// TraderScheme landing (lp__) — ported theme: IBM Plex Sans, primary #001840, secondary #010d21.
+// Dollarvault landing (lp__) — ported theme: IBM Plex Sans, primary #001840, secondary #010d21.
 
 .lp {
     --lp-bg: #01081a;
@@ -19,6 +19,20 @@
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
+    /* The document body is frozen while the landing overlay is open, so the
+       landing page owns the viewport scroll itself (sticky topbar included). */
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* Landing is a full-screen marketing surface: the app chrome (header + Run
+   footer) stays out of the way until the workspace opens. */
+body.landing-open {
+    .deriv-header,
+    .app-footer {
+        display: none;
+    }
 }
 
 /* Reveal on scroll */
@@ -54,6 +68,32 @@
     background: #01081acc;
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--lp-line);
+    animation: 0.45s ease-out both lp-slide-down;
+}
+.lp__topbar-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border: 1px solid #34d39938;
+    border-radius: 100px;
+    background: #34d39912;
+    color: #9fe8c9;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+
+    @media (max-width: 720px) {
+        display: none;
+    }
+}
+.lp__topbar-pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #34d399;
+    animation: 2.2s ease-in-out infinite lp-pulse-dot;
 }
 .lp__brand {
     display: flex;
@@ -143,6 +183,8 @@
     gap: 0;
     white-space: nowrap;
     will-change: transform;
+    width: max-content;
+    animation: 38s linear infinite lp-ticker;
 }
 .lp__ticker-item {
     display: inline-flex;
@@ -170,11 +212,94 @@
 
 /* -------------------------------- Hero -------------------------------- */
 .lp__hero {
+    position: relative;
+    overflow: hidden;
     padding: clamp(40px, 7vw, 90px) clamp(16px, 4vw, 56px) 40px;
 }
+.lp__hero-bg {
+    --lp-hero-image: url('../../assets/landing-market-grid.png');
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: #020b1d;
+}
+.lp__hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--lp-hero-image);
+    background-position: 50% 58%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    filter: saturate(1.16) contrast(1.05);
+    opacity: 0.86;
+}
+.lp__hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(#01071580 0%, #0107151f 45%, #0107157a 100%),
+        radial-gradient(circle at 50% 35%, #020b1d33 0%, #0106138f 72%);
+}
+.lp__hero-orb {
+    position: absolute;
+    z-index: 1;
+    border-radius: 50%;
+    filter: blur(80px);
+}
+.lp__hero-orb--1 {
+    top: -160px;
+    left: -140px;
+    width: 600px;
+    height: 600px;
+    opacity: 0.45;
+    background: radial-gradient(circle, #00aeff59, #0000 70%);
+    animation: 10s ease-in-out infinite alternate lp-orb-a;
+}
+.lp__hero-orb--2 {
+    top: -80px;
+    right: -100px;
+    width: 450px;
+    height: 450px;
+    opacity: 0.22;
+    background: radial-gradient(circle, #ff1a8040, #0000 70%);
+    animation: 12s ease-in-out infinite alternate lp-orb-b;
+}
+.lp__hero-orb--3 {
+    bottom: 0;
+    left: 40%;
+    width: 300px;
+    height: 300px;
+    opacity: 0.18;
+    background: radial-gradient(circle, #34d39940, #0000 70%);
+    animation: 9s ease-in-out infinite alternate lp-orb-c;
+}
 .lp__hero-inner {
+    position: relative;
+    z-index: 2;
     max-width: 1160px;
     margin: 0 auto;
+}
+/* Reference staggered hero entrance (lp-fade-up with per-element delays). */
+.lp__hero-h1[data-reveal] {
+    transition-delay: 0.05s;
+}
+.lp__hero-eyebrow[data-reveal] {
+    transition-delay: 0.18s;
+}
+.lp__hero-sub[data-reveal] {
+    transition-delay: 0.5s;
+}
+.lp__hero-cta[data-reveal] {
+    transition-delay: 0.64s;
+}
+.lp__hero-link[data-reveal] {
+    transition-delay: 0.72s;
+}
+.lp__hero-badges[data-reveal] {
+    transition-delay: 0.78s;
 }
 .lp__hero-eyebrow {
     display: inline-block;
@@ -570,4 +695,91 @@
     border-top: 1px solid var(--lp-line);
     color: var(--lp-muted);
     font-size: 13px;
+}
+
+/* --------------------- Reference lp__ keyframe set -------------------- */
+@keyframes lp-fade-up {
+    0% {
+        opacity: 0;
+        transform: translateY(22px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes lp-pop-in {
+    0% {
+        opacity: 0;
+        transform: translateY(28px) scale(0.93);
+    }
+    68% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1.01);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+@keyframes lp-pulse-dot {
+    0%,
+    to {
+        opacity: 1;
+        box-shadow: 0 0 #34d3998c;
+    }
+    50% {
+        opacity: 0.75;
+        box-shadow: 0 0 0 5px #34d39900;
+    }
+}
+@keyframes lp-slide-down {
+    0% {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes lp-ticker {
+    0% {
+        transform: translate(0);
+    }
+    to {
+        transform: translate(-50%);
+    }
+}
+@keyframes lp-orb-a {
+    0% {
+        transform: translate(0) scale(1);
+    }
+    to {
+        transform: translate(40px, 28px) scale(1.08);
+    }
+}
+@keyframes lp-orb-b {
+    0% {
+        transform: translate(0) scale(1);
+    }
+    to {
+        transform: translate(-32px, 18px) scale(1.05);
+    }
+}
+@keyframes lp-orb-c {
+    0% {
+        transform: translate(0) scale(1);
+    }
+    to {
+        transform: translate(20px, -30px) scale(1.06);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .lp__topbar,
+    .lp__ticker-track,
+    .lp__topbar-pulse,
+    .lp__hero-orb {
+        animation: none;
+    }
 }

@@ -54,9 +54,9 @@
     --brand-neutral: #6b7280;
 
     /* Brand typography - dynamically generated from brand.config.json */
-    --brand-font-primary: Source Sans 3;
+    --brand-font-primary: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
     --brand-font-secondary: Georgia, 'Times New Roman', Times, serif;
-    --brand-font-monospace: 'Courier New', Courier, monospace;
+    --brand-font-monospace: 'IBM Plex Mono', 'Courier New', monospace;
     /* [/AI] */
 
     // App Cards gradient background
@@ -212,7 +212,7 @@
         --header-background-mt5: #{constants.$color-blue-8};
         --header-background-others: #{constants.$color-green-7};
 
-        /* Cinematic layer (Mwebifx hub surfaces) — light */
+        /* Cinematic layer (Dollarvault hub surfaces) — light */
         --canvas-tint: #f2f3f4;
         --surface-card: #ffffff;
         --surface-raised: #ffffff;
@@ -375,7 +375,7 @@
         --header-background-mt5: #{constants.$color-blue-8};
         --header-background-others: #{constants.$color-green-7};
 
-        /* Cinematic layer (Mwebifx hub surfaces) — dark */
+        /* Cinematic layer (Dollarvault hub surfaces) — dark */
         --canvas-tint: #050a14;
         --surface-card: #0d1526;
         --surface-raised: #101a30;

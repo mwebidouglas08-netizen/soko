@@ -31,6 +31,29 @@
             // JS bundle is being parsed/evaluated, before main.tsx can register
             // its own handlers. Renders directly into #root (no React needed).
             window.__fatalErrorShown = false;
+            // Set by main.tsx once React has committed its first render. Before
+            // that a crash really is fatal (nothing is on screen); afterwards the
+            // app is alive and must NEVER be replaced by a full-screen error page.
+            window.__appMounted = false;
+            // Errors raised by browser extensions (MetaMask and other wallet
+            // add-ons, ad blockers, password managers) surface on `window` exactly
+            // like our own, but say nothing about this app's health. Identify them
+            // so they can be logged instead of being mistaken for an app crash.
+            window.__isExtensionError = function (err) {
+                if (!err) return false;
+                var text = '';
+                try {
+                    text = String((err && (err.stack || err.message)) || err);
+                } catch (_) {
+                    return false;
+                }
+                return (
+                    /(chrome|moz|safari|safari-web|ms-browser)-extension:\/\//i.test(text) ||
+                    /metamask|ethereum|evmask|eth_requestAccounts|wallet_?connect|coinbase|trust ?wallet|phantom/i.test(
+                        text
+                    )
+                );
+            };
             window.__showFatalError = function (message) {
                 if (window.__fatalErrorShown) return;
                 window.__fatalErrorShown = true;
@@ -48,19 +71,93 @@
                     '<button onclick="location.reload()" style="padding:8px 24px;border-radius:4px;border:none;background:#0e9aa7;color:#fff;cursor:pointer;font-size:14px">Refresh</button>' +
                     '</div>';
             };
-            window.addEventListener('error', function (e) {
-                var src = e.target && e.target.src ? ' (script: ' + e.target.src + ')' : '';
-                if (e.error) window.__showFatalError((e.error.message || String(e.error)) + src);
-                else if (e.message) window.__showFatalError(e.message + src);
-            }, true);
+            // Non-blocking, dismissible notice for recoverable runtime problems.
+            // A wallet-extension rejection gets a small dismissible card in the
+            // corner - never a full-screen "Something went wrong" page.
+            window.__showNonFatalNotice = function (message) {
+                try {
+                    var text = String(message == null ? 'Something went wrong' : message).slice(0, 240);
+                    var stack = document.getElementById('app-notice-stack');
+                    if (!stack) {
+                        stack = document.createElement('div');
+                        stack.id = 'app-notice-stack';
+                        stack.setAttribute('role', 'status');
+                        stack.setAttribute('aria-live', 'polite');
+                        stack.style.cssText =
+                            'position:fixed;right:14px;bottom:14px;z-index:2147482000;display:flex;' +
+                            'flex-direction:column;gap:8px;max-width:min(360px,calc(100vw - 28px));pointer-events:none;';
+                        (document.body || document.documentElement).appendChild(stack);
+                    }
+                    // Collapse repeats so a retrying extension cannot spam the page.
+                    var key = text.replace(/[\\"']/g, '');
+                    if (stack.querySelector('[data-notice="' + key + '"]')) return;
+                    var card = document.createElement('div');
+                    card.setAttribute('data-notice', key);
+                    card.style.cssText =
+                        'pointer-events:auto;display:flex;gap:10px;align-items:flex-start;padding:10px 12px;' +
+                        'border-radius:10px;font:13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;' +
+                        'color:#0b1220;background:#fff;border:1px solid rgba(15,23,42,.12);' +
+                        'box-shadow:0 10px 30px rgba(15,23,42,.16);';
+                    var body = document.createElement('span');
+                    body.style.cssText = 'flex:1;word-break:break-word;';
+                    body.textContent = text;
+                    var close = document.createElement('button');
+                    close.type = 'button';
+                    close.textContent = '\u00d7';
+                    close.setAttribute('aria-label', 'Dismiss');
+                    close.style.cssText =
+                        'border:0;background:transparent;color:#5b6472;font-size:16px;line-height:1;' +
+                        'cursor:pointer;padding:0 2px;';
+                    close.onclick = function () {
+                        if (card.parentNode) card.parentNode.removeChild(card);
+                    };
+                    card.appendChild(body);
+                    card.appendChild(close);
+                    stack.appendChild(card);
+                    setTimeout(function () {
+                        if (card.parentNode) card.parentNode.removeChild(card);
+                    }, 9000);
+                } catch (_) {}
+            };
+            // Central policy: a runtime error only kills the app while nothing has
+            // rendered yet. Once mounted, report non-fatally and keep going.
+            window.__reportError = function (err, label) {
+                if (window.__isExtensionError(err)) {
+                    console.warn('[ignored extension error]', label, err);
+                    return;
+                }
+                var message = (err && err.message) || (err == null ? '' : String(err)) || label;
+                if (window.__appMounted) {
+                    console.warn('[non-fatal]', label, err);
+                    window.__showNonFatalNotice(message);
+                    return;
+                }
+                window.__showFatalError(message);
+            };
+
+            window.addEventListener(
+                'error',
+                function (e) {
+                    // Resource load failures (img / audio / chunk 404s) must never
+                    // be fatal - only a missing entry bundle leaves nothing to draw.
+                    var target = e.target;
+                    if (target && target !== window && target.tagName) {
+                        if (target.tagName === 'SCRIPT' && !window.__appMounted) {
+                            window.__showFatalError('Failed to load ' + (target.src || 'the application bundle'));
+                        }
+                        return;
+                    }
+                    window.__reportError(e.error || e.message, 'error');
+                },
+                true
+            );
             window.addEventListener('unhandledrejection', function (e) {
-                var r = e.reason;
-                window.__showFatalError(r instanceof Error ? r.message : String(r));
+                window.__reportError(e.reason, 'unhandledrejection');
             });
             // If the bundle silently fails (e.g. a deferred script 404s or a
             // module throws before any handler fires), detect the blank state.
             setTimeout(function () {
-                if (window.__fatalErrorShown) return;
+                if (window.__fatalErrorShown || window.__appMounted) return;
                 var el = document.getElementById('root');
                 if (el && el.childElementCount === 0) {
                     var scripts = Array.prototype.map.call(

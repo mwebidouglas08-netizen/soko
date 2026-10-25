@@ -63,8 +63,10 @@
 
     /* Phones: the execution bar is taller and the Run button sits near the
        bottom edge, so lift the pill clear of it. */
+    /* Phones: the fixed execution bar is ~6rem tall, so the pill must clear it
+       (6rem bar + 1.4rem gap) or it sits on top of the Run button. */
     @media (max-width: 640px) {
-        bottom: 8.4rem;
+        bottom: calc(6rem + 1.4rem);
 
         &__btn {
             padding: 0.8rem 1.2rem;

@@ -1016,7 +1016,10 @@ body.hub-view {
     scrollbar-color: var(--shell-border) transparent;
 
     @media (max-width: 859px) {
-        padding: 1.2rem 1rem 10.4rem;
+        /* 10.4rem clears the fixed execution bar; the extra 1.6rem also clears
+           the floating Risk pill / AI bubble row that sits just above it, so the
+           last content on a page is never trapped under the floating controls. */
+        padding: 1.2rem 1rem 12rem;
     }
 }
 

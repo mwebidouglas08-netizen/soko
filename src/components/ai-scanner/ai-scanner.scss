@@ -379,8 +379,10 @@
     .ai-scanner-button {
         width: 52px;
         height: 52px;
-        bottom: 26px;
-        right: 22px;
+        /* Clear the fixed ~6rem execution bar so the bubble never covers the
+           Run button / status area on phones. */
+        bottom: calc(6rem + 1.4rem);
+        right: 1.4rem;
     }
     .ai-scanner-button__main {
         width: 52px;

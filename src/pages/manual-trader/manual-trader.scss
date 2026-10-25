@@ -149,9 +149,22 @@
         transform 0.15s ease,
         box-shadow 0.15s ease;
 
+    /* Placeholder ring for a slot with no tick yet. It must still be VISIBLE:
+       the old version set `color: transparent` on a near-invisible fill, so a
+       freshly-opened panel looked like a row of empty holes. A dashed ring with
+       a faint centre dot reads as "waiting for data" instead. */
     &--empty {
-        background: color-mix(in srgb, var(--text-general, #8b98b8) 22%, transparent);
-        color: transparent;
+        background: color-mix(in srgb, var(--text-general, #8b98b8) 12%, transparent);
+        border: 2px dashed color-mix(in srgb, var(--text-general, #8b98b8) 45%, transparent);
+        color: color-mix(in srgb, var(--text-general, #8b98b8) 60%, transparent);
+
+        &::after {
+            content: '';
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: currentColor;
+        }
     }
 
     &--zero { background: #6b7f8f; }

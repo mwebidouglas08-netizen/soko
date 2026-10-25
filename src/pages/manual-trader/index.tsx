@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { HubContractType } from '@/bot/engine/hub-session';
 import { useHubSession } from '@/bot/use-hub-session';
@@ -61,6 +61,15 @@ const ManualTraderPage = observer(() => {
         nameOf: s => VOL_MARKETS.find(m => m.symbol === s)?.name || s,
         evaluate: () => null,
     }));
+
+    // The digit circles, price and stats all read from the live tick feed, so the
+    // session must actually be running. Without this the panel stayed empty
+    // forever (10 blank circles, price "\u2014", all stats 0) because nothing ever
+    // subscribed to the market. Guests are fine \u2014 the public feed needs no login.
+    useEffect(() => {
+        session.start();
+        return () => session.stop('Manual trader closed');
+    }, [session]);
 
     const digits = snap.digits[symbol] || [];
     const price = snap.quotes[symbol] || 0;

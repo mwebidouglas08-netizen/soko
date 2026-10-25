@@ -39,6 +39,25 @@ const REFERENCE_CARDS: BotCard[] = [
     { id: 'quantum', name: '🥉 Quantum Edge AI', description: 'Quick extreme-digit bot. Stake 0.8, recovery ×2, Over/Under on every trade plus a percentage reversal after every 3 trades.', kind: 'quick', badge: 'QUICK', preset: 'quantum' },
 ];
 
+/** Per-card accent + glyph so every bot is bright, distinct and easy to spot
+ *  on both the dark and light themes (the reference grid is colourful, not a
+ *  wall of near-black cards). */
+const CARD_VISUALS: Record<string, { accent: string; glyph: string }> = {
+    vertex: { accent: '#22e7ff', glyph: '\u{1F4D0}' },
+    digit_nexus: { accent: '#7c5cff', glyph: '\u{1F9E0}' },
+    volt_scalper: { accent: '#ffd23f', glyph: '\u26A1' },
+    apex_ai: { accent: '#ff7a45', glyph: '\u{1F3D4}\uFE0F' },
+    neutrade: { accent: '#2fd6a5', glyph: '\u2696\uFE0F' },
+    straddle: { accent: '#ff5c8a', glyph: '\u{1F3AF}' },
+    aurora: { accent: '#4dd0ff', glyph: '\u{1F30C}' },
+    obsidian: { accent: '#9b8cff', glyph: '\u{1F5A4}' },
+    prism: { accent: '#ffb020', glyph: '\u{1F53A}' },
+    pulsetrader: { accent: '#ff4d6d', glyph: '\u{1F493}' },
+    titan: { accent: '#3fa9f5', glyph: '\u{1F6E1}\uFE0F' },
+    zenith: { accent: '#b06bff', glyph: '\u{1F680}' },
+    quantum: { accent: '#00e0b8', glyph: '\u{1F9EA}' },
+};
+
 const TradingBotsPage = observer(() => {
     const [query, setQuery] = useState('');
     const [busyId, setBusyId] = useState<string | null>(null);
@@ -137,9 +156,18 @@ const TradingBotsPage = observer(() => {
                 </div>
             ) : (
                 <div className='bots-grid'>
-                    {visible.map(card => (
-                        <article key={card.id} className='hub-panel hub-lift bots-card'>
+                    {visible.map(card => {
+                        const vis = CARD_VISUALS[card.id] ?? { accent: '#22e7ff', glyph: '\u{1F916}' };
+                        return (
+                        <article
+                            key={card.id}
+                            className='hub-panel hub-lift bots-card'
+                            style={{ ['--bot-accent' as string]: vis.accent }}
+                        >
                             <div className='bots-card__top'>
+                                <span className='bots-card__icon' aria-hidden='true'>
+                                    {vis.glyph}
+                                </span>
                                 <h3>{card.name}</h3>
                                 <div className='bots-card__tags'>
                                     <span className={`bots-card__badge bots-card__badge--${card.badge.toLowerCase()}`}>
@@ -162,7 +190,8 @@ const TradingBotsPage = observer(() => {
                                 </span>
                             </div>
                         </article>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </HubPage>

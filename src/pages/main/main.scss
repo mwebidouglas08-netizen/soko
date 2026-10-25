@@ -835,6 +835,13 @@ body.hub-view {
         pointer-events: none;
         z-index: -1;
         mask-image: linear-gradient(#000 55%, transparent);
+
+        /* Phones: the fixed 420px band left a hard horizontal edge partway down
+           the page. Stretch it to the full viewport so the aurora reads as one
+           continuous backdrop behind the hero. */
+        @media (max-width: 640px) {
+            height: 100dvh;
+        }
     }
 
     > .version-banner {

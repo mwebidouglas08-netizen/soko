@@ -342,12 +342,16 @@
        art is richest (rising candles + light trails), and a soft top-down scrim
        keeps the type legible over the brighter chart detail. */
     @media (max-width: 640px) {
-        margin: -1.2rem -1rem 0;
-        min-height: calc(100dvh - 10.4rem);
-        padding-bottom: 2rem;
+        /* Bleed to the very bottom edge: cancel .main-content's 10.4rem bottom
+           padding with a matching negative margin, then re-add it as padding so
+           the hero art reaches the bottom of the scroll area with NO flat navy
+           band below it, while the cards still clear the fixed footer. */
+        margin: -1.2rem -1rem -10.4rem;
+        min-height: calc(100dvh - 8.4rem);
+        padding-bottom: 10.4rem;
         background:
-            linear-gradient(180deg, rgb(2 10 22 / 80%) 0%, rgb(2 10 22 / 28%) 32%, rgb(2 10 22 / 66%) 100%),
-            #020a16 url('../../assets/dashboard-bg.png') 72% center / cover no-repeat;
+            linear-gradient(180deg, rgb(2 10 22 / 72%) 0%, rgb(2 10 22 / 22%) 30%, rgb(2 10 22 / 58%) 100%),
+            #020a16 url('../../assets/dashboard-bg.png') 68% center / cover no-repeat;
 
         &__hero {
             padding: 2rem 1.2rem 1.6rem;

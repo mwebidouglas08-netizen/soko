@@ -1,4 +1,7 @@
-/* Signal-category explorer (prodigittool-style) */
+/* Signal-category explorer (prodigittool-style).
+   Theme-aware: surfaces/text derive from the shared CSS vars so the tool reads
+   correctly on the dark hub shell AND the light theme, with the per-category
+   accent (--sig-accent) driving the colour. */
 .sig-tool {
     .sig-grid {
         display: grid;
@@ -17,9 +20,13 @@
         flex-direction: column;
         gap: 0.9rem;
         padding: 1.6rem;
-        border: 1px solid rgb(15 40 60 / 10%);
+        border: 1px solid color-mix(in srgb, var(--sig-accent) 30%, var(--card-border, rgb(148 163 184 / 14%)));
         border-radius: 1.4rem;
-        background: linear-gradient(160deg, #ffffff, #f4f9ff);
+        background:
+            linear-gradient(160deg, color-mix(in srgb, var(--sig-accent) 14%, transparent), transparent 60%),
+            var(--surface-glass, rgb(15 23 42 / 72%));
+        backdrop-filter: blur(12px);
+        box-shadow: var(--card-shadow, 0 16px 40px -24px rgb(15 23 42 / 45%));
         overflow: hidden;
         transition:
             transform 0.18s ease,
@@ -32,12 +39,13 @@
             inset: 0 0 auto 0;
             height: 3px;
             background: linear-gradient(90deg, transparent, var(--sig-accent), transparent);
+            box-shadow: 0 0 18px color-mix(in srgb, var(--sig-accent) 50%, transparent);
         }
 
         &:hover {
             transform: translateY(-3px);
-            box-shadow: 0 14px 34px rgb(15 42 61 / 12%);
-            border-color: color-mix(in srgb, var(--sig-accent) 45%, #dbe7f2);
+            box-shadow: var(--card-shadow-lifted, 0 24px 48px -24px rgb(15 23 42 / 45%));
+            border-color: color-mix(in srgb, var(--sig-accent) 55%, var(--card-border, rgb(148 163 184 / 14%)));
         }
 
         &--active {
@@ -53,9 +61,9 @@
     }
 
     .sig-card__tag {
-        color: color-mix(in srgb, var(--sig-accent) 70%, #0f2a3d);
-        background: color-mix(in srgb, var(--sig-accent) 14%, transparent);
-        border: 1px solid color-mix(in srgb, var(--sig-accent) 34%, transparent);
+        color: color-mix(in srgb, var(--sig-accent) 78%, var(--text-prominent, #e8eefc));
+        background: color-mix(in srgb, var(--sig-accent) 16%, transparent);
+        border: 1px solid color-mix(in srgb, var(--sig-accent) 40%, transparent);
         border-radius: 6px;
         padding: 3px 9px;
         font-size: 1rem;
@@ -67,7 +75,7 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        color: #6b7f8f;
+        color: var(--text-general, #8b98b8);
         font-size: 0.95rem;
         font-weight: 700;
         letter-spacing: 0.06em;
@@ -84,7 +92,7 @@
 
     .sig-card__foot {
         margin: 0;
-        color: #7d8f9d;
+        color: var(--text-general, #8b98b8);
         font-size: 1.05rem;
         font-weight: 600;
     }
@@ -93,12 +101,12 @@
         margin: 0.2rem 0 0;
         font-size: 1.7rem;
         font-weight: 800;
-        color: #0f2a3d;
+        color: var(--text-prominent, #e8eefc);
     }
 
     .sig-card__blurb {
         margin: 0;
-        color: #5a6f80;
+        color: var(--text-general, #8b98b8);
         font-size: 1.2rem;
         line-height: 1.55;
         flex: 1;
@@ -133,12 +141,12 @@
     .sig-split__labels {
         display: flex;
         justify-content: space-between;
-        color: #5a6f80;
+        color: var(--text-general, #8b98b8);
         font-size: 1.05rem;
         font-weight: 700;
 
         strong {
-            color: #0f2a3d;
+            color: var(--text-prominent, #e8eefc);
             font-variant-numeric: tabular-nums;
         }
     }
@@ -148,7 +156,7 @@
         height: 0.9rem;
         border-radius: 999px;
         overflow: hidden;
-        background: #e6eef5;
+        background: color-mix(in srgb, var(--text-general, #8b98b8) 22%, transparent);
     }
 
     .sig-split__left,
@@ -159,15 +167,16 @@
     }
 
     .sig-split__right {
-        background: #c3d3e0;
+        background: color-mix(in srgb, var(--text-general, #8b98b8) 45%, transparent);
     }
 
     .sig-detail {
         margin-top: 1.8rem;
         padding: 1.8rem;
-        border: 1px solid color-mix(in srgb, var(--sig-accent) 40%, #dbe7f2);
+        border: 1px solid color-mix(in srgb, var(--sig-accent) 40%, var(--card-border, rgb(148 163 184 / 14%)));
         border-radius: 1.4rem;
-        background: #fff;
+        background: var(--surface-glass, rgb(15 23 42 / 72%));
+        backdrop-filter: blur(12px);
         scroll-margin-top: 8rem;
     }
 
@@ -181,15 +190,15 @@
         h2 {
             margin: 0.6rem 0 0;
             font-size: 1.9rem;
-            color: #0f2a3d;
+            color: var(--text-prominent, #e8eefc);
         }
     }
 
     .sig-detail__close {
         cursor: pointer;
-        border: 1px solid #dbe7f2;
-        background: #f4f9ff;
-        color: #5a6f80;
+        border: 1px solid var(--card-border, rgb(148 163 184 / 14%));
+        background: color-mix(in srgb, var(--text-general, #8b98b8) 12%, transparent);
+        color: var(--text-general, #8b98b8);
         border-radius: 0.8rem;
         padding: 0.7rem 1.3rem;
         font-size: 1.15rem;
@@ -204,12 +213,12 @@
 
     .sig-detail__note {
         margin: 0;
-        color: #5a6f80;
+        color: var(--text-general, #8b98b8);
         font-size: 1.25rem;
         line-height: 1.6;
 
         strong {
-            color: #0f2a3d;
+            color: var(--text-prominent, #e8eefc);
         }
     }
 }

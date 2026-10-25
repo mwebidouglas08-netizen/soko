@@ -43,11 +43,30 @@
     }
 
     .bots-card {
+        --bot-accent: #22e7ff;
+
+        position: relative;
         display: flex;
         flex-direction: column;
         gap: 0.8rem;
         padding: 1.2rem 1.3rem;
         min-height: 250px;
+        overflow: hidden;
+        /* Bright, per-bot tinted surface so each card is clearly visible and
+           distinguishable instead of a near-black slab. */
+        background:
+            linear-gradient(160deg, color-mix(in srgb, var(--bot-accent) 16%, transparent), transparent 62%),
+            var(--surface-glass, rgb(15 23 42 / 72%));
+        border-color: color-mix(in srgb, var(--bot-accent) 34%, var(--card-border, rgb(148 163 184 / 14%)));
+
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--bot-accent), transparent);
+            box-shadow: 0 0 18px color-mix(in srgb, var(--bot-accent) 55%, transparent);
+        }
 
         h3 {
             margin: 0;
@@ -58,16 +77,31 @@
 
         &__top {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 0.6rem;
+            align-items: center;
+            gap: 0.7rem;
             flex-wrap: wrap;
+        }
+
+        &__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+            width: 3.4rem;
+            height: 3.4rem;
+            border-radius: 0.9rem;
+            font-size: 1.7rem;
+            line-height: 1;
+            background: color-mix(in srgb, var(--bot-accent) 22%, transparent);
+            border: 1px solid color-mix(in srgb, var(--bot-accent) 45%, transparent);
+            box-shadow: 0 0 16px color-mix(in srgb, var(--bot-accent) 30%, transparent);
         }
 
         &__tags {
             display: flex;
             gap: 0.4rem;
             flex-wrap: wrap;
+            margin-left: auto;
         }
 
         /* Reference Free Bots grid badges: teal QUICK/FREE, gold PREMIUM. */

@@ -1,12 +1,17 @@
+/* Manual trader — one-tick terminal with Deriv D-bot digit circles.
+   Theme-aware: surfaces/text come from the shared CSS vars so it reads
+   correctly on the dark hub shell and the light theme alike. */
 .manual-trader {
     &__ticket {
         display: flex;
         flex-direction: column;
         gap: 1.2rem;
         padding: 1.4rem 1.6rem;
-        border: 1px solid rgb(15 40 60 / 8%);
+        border: 1px solid var(--card-border, rgb(148 163 184 / 14%));
         border-radius: 1.3rem;
-        background: #fff;
+        background: var(--surface-glass, rgb(15 23 42 / 72%));
+        backdrop-filter: blur(12px);
+        box-shadow: var(--card-shadow, 0 16px 40px -24px rgb(15 23 42 / 45%));
     }
 
     &__quote {
@@ -22,7 +27,7 @@
         gap: 0.4rem;
 
         > span:first-child {
-            color: #6b7f8f;
+            color: var(--text-general, #8b98b8);
             font-size: 1.05rem;
             font-weight: 700;
             letter-spacing: 0.07em;
@@ -32,6 +37,7 @@
         strong {
             font-size: 1.9rem;
             font-variant-numeric: tabular-nums;
+            color: var(--text-prominent, #e8eefc);
         }
     }
 
@@ -48,7 +54,7 @@
     }
 
     &__sub {
-        color: #7d8f9d;
+        color: var(--text-general, #8b98b8);
         font-size: 1.15rem;
         font-weight: 600;
 
@@ -64,9 +70,11 @@
         flex-direction: column;
         gap: 0.9rem;
         padding: 1.2rem 1.4rem;
-        border: 1px solid rgb(15 40 60 / 8%);
+        border: 1px solid var(--card-border, rgb(148 163 184 / 14%));
         border-radius: 1.1rem;
-        background: linear-gradient(180deg, #f7fbff, #eef5fb);
+        background:
+            linear-gradient(180deg, color-mix(in srgb, var(--shell-accent, #22d3ee) 8%, transparent), transparent 70%),
+            color-mix(in srgb, var(--text-general, #8b98b8) 8%, transparent);
     }
 
     &__circles-head {
@@ -74,7 +82,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        color: #6b7f8f;
+        color: var(--text-general, #8b98b8);
         font-size: 1.05rem;
         font-weight: 700;
         letter-spacing: 0.07em;
@@ -93,11 +101,11 @@
         display: flex;
         flex-wrap: wrap;
         gap: 1.4rem;
-        color: #5a6f80;
+        color: var(--text-general, #8b98b8);
         font-size: 1.15rem;
 
         strong {
-            color: #0f2a3d;
+            color: var(--text-prominent, #e8eefc);
             font-variant-numeric: tabular-nums;
         }
     }
@@ -137,7 +145,7 @@
         box-shadow 0.15s ease;
 
     &--empty {
-        background: #e6eef5;
+        background: color-mix(in srgb, var(--text-general, #8b98b8) 22%, transparent);
         color: transparent;
     }
 
@@ -147,12 +155,12 @@
 
     &--latest {
         transform: scale(1.12);
-        box-shadow: 0 0 0 3px rgb(15 42 61 / 18%);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--text-prominent, #e8eefc) 22%, transparent);
     }
 
     &--prediction {
-        border-color: #0f2a3d;
-        box-shadow: 0 0 0 3px rgb(15 42 61 / 25%);
+        border-color: var(--shell-accent, #22d3ee);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--shell-accent, #22d3ee) 35%, transparent);
     }
 }
 

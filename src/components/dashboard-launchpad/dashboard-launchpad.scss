@@ -335,26 +335,30 @@
         }
     }
 
-    /* Phones: the hero art is a wide 1915x821 banner. `contain` shrank it to a
-       thin strip with flat navy below it, so the phone now uses `cover` — the
-       image scales to the hero's full height and fills the whole area
-       edge-to-edge with no gaps. It is anchored to the right (72%) where the
-       art is richest (rising candles + light trails), and a soft top-down scrim
-       keeps the type legible over the brighter chart detail. */
-    @media (max-width: 640px) {
-        /* Bleed to the very bottom edge: cancel .main-content's 10.4rem bottom
-           padding with a matching negative margin, then re-add it as padding so
-           the hero art reaches the bottom of the scroll area with NO flat navy
-           band below it, while the cards still clear the fixed footer. */
+    /* Phones — art-directed portrait backdrop.
+       ROOT CAUSE of the "thin / cropped / doesn't fill" reports: the desktop
+       art is a 1915x821 (2.33:1) ultrawide panorama. A phone hero is ~0.45:1
+       (tall and narrow), so `cover` scaled that panorama to the hero's HEIGHT
+       and showed only ~20% of its width — an unrecognisable dark blur — while
+       `contain` shrank it to a 167px strip. Neither can fill a portrait box.
+       Fix: a dedicated 1080x1920 portrait composition (dashboard-bg-phone)
+       baked from the same artwork — blurred cover base + the full banner band
+       centred, unmutilated — painted edge-to-edge with `cover`. It fills any
+       phone aspect ratio completely with no gaps and no crop of the art. */
+    @media (max-width: 860px) {
+        /* Bleed to the shell edges: cancel .main-content's padding so the art
+           reaches the viewport on all four sides, then re-add the bottom pad so
+           the launcher cards still clear the fixed footer. */
         margin: -1.2rem -1rem -10.4rem;
-        min-height: calc(100dvh - 8.4rem);
+        min-height: calc(100dvh - 6.4rem);
         padding-bottom: 10.4rem;
         background:
-            linear-gradient(180deg, rgb(2 10 22 / 72%) 0%, rgb(2 10 22 / 22%) 30%, rgb(2 10 22 / 58%) 100%),
-            #020a16 url('../../assets/dashboard-bg.png') 68% center / cover no-repeat;
+            linear-gradient(180deg, rgb(2 10 22 / 18%) 0%, rgb(2 10 22 / 0%) 22%, rgb(2 10 22 / 22%) 100%),
+            #020a16 url('../../assets/dashboard-bg-phone.png') center top / cover no-repeat;
 
         &__hero {
-            padding: 2rem 1.2rem 1.6rem;
+            min-height: calc(100dvh - 6.4rem);
+            padding: 2.4rem 1.4rem 2rem;
             justify-content: flex-start;
         }
 

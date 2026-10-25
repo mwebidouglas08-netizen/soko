@@ -12,8 +12,11 @@
 
     .bots-count {
         margin-left: auto;
-        color: var(--text-general);
+        /* Secondary but must stay legible on both the dark hub shell and the
+           light canvas — plain --text-general was near-invisible at 1.05rem. */
+        color: color-mix(in srgb, var(--text-prominent) 72%, var(--text-general));
         font-size: 1.05rem;
+        font-weight: 600;
     }
 
     .bots-error,
@@ -53,11 +56,14 @@
         min-height: 250px;
         overflow: hidden;
         /* Bright, per-bot tinted surface so each card is clearly visible and
-           distinguishable instead of a near-black slab. */
+           distinguishable instead of a near-black slab. On the light canvas the
+           white glass base gets a stronger accent wash plus a corner glow, so
+           13 cards never read as a flat grey grid. */
         background:
-            linear-gradient(160deg, color-mix(in srgb, var(--bot-accent) 16%, transparent), transparent 62%),
+            radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--bot-accent) 22%, transparent), transparent 62%),
+            linear-gradient(160deg, color-mix(in srgb, var(--bot-accent) 18%, transparent), transparent 64%),
             var(--surface-glass, rgb(15 23 42 / 72%));
-        border-color: color-mix(in srgb, var(--bot-accent) 34%, var(--card-border, rgb(148 163 184 / 14%)));
+        border-color: color-mix(in srgb, var(--bot-accent) 46%, var(--card-border, rgb(148 163 184 / 14%)));
 
         &::before {
             content: '';

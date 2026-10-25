@@ -76,9 +76,12 @@
 
     &__panel-note {
         margin: 0;
-        color: var(--text-general);
         font-size: 1.05rem;
         max-width: 84ch;
+        /* Light theme: --text-general is a mid grey that washed out on the
+           tinted info note. Deepen it locally so the note is readable in both
+           themes without touching the shared token. */
+        color: color-mix(in srgb, var(--text-prominent, #e8eefc) 78%, var(--text-general, #8b98b8));
 
         strong {
             color: var(--text-prominent);

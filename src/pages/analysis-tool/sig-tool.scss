@@ -213,7 +213,9 @@
 
     .sig-detail__note {
         margin: 0;
-        color: var(--text-general, #8b98b8);
+        /* Readable on both themes: --text-general alone washed out against the
+           tinted note surface. */
+        color: color-mix(in srgb, var(--text-prominent, #e8eefc) 74%, var(--text-general, #8b98b8));
         font-size: 1.25rem;
         line-height: 1.6;
 

@@ -72,9 +72,14 @@
         padding: 1.2rem 1.4rem;
         border: 1px solid var(--card-border, rgb(148 163 184 / 14%));
         border-radius: 1.1rem;
+        /* The circles panel is the most dynamic part of the ticket, so it gets a
+           real surface of its own: a faint accent wash over a neutral tint that
+           is deepened against the card, instead of the old grey-on-grey that
+           made the whole strip look disabled. */
         background:
-            linear-gradient(180deg, color-mix(in srgb, var(--shell-accent, #22d3ee) 8%, transparent), transparent 70%),
-            color-mix(in srgb, var(--text-general, #8b98b8) 8%, transparent);
+            linear-gradient(180deg, color-mix(in srgb, var(--shell-accent, #22d3ee) 12%, transparent), transparent 72%),
+            color-mix(in srgb, var(--text-prominent, #e8eefc) 6%, var(--general-main-1, #fff));
+        box-shadow: inset 0 1px 0 color-mix(in srgb, var(--shell-accent, #22d3ee) 16%, transparent);
     }
 
     &__circles-head {

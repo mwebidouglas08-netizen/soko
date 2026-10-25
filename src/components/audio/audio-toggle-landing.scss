@@ -1,0 +1,9 @@
+/* Hide the floating audio toggle (and the risk pill) while the landing page is
+   open, so they never overlap the marketing content. The landing adds
+   `landing-open` to <body> for exactly this purpose. */
+body.landing-open {
+    .audio-toggle,
+    .risk-pill {
+        display: none !important;
+    }
+}

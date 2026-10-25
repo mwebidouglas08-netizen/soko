@@ -57,4 +57,109 @@
             &.is-loss { color: #d84646; }
         }
     }
+
+    /* Deriv D-bot digit circles */
+    &__circles {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        padding: 1.2rem 1.4rem;
+        border: 1px solid rgb(15 40 60 / 8%);
+        border-radius: 1.1rem;
+        background: linear-gradient(180deg, #f7fbff, #eef5fb);
+    }
+
+    &__circles-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        color: #6b7f8f;
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+    }
+
+    &__circles-legend {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        letter-spacing: 0.04em;
+    }
+
+    &__circles-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.4rem;
+        color: #5a6f80;
+        font-size: 1.15rem;
+
+        strong {
+            color: #0f2a3d;
+            font-variant-numeric: tabular-nums;
+        }
+    }
+}
+
+.dt-legend {
+    display: inline-block;
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: 50%;
+    margin-left: 0.6rem;
+
+    &--low { background: #2f9e6b; }
+    &--high { background: #d84646; }
+}
+
+.dt-circles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+}
+
+.dt-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    border: 2px solid transparent;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+
+    &--empty {
+        background: #e6eef5;
+        color: transparent;
+    }
+
+    &--zero { background: #6b7f8f; }
+    &--low { background: #2f9e6b; }
+    &--high { background: #d84646; }
+
+    &--latest {
+        transform: scale(1.12);
+        box-shadow: 0 0 0 3px rgb(15 42 61 / 18%);
+    }
+
+    &--prediction {
+        border-color: #0f2a3d;
+        box-shadow: 0 0 0 3px rgb(15 42 61 / 25%);
+    }
+}
+
+@media (max-width: 640px) {
+    .dt-circle {
+        width: 2.8rem;
+        height: 2.8rem;
+        font-size: 1.25rem;
+    }
 }

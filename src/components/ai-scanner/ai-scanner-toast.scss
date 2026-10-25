@@ -1,0 +1,47 @@
+/* Transient "bot loaded" toast anchored above the floating AI button. */
+.ai-scanner-toast {
+    position: fixed;
+    right: 2.4rem;
+    bottom: 12.4rem;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    max-width: 30rem;
+    padding: 1rem 1.4rem;
+    border-radius: 1.2rem;
+    background: linear-gradient(135deg, #0b2a3d, #06202f);
+    border: 1px solid rgb(34 231 255 / 45%);
+    box-shadow: 0 12px 30px rgb(0 0 0 / 35%);
+    color: #d7f6ff;
+    font-size: 1.2rem;
+    line-height: 1.4;
+    animation: ai-toast-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    strong {
+        color: #fff;
+    }
+
+    svg {
+        flex: 0 0 auto;
+        color: #22e7ff;
+    }
+
+    @media (max-width: 640px) {
+        right: 1.2rem;
+        left: 1.2rem;
+        bottom: 11rem;
+        max-width: none;
+    }
+}
+
+@keyframes ai-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

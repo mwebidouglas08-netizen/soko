@@ -9,6 +9,8 @@ import './tick_analysis';
 import './last_digit';
 import './last_digits_condition';
 import './lastDigitList';
+import './nthLastDigit';
+import './lastNDigitsList';
 import './analysis-blocks';
 import './stat';
 import './stat_list';

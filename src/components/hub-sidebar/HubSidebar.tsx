@@ -15,6 +15,7 @@ export type HubViewId =
     | 'copy-trader'
     | 'speedbot'
     | 'automated'
+    | 'bots-catalog'
     | 'chart'
     | 'ai-hub'
     | 'ou-bot'
@@ -45,6 +46,7 @@ export const HUB_VIEW_LABELS: Record<HubViewId, string> = {
     'copy-trader': 'Copy Trader',
     speedbot: 'Speedbot',
     automated: 'Automated',
+    'bots-catalog': 'AI Bots Catalog',
     chart: 'Chart',
     'ai-hub': 'AI Trading Hub',
     'ou-bot': 'Over / Under Bot',
@@ -77,5 +79,6 @@ export const HUB_TAB_ORDER: HubViewId[] = [
     'copy-trader',
     'speedbot',
     'automated',
+    'bots-catalog',
     'chart',
 ];

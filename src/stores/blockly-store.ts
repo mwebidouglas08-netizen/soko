@@ -13,11 +13,13 @@ export default class BlocklyStore {
             is_loading: observable,
             active_tab: observable,
             _has_saved_bots: observable,
+            workspace_revision: observable,
             has_active_bot: computed,
             has_saved_bots: computed,
             setLoading: action,
             setActiveTab: action,
             checkForSavedBots: action,
+            notifyWorkspaceChanged: action,
         });
         this.root_store = root_store;
     }
@@ -25,8 +27,21 @@ export default class BlocklyStore {
     is_loading = false;
     active_tab = tabs_title.WORKSPACE;
 
+    // Bumped whenever the Blockly workspace content changes (a strategy is
+    // loaded, cleared or deleted). `has_active_bot` reads it so the computed
+    // re-evaluates and the Run button enables the moment a bot lands — without
+    // this, the computed reads the non-observable `window.Blockly` and never
+    // invalidates, leaving the Run button stuck disabled after a load.
+    workspace_revision = 0;
+
+    notifyWorkspaceChanged = (): void => {
+        this.workspace_revision += 1;
+    };
+
     // Computed property to check if there's an active bot
     get has_active_bot(): boolean {
+        // Reference the revision so MobX tracks it as a dependency.
+        void this.workspace_revision;
         // Check if there's an active bot in the workspace
         const workspace = window.Blockly?.derivWorkspace;
         if (!workspace) return false;

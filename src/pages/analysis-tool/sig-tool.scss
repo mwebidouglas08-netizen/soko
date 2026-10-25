@@ -1,0 +1,225 @@
+/* Signal-category explorer (prodigittool-style) */
+.sig-tool {
+    .sig-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        margin-top: 1.6rem;
+
+        @media (max-width: 760px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .sig-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        padding: 1.6rem;
+        border: 1px solid rgb(15 40 60 / 10%);
+        border-radius: 1.4rem;
+        background: linear-gradient(160deg, #ffffff, #f4f9ff);
+        overflow: hidden;
+        transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease,
+            border-color 0.18s ease;
+
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--sig-accent), transparent);
+        }
+
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 34px rgb(15 42 61 / 12%);
+            border-color: color-mix(in srgb, var(--sig-accent) 45%, #dbe7f2);
+        }
+
+        &--active {
+            border-color: var(--sig-accent);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--sig-accent) 35%, transparent);
+        }
+    }
+
+    .sig-card__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .sig-card__tag {
+        color: color-mix(in srgb, var(--sig-accent) 70%, #0f2a3d);
+        background: color-mix(in srgb, var(--sig-accent) 14%, transparent);
+        border: 1px solid color-mix(in srgb, var(--sig-accent) 34%, transparent);
+        border-radius: 6px;
+        padding: 3px 9px;
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+    }
+
+    .sig-card__live {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6b7f8f;
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+
+        i {
+            width: 0.7rem;
+            height: 0.7rem;
+            border-radius: 50%;
+            background: #12a35c;
+            box-shadow: 0 0 0 3px rgb(18 163 92 / 18%);
+            animation: sig-pulse 1.6s ease-in-out infinite;
+        }
+    }
+
+    .sig-card__foot {
+        margin: 0;
+        color: #7d8f9d;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+
+    .sig-card__title {
+        margin: 0.2rem 0 0;
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: #0f2a3d;
+    }
+
+    .sig-card__blurb {
+        margin: 0;
+        color: #5a6f80;
+        font-size: 1.2rem;
+        line-height: 1.55;
+        flex: 1;
+    }
+
+    .sig-card__cta {
+        align-self: flex-start;
+        cursor: pointer;
+        border: 0;
+        border-radius: 0.9rem;
+        padding: 0.9rem 1.6rem;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #02121f;
+        background: linear-gradient(135deg, var(--sig-accent), #2563eb);
+        transition:
+            transform 0.15s ease,
+            box-shadow 0.2s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px color-mix(in srgb, var(--sig-accent) 40%, transparent);
+        }
+    }
+
+    .sig-split {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .sig-split__labels {
+        display: flex;
+        justify-content: space-between;
+        color: #5a6f80;
+        font-size: 1.05rem;
+        font-weight: 700;
+
+        strong {
+            color: #0f2a3d;
+            font-variant-numeric: tabular-nums;
+        }
+    }
+
+    .sig-split__bar {
+        display: flex;
+        height: 0.9rem;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #e6eef5;
+    }
+
+    .sig-split__left,
+    .sig-split__right {
+        display: block;
+        height: 100%;
+        transition: width 0.4s ease;
+    }
+
+    .sig-split__right {
+        background: #c3d3e0;
+    }
+
+    .sig-detail {
+        margin-top: 1.8rem;
+        padding: 1.8rem;
+        border: 1px solid color-mix(in srgb, var(--sig-accent) 40%, #dbe7f2);
+        border-radius: 1.4rem;
+        background: #fff;
+        scroll-margin-top: 8rem;
+    }
+
+    .sig-detail__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.2rem;
+
+        h2 {
+            margin: 0.6rem 0 0;
+            font-size: 1.9rem;
+            color: #0f2a3d;
+        }
+    }
+
+    .sig-detail__close {
+        cursor: pointer;
+        border: 1px solid #dbe7f2;
+        background: #f4f9ff;
+        color: #5a6f80;
+        border-radius: 0.8rem;
+        padding: 0.7rem 1.3rem;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
+    .sig-detail__body {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    .sig-detail__note {
+        margin: 0;
+        color: #5a6f80;
+        font-size: 1.25rem;
+        line-height: 1.6;
+
+        strong {
+            color: #0f2a3d;
+        }
+    }
+}
+
+@keyframes sig-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.35;
+    }
+}

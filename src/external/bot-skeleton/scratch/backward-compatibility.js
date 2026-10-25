@@ -623,7 +623,12 @@ export default class BlockConversion {
                     if (field) {
                         if (field instanceof window.Blockly.FieldVariable) {
                             const variable_id = el_block_child.getAttribute('id');
-                            const variable_name = el_block_child.innerText.trim();
+                            // XML DOM elements have no `innerText` (that is an
+                            // HTMLElement-only property), so reading it threw
+                            // "Cannot read properties of undefined (reading
+                            // 'trim')" and aborted the whole strategy load.
+                            // `textContent` is the correct accessor for XML.
+                            const variable_name = (el_block_child.innerText ?? el_block_child.textContent ?? '').trim();
                             const variable = window.Blockly.Variables.getOrCreateVariablePackage(
                                 this.workspace,
                                 variable_id,
@@ -633,7 +638,7 @@ export default class BlockConversion {
                             this.workspace_variables[variable.id_] = variable_name;
                             field.setValue(variable.id_);
                         } else {
-                            field.setValue(el_block_child.innerText);
+                            field.setValue(el_block_child.innerText ?? el_block_child.textContent ?? '');
                         }
                     }
                     break;

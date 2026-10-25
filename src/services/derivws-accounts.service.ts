@@ -2,6 +2,15 @@ import { isProduction } from '@/components/shared';
 import brandConfig from '../../brand.config.json';
 
 /**
+ * The Deriv-App-ID header. The Options REST API requires it on every request
+ * when the bearer token is a Personal Access Token, and the OTP endpoint in
+ * particular rejects a request without it (401 / "Failed to generate OTP").
+ * Without this header the demo-account OTP never resolves, which is what
+ * blocked live-bot testing.
+ */
+const getDerivAppId = (): string => process.env.NEXT_PUBLIC_DERIV_APP_ID || '';
+
+/**
  * Account information from derivatives/accounts endpoint
  */
 export interface DerivAccount {
@@ -135,6 +144,7 @@ export class DerivWSAccountsService {
                     method: 'GET',
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
+                        'Deriv-App-ID': getDerivAppId(),
                     },
                 });
 
@@ -199,6 +209,7 @@ export class DerivWSAccountsService {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
+                        'Deriv-App-ID': getDerivAppId(),
                     },
                 });
 

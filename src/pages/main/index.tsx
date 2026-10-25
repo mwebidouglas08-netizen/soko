@@ -14,6 +14,7 @@ import SpeedbotPage from '@/pages/speedbot';
 import AutomatedPage from '@/pages/automated';
 import HedgingToolPage from '@/pages/hedging-tool';
 import ManualTraderPage from '@/pages/manual-trader';
+import BotsCatalogPage from '@/pages/bots-catalog';
 import VersionBanner from '@/components/version-banner';
 import { type HubViewId } from '@/components/hub-sidebar';
 import HubTabNav from '@/components/hub-tab-nav';
@@ -151,6 +152,7 @@ const Main = observer(() => {
                             {mount('copy-trader', <CopyTradingPage />)}
                             {mount('speedbot', <SpeedbotPage />)}
                             {mount('automated', <AutomatedPage />)}
+                            {mount('bots-catalog', <BotsCatalogPage />)}
                             {mount(
                                 'chart',
                                 <Suspense fallback={<div className='main-hub__fallback'>Loading chart…</div>}>

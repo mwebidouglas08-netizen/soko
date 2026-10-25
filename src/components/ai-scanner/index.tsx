@@ -5,6 +5,7 @@ import { ouBotEngine } from '@/bot/engine/engine';
 import { soundService } from '@/services/sound-service';
 import { voiceService } from '@/services/voice-service';
 import './ai-scanner.scss';
+import './ai-scanner-toast.scss';
 
 type View = 'chooser' | 'entry' | 'pro';
 
@@ -345,6 +346,20 @@ const AIBotDock = () => {
 
     const running = ['starting', 'scanning', 'proposing', 'buying', 'monitoring'].includes(ai.status);
 
+    // Reference behaviour: when a bot is loaded into the builder, the floating
+    // AI bot pulses and announces it, so the user knows the strategy is ready
+    // to run. We surface a transient "loaded" state on the dock.
+    const [loadedName, setLoadedName] = useState<string | null>(null);
+    useEffect(() => {
+        const onLoaded = (e: Event) => {
+            const name = (e as CustomEvent<{ name?: string }>).detail?.name;
+            setLoadedName(name || 'Bot');
+            window.setTimeout(() => setLoadedName(null), 6000);
+        };
+        window.addEventListener('mwx:bot-loaded', onLoaded as EventListener);
+        return () => window.removeEventListener('mwx:bot-loaded', onLoaded as EventListener);
+    }, []);
+
     // Reference behaviour: the floating button toggles the chooser on release.
     const toggle = () => setView(v => (v ? null : 'chooser'));
 
@@ -409,6 +424,15 @@ const AIBotDock = () => {
                     <span className='ai-scanner-button__label-subtext'>AI Scanner</span>
                 </div>
             </div>
+
+            {loadedName && (
+                <div className='ai-scanner-toast' role='status'>
+                    <BotIcon size={16} stroke={2.2} />
+                    <span>
+                        <strong>{loadedName}</strong> loaded {'\u2014'} press Run to start it.
+                    </span>
+                </div>
+            )}
 
             {view && (
                 <div className='ai-scan-modal-overlay' onClick={() => setView(null)}>

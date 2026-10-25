@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { soundService, subscribeSoundSettings } from '@/services/sound-service';
 import { voiceService, subscribeVoiceSettings } from '@/services/voice-service';
 import './audio-toggle.scss';
+import './audio-toggle-landing.scss';
 
 /**
  * Floating speaker toggle (bottom-left, above the Risk Disclaimer pill).

@@ -240,6 +240,17 @@ export const load = async ({
         });
         if (workspace === window.Blockly.derivWorkspace) {
             globalObserver.emit('ui.log.success', { log_type: LogTypes.LOAD_BLOCK });
+            // Signal the store so the Run button re-enables the instant a bot
+            // lands. `has_active_bot` reads a non-observable `window.Blockly`,
+            // so without this bump the computed never invalidates after a load.
+            DBotStore?.instance?.blockly_store?.notifyWorkspaceChanged?.();
+            // Let the floating AI bot react to a freshly loaded strategy
+            // (reference behaviour: it pulses and announces the loaded bot).
+            try {
+                window.dispatchEvent(new CustomEvent('mwx:bot-loaded', { detail: { name: file_name } }));
+            } catch {
+                /* CustomEvent unsupported — non-fatal */
+            }
         }
     } catch (e) {
         console.error(e); // eslint-disable-line

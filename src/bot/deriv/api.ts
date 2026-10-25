@@ -120,7 +120,7 @@ export const getProposal = async (params: Record<string, unknown>): Promise<ApiR
 
 export interface LiveRequest {
     data?: any;
-    error?: { code: string; message: string };
+    error?: { code?: string; message?: string; [k: string]: any };
     /** Detach from the live stream; the server forgets the subscription. */
     release: () => void;
 }

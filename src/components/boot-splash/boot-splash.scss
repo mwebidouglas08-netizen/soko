@@ -337,12 +337,19 @@
         padding: 26px 18px 16px;
     }
 
+    /* Phones: four tiles in one row are too cramped to read or tap — use a
+       2x2 grid so each tile keeps a comfortable size. */
     .sf-cinematic__tiles {
-        gap: 6px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
 
     .sf-cinematic__tile {
-        padding: 10px 4px;
+        padding: 12px 8px;
+    }
+
+    .sf-cinematic__tile-label {
+        font-size: 10px;
     }
 
     .sf-cinematic__step-label {

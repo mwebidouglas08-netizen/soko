@@ -97,6 +97,20 @@ export default Engine =>
             return digits;
         }
 
+        getNthLastDigit(n = 1) {
+            const index = Number.parseInt(n, 10);
+            return new Promise(resolve =>
+                this.getTicks().then(ticks => {
+                    if (!Number.isFinite(index) || index < 1 || ticks.length < index) {
+                        resolve(undefined);
+                        return;
+                    }
+                    const tick = ticks[ticks.length - index];
+                    resolve(getLastDigit(tick.toFixed(this.getPipSize())));
+                })
+            );
+        }
+
         checkLastDigitsCondition(digit_count, condition, compare_value = 0) {
             const parsed_compare_value = Number.parseInt(compare_value, 10);
             const numeric_compare_value = Number.isNaN(parsed_compare_value) ? 0 : parsed_compare_value;

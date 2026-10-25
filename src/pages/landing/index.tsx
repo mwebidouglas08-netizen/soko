@@ -217,7 +217,8 @@ const Landing = ({ onEnter }: LandingProps) => {
                 <div className='lp__hero-inner'>
                     <span className='lp__hero-eyebrow' data-reveal>FREE STRATEGIES. REAL MARKET TOOLS.</span>
                     <h1 className='lp__hero-h1' data-reveal>
-                        Free<br />bots<br />ready<br />to<br />load
+                        Free <br className='lp__brk' />bots <br className='lp__brk' />ready{' '}
+                        <br className='lp__brk' />to <br className='lp__brk' />load
                     </h1>
                     <p className='lp__hero-sub' data-reveal>
                         Search proven templates, open tutorial guides, and move directly into the bot builder when you are ready to test.

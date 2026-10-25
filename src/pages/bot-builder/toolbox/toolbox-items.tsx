@@ -383,6 +383,8 @@ export const ToolboxItems = () =>
                     <Block type='stat_list' />
                     <Block type='ticks' />
                     <Block type='lastDigitList' />
+                    <Block type='nthLastDigit' />
+                    <Block type='lastNDigitsList' />
                     <Block type='check_direction' />
                     <Block type='is_candle_black' />
                     <Block type='read_ohlc'>

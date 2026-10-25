@@ -191,6 +191,16 @@ export const deployHubStrategy = async (strategy: HubStrategy, workspace: any): 
     // The market block blanks values that were not present in active_symbols at
     // load time. Replay a create event on every market block so the dropdowns
     // repopulate — the same trick app-store.ts uses after a symbol refresh.
+    replayMarketBlocks(workspace);
+};
+
+/**
+ * Re-fire a create event on every market block so its dropdowns repopulate from
+ * the live `active_symbols` feed. The market block's onchange silently blanks
+ * any value it does not recognise, so a strategy loaded before the symbol list
+ * is ready would otherwise lose its market/symbol selection.
+ */
+export const replayMarketBlocks = (workspace: any): void => {
     try {
         const BlocklyApi = window.Blockly as any;
         workspace
@@ -202,4 +212,45 @@ export const deployHubStrategy = async (strategy: HubStrategy, workspace: any): 
     } catch {
         // Non-fatal: the fields are already baked into the XML.
     }
+};
+
+/**
+ * Load a raw strategy XML string (e.g. one of the bundled AI bot XMLs) into the
+ * Blockly workspace through the same `load()` pipeline the Load modal uses, then
+ * replay the market blocks so the dropdowns survive the symbol-list race.
+ *
+ * Returns true when blocks actually landed in the workspace.
+ */
+export const loadStrategyXml = async (
+    xml: string,
+    name: string,
+    workspace: any
+): Promise<boolean> => {
+    if (!workspace) {
+        throw new Error('The Bot Builder workspace is not ready yet. Try again in a moment.');
+    }
+
+    const active_symbols = ApiHelpers?.instance?.active_symbols;
+    if (active_symbols && typeof active_symbols.retrieveActiveSymbols === 'function') {
+        try {
+            await active_symbols.retrieveActiveSymbols();
+        } catch {
+            // Dropdowns may already be populated; a refresh failure must not block the load.
+        }
+    }
+
+    await load({
+        block_string: xml,
+        workspace,
+        file_name: name,
+        strategy_id: undefined,
+        from: save_types.UNSAVED,
+        drop_event: null,
+        showIncompatibleStrategyDialog: false,
+        show_snackbar: false,
+    });
+
+    replayMarketBlocks(workspace);
+
+    return workspace.getAllBlocks().length > 0;
 };

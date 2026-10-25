@@ -60,6 +60,17 @@
     @media (max-width: 859px) {
         bottom: 5.6rem;
     }
+
+    /* Phones: the execution bar is taller and the Run button sits near the
+       bottom edge, so lift the pill clear of it. */
+    @media (max-width: 640px) {
+        bottom: 8.4rem;
+
+        &__btn {
+            padding: 0.8rem 1.2rem;
+            font-size: 1.1rem;
+        }
+    }
 }
 
 @keyframes riskCardIn {

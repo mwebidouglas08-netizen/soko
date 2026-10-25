@@ -93,4 +93,29 @@
             color: #fff;
         }
     }
+
+    /* Phones: tighten the strip so more tabs are reachable and the active tab
+       stays comfortably tappable. */
+    @media (max-width: 640px) {
+        height: 3.6rem;
+
+        &__filter {
+            width: 3.4rem;
+        }
+
+        &__item {
+            gap: 0.4rem;
+            padding: 0 1.3rem;
+            font-size: 1.2rem;
+
+            svg {
+                width: 15px;
+                height: 15px;
+            }
+        }
+
+        &__ai {
+            font-size: 1.3rem;
+        }
+    }
 }

@@ -1445,3 +1445,13 @@
         background: #3a1118;
     }
 }
+
+/* Phones: the floating AI Scanner button (bottom: 26px) sat on top of the fixed
+   execution bar (~6rem) and the Run button. Lift it clear of the bar so it never
+   covers the Run control or the last page content. */
+@media (max-width: 640px) {
+    .ai-scanner-button {
+        bottom: calc(6rem + 1.4rem);
+        right: 1.4rem;
+    }
+}

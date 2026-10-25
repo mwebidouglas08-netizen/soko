@@ -47,3 +47,13 @@
         color: #cbd5e1;
     }
 }
+
+/* Phones: the fixed execution bar (~6rem) plus the Risk Disclaimer pill both
+   sit at the bottom-left, so the toggle overlapped the pill. Lift it clear of
+   both (bar + pill + gap) so the two never collide. */
+@media (max-width: 640px) {
+    .audio-toggle {
+        left: 1.2rem;
+        bottom: calc(6rem + 1.4rem + 3.8rem);
+    }
+}

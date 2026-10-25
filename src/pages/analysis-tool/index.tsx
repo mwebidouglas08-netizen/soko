@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 import { isDemoAccount } from '@/utils/account-helpers';
 import { fetchHistoricalTicks, type HistoricalTicks } from '@/bot/deriv/history';
+import { TickFeed } from '@/bot/deriv/ticks';
 import { computeDigitCounts, empiricalProbability, theoreticalProbability } from '@/bot/core/digit-stats';
 import { HubNote, HubPage, HubPageHeader } from '@/components/hub-page';
 import './analysis-tool.scss';
@@ -13,6 +14,11 @@ import './sig-tool.scss';
  * families (Even/Odd, Over/Under, Matches/Differs, Rise/Fall), each showing the
  * live observed split over the recent tick window, with a detail view per
  * category. Everything is measured on real Deriv tick history — no prediction.
+ *
+ * The tool is CONTINUOUSLY LIVE: it seeds from historical ticks so the cards are
+ * never empty, then subscribes to the public Deriv tick stream and recomputes on
+ * every tick. `TickFeed` owns the socket and reconnects automatically, so the
+ * panel keeps updating even if the feed drops.
  */
 
 const SYMBOLS = [
@@ -30,6 +36,8 @@ const SYMBOLS = [
 
 const RANGES = [100, 500, 1000];
 const WINDOW = 30;
+const STREAM_LEN = 14;
+const STALE_MS = 8000;
 
 type CategoryId = 'even_odd' | 'over_under' | 'match_diff' | 'rise_fall';
 
@@ -167,32 +175,72 @@ const AnalysisToolPage = observer(() => {
     const [symbol, setSymbol] = useState('R_50');
     const [range, setRange] = useState(500);
     const [barrier, setBarrier] = useState(5);
-    const [loading, setLoading] = useState(false);
+    const [seeding, setSeeding] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [ticks, setTicks] = useState<HistoricalTicks | null>(null);
+    const [connected, setConnected] = useState(false);
+    const [lastTickAt, setLastTickAt] = useState(0);
+    const [seedNonce, setSeedNonce] = useState(0);
     const [active, setActive] = useState<CategoryId | null>(null);
+    const [now, setNow] = useState(() => Date.now());
     const detailRef = useRef<HTMLDivElement | null>(null);
 
-    const run = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const history = await fetchHistoricalTicks(symbol, range);
-            setTicks(history);
-        } catch (e) {
-            setError(e instanceof Error ? e.message : 'Failed to load ticks');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Auto-load on first mount so the cards are never empty.
+    // A 1s heartbeat keeps the "last tick" age and staleness indicator honest
+    // even when a symbol is quiet.
     useEffect(() => {
-        void run();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const t = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(t);
     }, []);
 
+    // Continuous live feed: seed from history (best-effort) then stream ticks.
+    // TickFeed reconnects on its own, so a dropped socket recovers without a
+    // page reload. Re-runs on symbol/range change and on manual refresh.
+    useEffect(() => {
+        let cancelled = false;
+        const feed = new TickFeed({
+            onTick: (_symbol, _point, series) => {
+                if (cancelled) return;
+                setTicks({ digits: [...series.digits], quotes: [...series.quotes], pipSize: series.pipSize });
+                setLastTickAt(Date.now());
+            },
+            onStatus: ok => {
+                if (!cancelled) setConnected(ok);
+            },
+        });
+
+        const boot = async () => {
+            setSeeding(true);
+            setError(null);
+            try {
+                const history = await fetchHistoricalTicks(symbol, range);
+                if (cancelled) return;
+                feed.seed(symbol, history.pipSize, history.quotes);
+                setTicks({ digits: [...history.digits], quotes: [...history.quotes], pipSize: history.pipSize });
+            } catch (e) {
+                // A failed seed must not stop the live stream — the feed will
+                // simply build its own series from incoming ticks.
+                if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load ticks');
+            } finally {
+                if (!cancelled) setSeeding(false);
+            }
+            if (cancelled) return;
+            feed.setSymbols([symbol]);
+            feed.start();
+        };
+        void boot();
+
+        return () => {
+            cancelled = true;
+            feed.stop();
+        };
+    }, [symbol, range, seedNonce]);
+
     const analysis = useMemo<Analysis | null>(() => (ticks ? computeAnalysis(ticks, barrier) : null), [ticks, barrier]);
+
+    const streamDigits = useMemo(() => (analysis ? analysis.digits.slice(-STREAM_LEN) : []), [analysis]);
+    const ageMs = lastTickAt ? now - lastTickAt : 0;
+    const isStale = connected && lastTickAt > 0 && ageMs > STALE_MS;
+    const status: 'loading' | 'live' | 'ready' | 'idle' = seeding ? 'loading' : connected ? 'live' : analysis ? 'ready' : 'idle';
 
     const openCategory = (id: CategoryId) => {
         setActive(id);
@@ -200,7 +248,7 @@ const AnalysisToolPage = observer(() => {
     };
 
     const cardStats = (id: CategoryId): { left: number; right: number; leftLabel: string; rightLabel: string; foot: string } => {
-        if (!analysis) return { left: 0.5, right: 0.5, leftLabel: '\u2014', rightLabel: '\u2014', foot: 'Loading\u2026' };
+        if (!analysis) return { left: 0.5, right: 0.5, leftLabel: '—', rightLabel: '—', foot: 'Loading…' };
         switch (id) {
             case 'even_odd':
                 return {
@@ -224,14 +272,14 @@ const AnalysisToolPage = observer(() => {
                     right: analysis.match,
                     leftLabel: 'DIFFERS',
                     rightLabel: 'MATCHES',
-                    foot: `Hot digit #${analysis.hotDigit} \u00b7 Cold #${analysis.coldDigit}`,
+                    foot: `Hot digit #${analysis.hotDigit} · Cold #${analysis.coldDigit}`,
                 };
             case 'rise_fall':
                 return {
                     left: analysis.rise,
                     right: analysis.fall,
-                    leftLabel: 'RISE \u25b2',
-                    rightLabel: 'FALL \u25bc',
+                    leftLabel: 'RISE ▲',
+                    rightLabel: 'FALL ▼',
                     foot: 'Live directional velocity tracking',
                 };
         }
@@ -246,8 +294,8 @@ const AnalysisToolPage = observer(() => {
                 subtitle='Explore signal categories and read real-time market analysis over live Deriv tick data.'
                 badge={
                     <>
-                        <span className={`hub-badge ${loading ? 'hub-badge--running' : analysis ? 'hub-badge--ready' : 'hub-badge--idle'}`}>
-                            {loading ? 'loading' : analysis ? 'ready' : 'idle'}
+                        <span className={`hub-badge hub-badge--${status}`}>
+                            {status === 'loading' ? 'loading' : status === 'live' ? 'live' : status === 'ready' ? 'ready' : 'idle'}
                         </span>
                         <span
                             className={[
@@ -257,7 +305,7 @@ const AnalysisToolPage = observer(() => {
                                 .filter(Boolean)
                                 .join(' ')}
                         >
-                            {!isLoggedIn ? 'Guest \u00b7 analysis only' : `${isDemo ? 'Demo' : 'Real'} \u00b7 ${activeLoginid}`}
+                            {!isLoggedIn ? 'Guest · analysis only' : `${isDemo ? 'Demo' : 'Real'} · ${activeLoginid}`}
                         </span>
                     </>
                 }
@@ -299,10 +347,29 @@ const AnalysisToolPage = observer(() => {
                         onChange={e => setBarrier(Math.min(9, Math.max(0, Number(e.target.value))))}
                     />
                 </label>
-                <button className='hub-btn hub-btn--primary' onClick={run} disabled={loading}>
-                    {loading ? 'Loading\u2026' : 'Refresh analysis'}
+                <button className='hub-btn hub-btn--primary' onClick={() => setSeedNonce(n => n + 1)} disabled={seeding}>
+                    {seeding ? 'Loading…' : 'Refresh analysis'}
                 </button>
             </section>
+
+            <div className={`sig-stream ${isStale ? 'sig-stream--stale' : ''}`} aria-live='off'>
+                <span className='sig-stream__label'>
+                    <i className={connected && !isStale ? 'is-live' : ''} />
+                    {isStale ? 'RECONNECTING' : connected ? 'LIVE STREAM' : 'CONNECTING'}
+                </span>
+                <div className='sig-stream__digits'>
+                    {streamDigits.length === 0 && <span className='sig-stream__empty'>waiting for ticks…</span>}
+                    {streamDigits.map((d, i) => (
+                        <span key={`${i}-${d}`} className={`sig-stream__digit ${d % 2 === 0 ? 'is-even' : 'is-odd'}`}>
+                            {d}
+                        </span>
+                    ))}
+                </div>
+                <span className='sig-stream__meta'>
+                    {analysis ? `${analysis.n} ticks` : '—'}
+                    {lastTickAt ? ` · ${Math.max(0, Math.round(ageMs / 1000))}s ago` : ''}
+                </span>
+            </div>
 
             {error && (
                 <div className='analysis-tool__error' role='alert'>
@@ -417,8 +484,8 @@ const AnalysisToolPage = observer(() => {
                             <SplitBar
                                 left={analysis.rise}
                                 right={analysis.fall}
-                                leftLabel='RISE \u25b2'
-                                rightLabel='FALL \u25bc'
+                                leftLabel='RISE ▲'
+                                rightLabel='FALL ▼'
                                 accent={detail.accent}
                             />
                             <p className='sig-detail__note'>

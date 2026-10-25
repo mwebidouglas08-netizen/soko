@@ -949,3 +949,39 @@
         }
     }
 }
+
+/* Phones: the header account block (currency select + flag + balance) is wider
+   than the narrow viewport and the balance was clipped / pushed off-screen.
+   Let it shrink, tighten the padding, and keep the amount on one line so the
+   balance is always fully visible. */
+@media (max-width: 640px) {
+    .acc-info {
+        padding: 6px 0.8rem;
+        max-width: 100%;
+        min-width: 0;
+
+        &__content {
+            min-width: 0;
+        }
+
+        &__balance {
+            font-size: 1.3rem;
+            white-space: nowrap;
+        }
+
+        &__currency-icon {
+            width: 1.9rem;
+            height: 1.9rem;
+            margin-right: 0.5rem;
+        }
+    }
+
+    .currency-switch-select-wrapper {
+        padding-inline-end: 0.4rem;
+    }
+
+    .currency-switch-select {
+        min-width: 5.2rem;
+        padding: 0 2.2rem 0 0.8rem;
+    }
+}

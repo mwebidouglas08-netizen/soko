@@ -1,155 +1,65 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 import { isDemoAccount } from '@/utils/account-helpers';
-import { fetchHistoricalTicks, type HistoricalTicks } from '@/bot/deriv/history';
-import { TickFeed } from '@/bot/deriv/ticks';
-import { computeDigitCounts, empiricalProbability, theoreticalProbability } from '@/bot/core/digit-stats';
 import { HubNote, HubPage, HubPageHeader } from '@/components/hub-page';
+import {
+    BARRIERS,
+    CATEGORY_META,
+    FEED_LEN,
+    MARKETS,
+    SCAN_WINDOW,
+    barrierLabel,
+    computeWindow,
+    directions,
+    leadConfidence,
+    type CategoryId,
+    type MarketGroup,
+    type WindowStats,
+} from './analysis-core';
+import { useMarketScanner, type MarketLive } from './use-market-scanner';
 import './analysis-tool.scss';
 import './sig-tool.scss';
 
 /**
- * Signal-category explorer modelled on prodigittool.vercel.app: four contract
- * families (Even/Odd, Over/Under, Matches/Differs, Rise/Fall), each showing the
- * live observed split over the recent tick window, with a detail view per
- * category. Everything is measured on real Deriv tick history — no prediction.
+ * Signal-category explorer with feature parity to prodigittool.vercel.app.
  *
- * The tool is CONTINUOUSLY LIVE: it seeds from historical ticks so the cards are
- * never empty, then subscribes to the public Deriv tick stream and recomputes on
- * every tick. `TickFeed` owns the socket and reconnects automatically, so the
- * panel keeps updating even if the feed drops.
+ * The reference runs a strict 15-tick window over 17 Deriv volatility indexes
+ * (12 one-second + 5 standard) and, per contract family, shows the observed
+ * split, the live digit feed, and an entry recommendation once the window is
+ * full. Everything here is measured on REAL Deriv ticks — a single shared
+ * WebSocket seeds history for every index and then streams continuously, so the
+ * board keeps updating and recovers by itself if the feed drops.
+ *
+ * No number here predicts the next tick; each is the empirical frequency of the
+ * last 15 ticks. The honesty note is deliberate.
  */
 
-const SYMBOLS = [
-    { symbol: 'R_10', name: 'Volatility 10' },
-    { symbol: 'R_25', name: 'Volatility 25' },
-    { symbol: 'R_50', name: 'Volatility 50' },
-    { symbol: 'R_75', name: 'Volatility 75' },
-    { symbol: 'R_100', name: 'Volatility 100' },
-    { symbol: '1HZ10V', name: 'Volatility 10 (1s)' },
-    { symbol: '1HZ25V', name: 'Volatility 25 (1s)' },
-    { symbol: '1HZ50V', name: 'Volatility 50 (1s)' },
-    { symbol: '1HZ75V', name: 'Volatility 75 (1s)' },
-    { symbol: '1HZ100V', name: 'Volatility 100 (1s)' },
+const GROUPS: { id: MarketGroup; label: string }[] = [
+    { id: 'all', label: `All Indexes (${MARKETS.length})` },
+    { id: '1s', label: `1s Markets (${MARKETS.filter(m => m.group === '1s').length})` },
+    { id: 'standard', label: `Standard (${MARKETS.filter(m => m.group === 'standard').length})` },
 ];
 
-const RANGES = [100, 500, 1000];
-const WINDOW = 30;
-const STREAM_LEN = 14;
-const STALE_MS = 8000;
-
-type CategoryId = 'even_odd' | 'over_under' | 'match_diff' | 'rise_fall';
-
-interface Category {
-    id: CategoryId;
-    tag: string;
-    title: string;
-    blurb: string;
-    accent: string;
-}
-
-const CATEGORIES: Category[] = [
-    {
-        id: 'even_odd',
-        tag: 'EVEN / ODD',
-        title: 'Even/Odd Signals',
-        blurb: 'Analyze the latest market digits to identify even and odd patterns using real-time tick data.',
-        accent: '#22e7ff',
-    },
-    {
-        id: 'over_under',
-        tag: 'OVER / UNDER',
-        title: 'Over/Under Signals',
-        blurb: 'Analyze last-digit thresholds and observed digit distributions for available Over and Under contracts.',
-        accent: '#7effd8',
-    },
-    {
-        id: 'match_diff',
-        tag: 'DIGIT MATCH',
-        title: 'Matches/Differs Signals',
-        blurb: 'Explore target-digit analysis and compare matching versus non-matching digits from live market ticks.',
-        accent: '#a78bfa',
-    },
-    {
-        id: 'rise_fall',
-        tag: 'RISE / FALL',
-        title: 'Rise/Fall Signals',
-        blurb: 'Trade consecutive tick momentum and tick velocity swings using real-time price action.',
-        accent: '#fbbf24',
-    },
+const TABS: { id: CategoryId | 'hub'; label: string }[] = [
+    { id: 'even_odd', label: 'Even / Odd' },
+    { id: 'over_under', label: 'Over / Under' },
+    { id: 'match_diff', label: 'Match Now' },
+    { id: 'rise_fall', label: 'Rise / Fall' },
+    { id: 'hub', label: 'Categories Hub' },
 ];
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 
-interface Analysis {
-    digits: number[];
-    quotes: number[];
-    n: number;
-    counts: number[];
-    even: number;
-    odd: number;
-    over: number;
-    under: number;
-    match: number;
-    differ: number;
-    rise: number;
-    fall: number;
-    hotDigit: number;
-    coldDigit: number;
-    barrier: number;
+interface SplitProps {
+    left: number;
+    right: number;
+    leftLabel: string;
+    rightLabel: string;
+    accent: string;
 }
 
-const computeAnalysis = (ticks: HistoricalTicks, barrier: number): Analysis => {
-    const digits = ticks.digits;
-    const quotes = ticks.quotes;
-    const n = digits.length;
-    const counts = computeDigitCounts(digits);
-    const recent = digits.slice(-WINDOW);
-    const rn = recent.length || 1;
-
-    const even = recent.filter(d => d % 2 === 0).length;
-    const odd = recent.length - even;
-    const over = recent.filter(d => d > barrier).length;
-    const under = recent.filter(d => d < barrier).length;
-    const match = recent.filter(d => d === barrier).length;
-    const differ = recent.length - match;
-
-    const recentQuotes = quotes.slice(-WINDOW);
-    let rise = 0;
-    let fall = 0;
-    for (let i = 1; i < recentQuotes.length; i += 1) {
-        if (recentQuotes[i] > recentQuotes[i - 1]) rise += 1;
-        else if (recentQuotes[i] < recentQuotes[i - 1]) fall += 1;
-    }
-
-    let hotDigit = 0;
-    let coldDigit = 0;
-    counts.forEach((c, d) => {
-        if (c > counts[hotDigit]) hotDigit = d;
-        if (c < counts[coldDigit]) coldDigit = d;
-    });
-
-    return {
-        digits,
-        quotes,
-        n,
-        counts,
-        even: even / rn,
-        odd: odd / rn,
-        over: over / rn,
-        under: under / rn,
-        match: match / rn,
-        differ: differ / rn,
-        rise: rise / rn,
-        fall: fall / rn,
-        hotDigit,
-        coldDigit,
-        barrier,
-    };
-};
-
-const SplitBar = ({ left, right, leftLabel, rightLabel, accent }: { left: number; right: number; leftLabel: string; rightLabel: string; accent: string }) => (
+const SplitBar = ({ left, right, leftLabel, rightLabel, accent }: SplitProps) => (
     <div className='sig-split'>
         <div className='sig-split__labels'>
             <span>
@@ -166,137 +76,282 @@ const SplitBar = ({ left, right, leftLabel, rightLabel, accent }: { left: number
     </div>
 );
 
+/** The reference's `LIVE DIGIT HISTORY · 14 Ticks Feed` strip. */
+const DigitFeed = ({ live, mode }: { live: MarketLive; mode: 'digit' | 'arrow' }) => {
+    const digits = live.digits.slice(-FEED_LEN);
+    const arrows = useMemo(() => directions(live.quotes, FEED_LEN), [live.quotes]);
+    return (
+        <div className='sig-feed'>
+            <span className='sig-feed__cap'>
+                Live digit history
+                <em>{FEED_LEN} ticks feed</em>
+            </span>
+            <div className='sig-feed__row'>
+                {digits.length === 0 && <span className='sig-feed__empty'>waiting for ticks…</span>}
+                {mode === 'arrow'
+                    ? arrows.map((d, i) => (
+                          <span key={`a-${i}-${d}`} className={`sig-feed__arrow ${d === 'up' ? 'is-up' : 'is-down'}`}>
+                              {d === 'up' ? '▲' : '▼'}
+                          </span>
+                      ))
+                    : digits.map((d, i) => (
+                          <span key={`d-${i}-${d}`} className={`sig-feed__digit ${d % 2 === 0 ? 'is-even' : 'is-odd'}`}>
+                              {d}
+                          </span>
+                      ))}
+            </div>
+        </div>
+    );
+};
+
+/** Per-category body of a market card — the reference's SCANNING → ENTRY flip. */
+const MarketBody = ({
+    id,
+    stats,
+    accent,
+    targetDigit,
+    unavailable,
+}: {
+    id: CategoryId;
+    stats: WindowStats;
+    accent: string;
+    targetDigit: number;
+    unavailable?: boolean;
+}) => {
+    if (unavailable) {
+        return <p className='sig-mkt__unavailable'>No live feed for this index on the public tick API.</p>;
+    }
+    if (!stats.ready) {
+        return (
+            <div className='sig-mkt__scanning'>
+                <span className='sig-mkt__scan-secs'>{stats.n}</span>
+                <span className='sig-mkt__scan-unit'>SEC</span>
+                <span className='sig-mkt__scan-label'>Scanning</span>
+                <span className='sig-mkt__scan-win'>
+                    {stats.n} ticks · {SCAN_WINDOW}-tick window
+                </span>
+            </div>
+        );
+    }
+
+    const entry = (pick: string, conf: number, extra: string) => (
+        <>
+            <div className='sig-mkt__entry'>
+                <span className='sig-mkt__pick' style={{ color: accent }}>
+                    {pick}
+                </span>
+                <span className='sig-mkt__entry-tag'>ENTRY</span>
+                <span className='sig-mkt__conf'>{pct(conf)}</span>
+            </div>
+            <div className='sig-mkt__extra'>{extra}</div>
+        </>
+    );
+
+    switch (id) {
+        case 'even_odd':
+            return entry(stats.evenOddPick, leadConfidence('even_odd', stats), `${pct(stats.even)} E · ${pct(stats.odd)} O`);
+        case 'over_under':
+            return entry(
+                `${stats.overUnderPick} ${Math.floor(BARRIERS[2])}`,
+                leadConfidence('over_under', stats),
+                `${pct(stats.over)} >${Math.floor(BARRIERS[2])} · ${pct(stats.under)} ≤${Math.floor(BARRIERS[2])}`
+            );
+        case 'match_diff':
+            return (
+                <>
+                    <div className='sig-mkt__entry'>
+                        <span className='sig-mkt__pick' style={{ color: accent }}>
+                            {targetDigit}
+                        </span>
+                        <span className='sig-mkt__entry-tag'>Match Now</span>
+                        <span className='sig-mkt__conf'>{pct(leadConfidence('match_diff', stats))}</span>
+                    </div>
+                    <div className='sig-mkt__extra'>
+                        {stats.topDigits.map(t => `${t.digit}:${pct(t.pct)}`).join(' · ')}
+                    </div>
+                    <div className='sig-mkt__entry-digit'>
+                        MATCH NOW <span aria-hidden>➔</span> Entry digit <strong>{targetDigit}</strong>
+                    </div>
+                </>
+            );
+        case 'rise_fall':
+            return entry(
+                `${stats.riseFallPick} ${stats.riseFallPick === 'RISE' ? '▲' : '▼'}`,
+                leadConfidence('rise_fall', stats),
+                `${pct(stats.rise)} R · ${pct(stats.fall)} F`
+            );
+    }
+};
+
+const MarketCard = ({
+    market,
+    live,
+    id,
+    accent,
+    targetDigit,
+}: {
+    market: (typeof MARKETS)[number];
+    live: MarketLive;
+    id: CategoryId;
+    accent: string;
+    targetDigit: number;
+}) => {
+    const stats = useMemo(
+        () => computeWindow(live.digits, live.quotes, BARRIERS[2]),
+        [live.digits, live.quotes]
+    );
+    const unavailable = live.unsupported;
+    const stale = !unavailable && live.lastTickAt > 0 && Date.now() - live.lastTickAt > 12000;
+
+    return (
+        <article className={`sig-mkt ${stale ? 'sig-mkt--stale' : ''}`} style={{ ['--sig-accent' as never]: accent }}>
+            <header className='sig-mkt__head'>
+                <div className='sig-mkt__id'>
+                    <h3 className='sig-mkt__name'>{market.name}</h3>
+                    <span className='sig-mkt__code'>{market.code}</span>
+                </div>
+                <div className='sig-mkt__ai' aria-hidden='true'>
+                    AI
+                </div>
+            </header>
+            <div className='sig-mkt__status'>
+                <i className={unavailable ? 'is-off' : stale ? 'is-stale' : 'is-live'} aria-hidden='true' />
+                {unavailable ? 'NO FEED' : stale ? 'RECONNECTING' : 'LIVE DERIV'}
+            </div>
+            <div className='sig-mkt__body'>
+                <MarketBody id={id} stats={stats} accent={accent} targetDigit={targetDigit} unavailable={unavailable} />
+            </div>
+            <DigitFeed live={live} mode={id === 'rise_fall' ? 'arrow' : 'digit'} />
+        </article>
+    );
+};
+
 const AnalysisToolPage = observer(() => {
     const { client } = useStore() ?? {};
     const isLoggedIn = Boolean(client?.is_logged_in);
     const activeLoginid = client?.loginid || '';
     const isDemo = isDemoAccount(activeLoginid);
 
-    const [symbol, setSymbol] = useState('R_50');
-    const [range, setRange] = useState(500);
-    const [barrier, setBarrier] = useState(5);
-    const [seeding, setSeeding] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [ticks, setTicks] = useState<HistoricalTicks | null>(null);
-    const [connected, setConnected] = useState(false);
-    const [lastTickAt, setLastTickAt] = useState(0);
-    const [seedNonce, setSeedNonce] = useState(0);
-    const [active, setActive] = useState<CategoryId | null>(null);
-    const [now, setNow] = useState(() => Date.now());
-    const detailRef = useRef<HTMLDivElement | null>(null);
+    const [tab, setTab] = useState<CategoryId | 'hub'>('hub');
+    const [group, setGroup] = useState<MarketGroup>('all');
+    const [query, setQuery] = useState('');
+    const [barrierIdx, setBarrierIdx] = useState(2);
+    const [autoDigit, setAutoDigit] = useState(true);
+    const [manualDigit, setManualDigit] = useState(5);
 
-    // A 1s heartbeat keeps the "last tick" age and staleness indicator honest
-    // even when a symbol is quiet.
+    // One shared socket for all 17 indexes: seeds history, then streams live.
+    const symbols = useMemo(() => MARKETS.map(m => m.symbol), []);
+    const { markets, connected } = useMarketScanner(symbols, 120);
+
+    const visible = useMemo(() => {
+        const q = query.trim().toLowerCase();
+        return MARKETS.filter(m => (group === 'all' ? true : m.group === group)).filter(
+            m => !q || m.name.toLowerCase().includes(q) || m.code.toLowerCase().includes(q)
+        );
+    }, [group, query]);
+
+    // Hub aggregates: mean of each family's leading confidence across markets.
+    const hub = useMemo(() => {
+        const list = MARKETS.map(m => markets[m.symbol]).filter(l => l && !l.unsupported);
+        const ready = list.filter(l => l.digits.length >= SCAN_WINDOW);
+        if (!ready.length) return null;
+        const agg = ready.map(l => computeWindow(l.digits, l.quotes, BARRIERS[barrierIdx]));
+        const mean = (fn: (s: WindowStats) => number) => agg.reduce((a, s) => a + fn(s), 0) / agg.length;
+        const mode = (fn: (s: WindowStats) => string) => {
+            const tally: Record<string, number> = {};
+            agg.forEach(s => {
+                const k = fn(s);
+                tally[k] = (tally[k] || 0) + 1;
+            });
+            return Object.entries(tally).sort((a, b) => b[1] - a[1])[0][0];
+        };
+        return {
+            ready: ready.length,
+            total: MARKETS.length,
+            even: mean(s => s.even),
+            odd: mean(s => s.odd),
+            under: mean(s => s.under),
+            over: mean(s => s.over),
+            differ: mean(s => s.differ),
+            match: mean(s => s.match),
+            rise: mean(s => s.rise),
+            fall: mean(s => s.fall),
+            hotDigit: mode(s => String(s.hotDigit)),
+            coldDigit: mode(s => String(s.coldDigit)),
+            evenOddPick: mode(s => s.evenOddPick),
+            overUnderPick: mode(s => s.overUnderPick),
+            riseFallPick: mode(s => s.riseFallPick),
+        };
+    }, [markets, barrierIdx]);
+
+    const active = tab === 'hub' ? null : CATEGORY_META.find(c => c.id === tab)!;
+    const accent = active?.accent ?? '#22e7ff';
+    const barrier = BARRIERS[barrierIdx];
+    const firstMarket = markets[MARKETS[0].symbol];
+    const targetDigit = autoDigit
+        ? firstMarket && firstMarket.digits.length >= SCAN_WINDOW
+            ? computeWindow(firstMarket.digits, firstMarket.quotes, barrier).entryDigit
+            : manualDigit
+        : manualDigit;
+
+    // A 1s heartbeat keeps the staleness badges honest on quiet markets.
+    const [, setBeat] = useState(0);
     useEffect(() => {
-        const t = setInterval(() => setNow(Date.now()), 1000);
+        const t = setInterval(() => setBeat(v => v + 1), 1000);
         return () => clearInterval(t);
     }, []);
 
-    // Continuous live feed: seed from history (best-effort) then stream ticks.
-    // TickFeed reconnects on its own, so a dropped socket recovers without a
-    // page reload. Re-runs on symbol/range change and on manual refresh.
-    useEffect(() => {
-        let cancelled = false;
-        const feed = new TickFeed({
-            onTick: (_symbol, _point, series) => {
-                if (cancelled) return;
-                setTicks({ digits: [...series.digits], quotes: [...series.quotes], pipSize: series.pipSize });
-                setLastTickAt(Date.now());
-            },
-            onStatus: ok => {
-                if (!cancelled) setConnected(ok);
-            },
-        });
+    // `live` maps to the shell's green `running` badge variant.
+    const status = connected ? 'running' : Object.values(markets).some(m => m.digits.length) ? 'ready' : 'idle';
+    const statusLabel = connected ? 'live' : status === 'ready' ? 'ready' : 'idle';
 
-        const boot = async () => {
-            setSeeding(true);
-            setError(null);
-            try {
-                const history = await fetchHistoricalTicks(symbol, range);
-                if (cancelled) return;
-                feed.seed(symbol, history.pipSize, history.quotes);
-                setTicks({ digits: [...history.digits], quotes: [...history.quotes], pipSize: history.pipSize });
-            } catch (e) {
-                // A failed seed must not stop the live stream — the feed will
-                // simply build its own series from incoming ticks.
-                if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load ticks');
-            } finally {
-                if (!cancelled) setSeeding(false);
-            }
-            if (cancelled) return;
-            feed.setSymbols([symbol]);
-            feed.start();
-        };
-        void boot();
-
-        return () => {
-            cancelled = true;
-            feed.stop();
-        };
-    }, [symbol, range, seedNonce]);
-
-    const analysis = useMemo<Analysis | null>(() => (ticks ? computeAnalysis(ticks, barrier) : null), [ticks, barrier]);
-
-    const streamDigits = useMemo(() => (analysis ? analysis.digits.slice(-STREAM_LEN) : []), [analysis]);
-    const ageMs = lastTickAt ? now - lastTickAt : 0;
-    const isStale = connected && lastTickAt > 0 && ageMs > STALE_MS;
-    const status: 'loading' | 'live' | 'ready' | 'idle' = seeding ? 'loading' : connected ? 'live' : analysis ? 'ready' : 'idle';
-
-    const openCategory = (id: CategoryId) => {
-        setActive(id);
-        requestAnimationFrame(() => detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-    };
-
-    const cardStats = (id: CategoryId): { left: number; right: number; leftLabel: string; rightLabel: string; foot: string } => {
-        if (!analysis) return { left: 0.5, right: 0.5, leftLabel: '—', rightLabel: '—', foot: 'Loading…' };
-        switch (id) {
-            case 'even_odd':
-                return {
-                    left: analysis.even,
-                    right: analysis.odd,
-                    leftLabel: 'EVEN',
-                    rightLabel: 'ODD',
-                    foot: `Stream: ${analysis.n}`,
-                };
-            case 'over_under':
-                return {
-                    left: analysis.under,
-                    right: analysis.over,
-                    leftLabel: `UNDER (0-${barrier - 1})`,
-                    rightLabel: `OVER (${barrier}-9)`,
-                    foot: `Barrier pivot: ${barrier}`,
-                };
-            case 'match_diff':
-                return {
-                    left: analysis.differ,
-                    right: analysis.match,
-                    leftLabel: 'DIFFERS',
-                    rightLabel: 'MATCHES',
-                    foot: `Hot digit #${analysis.hotDigit} · Cold #${analysis.coldDigit}`,
-                };
-            case 'rise_fall':
-                return {
-                    left: analysis.rise,
-                    right: analysis.fall,
-                    leftLabel: 'RISE ▲',
-                    rightLabel: 'FALL ▼',
-                    foot: 'Live directional velocity tracking',
-                };
-        }
-    };
-
-    const detail = active ? CATEGORIES.find(c => c.id === active)! : null;
+    const hubCards = [
+        {
+            id: 'even_odd' as CategoryId,
+            left: hub?.even ?? 0.5,
+            right: hub?.odd ?? 0.5,
+            leftLabel: 'EVEN',
+            rightLabel: 'ODD',
+            foot: hub ? `${hub.evenOddPick} favoured · ${hub.ready}/${hub.total} indexes ready` : 'Scanning indexes…',
+        },
+        {
+            id: 'over_under' as CategoryId,
+            left: hub?.under ?? 0.5,
+            right: hub?.over ?? 0.5,
+            leftLabel: `UNDER (0-${Math.floor(barrier)})`,
+            rightLabel: `OVER (${Math.ceil(barrier)}-9)`,
+            foot: hub ? `${hub.overUnderPick} favoured · barrier ${barrier}` : 'Scanning indexes…',
+        },
+        {
+            id: 'match_diff' as CategoryId,
+            left: hub?.differ ?? 0.5,
+            right: hub?.match ?? 0.5,
+            leftLabel: 'DIFFERS',
+            rightLabel: 'MATCHES',
+            foot: hub ? `Hot digit #${hub.hotDigit} · Cold #${hub.coldDigit}` : 'Scanning indexes…',
+        },
+        {
+            id: 'rise_fall' as CategoryId,
+            left: hub?.rise ?? 0.5,
+            right: hub?.fall ?? 0.5,
+            leftLabel: 'RISE ▲',
+            rightLabel: 'FALL ▼',
+            foot: hub ? `${hub.riseFallPick} favoured · live velocity` : 'Scanning indexes…',
+        },
+    ];
 
     return (
         <HubPage className='analysis-tool sig-tool'>
             <HubPageHeader
-                title='Analysis Tool'
-                subtitle='Explore signal categories and read real-time market analysis over live Deriv tick data.'
+                title={active ? active.title : 'Analysis Tool'}
+                subtitle={
+                    active
+                        ? `${active.blurb} Strict ${SCAN_WINDOW}-tick window across ${MARKETS.length} Deriv volatility indexes.`
+                        : `Real-time Deriv scanner across ${MARKETS.length} volatility indexes (12 one-second + 5 standard).`
+                }
                 badge={
                     <>
-                        <span className={`hub-badge hub-badge--${status}`}>
-                            {status === 'loading' ? 'loading' : status === 'live' ? 'live' : status === 'ready' ? 'ready' : 'idle'}
-                        </span>
+                        <span className={`hub-badge hub-badge--${status}`}>{statusLabel}</span>
                         <span
                             className={[
                                 'hub-badge',
@@ -311,190 +366,153 @@ const AnalysisToolPage = observer(() => {
                 }
             />
 
+            <nav className='sig-tabs' aria-label='Signal categories'>
+                {TABS.map(t => (
+                    <button
+                        key={t.id}
+                        type='button'
+                        className={`sig-tabs__btn ${tab === t.id ? 'is-active' : ''}`}
+                        onClick={() => setTab(t.id)}
+                    >
+                        {t.label}
+                    </button>
+                ))}
+            </nav>
+
             <HubNote tone='info'>
-                <strong>Honest note:</strong> every figure here is measured on PAST ticks. Digit frequencies and
-                momentum describe history — they do not predict the next tick, and no panel is a trade signal.
+                <strong>Honest note:</strong> every figure is measured on PAST ticks over a strict {SCAN_WINDOW}-tick
+                window. Digit frequencies and momentum describe history — they do not predict the next tick, and no
+                panel is a trade signal.
             </HubNote>
 
-            <section className='analysis-tool__controls'>
-                <label className='hub-field'>
-                    Symbol
-                    <select value={symbol} onChange={e => setSymbol(e.target.value)}>
-                        {SYMBOLS.map(s => (
-                            <option key={s.symbol} value={s.symbol}>
-                                {s.name}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <label className='hub-field'>
-                    Range
-                    <select value={range} onChange={e => setRange(Number(e.target.value))}>
-                        {RANGES.map(r => (
-                            <option key={r} value={r}>
-                                Last {r} ticks
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <label className='hub-field'>
-                    Barrier (0-9)
-                    <input
-                        type='number'
-                        min={0}
-                        max={9}
-                        value={barrier}
-                        onChange={e => setBarrier(Math.min(9, Math.max(0, Number(e.target.value))))}
-                    />
-                </label>
-                <button className='hub-btn hub-btn--primary' onClick={() => setSeedNonce(n => n + 1)} disabled={seeding}>
-                    {seeding ? 'Loading…' : 'Refresh analysis'}
-                </button>
-            </section>
-
-            <div className={`sig-stream ${isStale ? 'sig-stream--stale' : ''}`} aria-live='off'>
-                <span className='sig-stream__label'>
-                    <i className={connected && !isStale ? 'is-live' : ''} />
-                    {isStale ? 'RECONNECTING' : connected ? 'LIVE STREAM' : 'CONNECTING'}
-                </span>
-                <div className='sig-stream__digits'>
-                    {streamDigits.length === 0 && <span className='sig-stream__empty'>waiting for ticks…</span>}
-                    {streamDigits.map((d, i) => (
-                        <span key={`${i}-${d}`} className={`sig-stream__digit ${d % 2 === 0 ? 'is-even' : 'is-odd'}`}>
-                            {d}
-                        </span>
-                    ))}
-                </div>
-                <span className='sig-stream__meta'>
-                    {analysis ? `${analysis.n} ticks` : '—'}
-                    {lastTickAt ? ` · ${Math.max(0, Math.round(ageMs / 1000))}s ago` : ''}
-                </span>
-            </div>
-
-            {error && (
-                <div className='analysis-tool__error' role='alert'>
-                    {error}
-                </div>
-            )}
-
-            <div className='sig-grid'>
-                {CATEGORIES.map(cat => {
-                    const s = cardStats(cat.id);
-                    return (
-                        <article
-                            key={cat.id}
-                            className={`sig-card ${active === cat.id ? 'sig-card--active' : ''}`}
-                            style={{ ['--sig-accent' as any]: cat.accent }}
-                        >
-                            <div className='sig-card__top'>
-                                <span className='sig-card__tag'>{cat.tag}</span>
-                                <span className='sig-card__live'>
-                                    <i /> LIVE DERIV
-                                </span>
-                            </div>
-                            <SplitBar left={s.left} right={s.right} leftLabel={s.leftLabel} rightLabel={s.rightLabel} accent={cat.accent} />
-                            <p className='sig-card__foot'>{s.foot}</p>
-                            <h3 className='sig-card__title'>{cat.title}</h3>
-                            <p className='sig-card__blurb'>{cat.blurb}</p>
-                            <button type='button' className='sig-card__cta' onClick={() => openCategory(cat.id)}>
-                                View Signals
+            {tab !== 'hub' && (
+                <section className='sig-controls'>
+                    <div className='sig-chips' role='group' aria-label='Market groups'>
+                        {GROUPS.map(g => (
+                            <button
+                                key={g.id}
+                                type='button'
+                                className={`sig-chip ${group === g.id ? 'is-active' : ''}`}
+                                onClick={() => setGroup(g.id)}
+                            >
+                                {g.label}
                             </button>
-                        </article>
-                    );
-                })}
-            </div>
+                        ))}
+                    </div>
+                    <input
+                        className='sig-search'
+                        type='search'
+                        value={query}
+                        placeholder='Search index (e.g. 10, 25, 100)…'
+                        onChange={e => setQuery(e.target.value)}
+                        aria-label='Search index'
+                    />
 
-            {detail && analysis && (
-                <section className='sig-detail' ref={detailRef} style={{ ['--sig-accent' as any]: detail.accent }}>
-                    <header className='sig-detail__head'>
-                        <div>
-                            <span className='sig-card__tag'>{detail.tag}</span>
-                            <h2>{detail.title}</h2>
-                        </div>
-                        <button type='button' className='sig-detail__close' onClick={() => setActive(null)}>
-                            Close
-                        </button>
-                    </header>
-
-                    {detail.id === 'even_odd' && (
-                        <div className='sig-detail__body'>
-                            <SplitBar left={analysis.even} right={analysis.odd} leftLabel='EVEN' rightLabel='ODD' accent={detail.accent} />
-                            <p className='sig-detail__note'>
-                                Over the last {WINDOW} ticks, {pct(analysis.even)} were even and {pct(analysis.odd)} were
-                                odd. Fair value is 50% each.
-                            </p>
+                    {tab === 'over_under' && (
+                        <div className='sig-barriers' role='group' aria-label='Barrier threshold'>
+                            <span className='sig-barriers__cap'>
+                                Current barrier: <strong>{barrier}</strong> ({barrierLabel(barrier)})
+                            </span>
+                            {BARRIERS.map((b, i) => (
+                                <button
+                                    key={b}
+                                    type='button'
+                                    className={`sig-barrier ${barrierIdx === i ? 'is-active' : ''}`}
+                                    onClick={() => setBarrierIdx(i)}
+                                >
+                                    Barrier {b}
+                                </button>
+                            ))}
                         </div>
                     )}
 
-                    {detail.id === 'over_under' && (
-                        <div className='sig-detail__body'>
-                            <SplitBar
-                                left={analysis.under}
-                                right={analysis.over}
-                                leftLabel={`UNDER (0-${barrier - 1})`}
-                                rightLabel={`OVER (${barrier}-9)`}
-                                accent={detail.accent}
-                            />
-                            <div className='hub-table-wrap'>
-                                <table className='hub-table'>
-                                    <thead>
-                                        <tr>
-                                            <th>Barrier</th>
-                                            <th>Over empirical</th>
-                                            <th>Over fair</th>
-                                            <th>Under empirical</th>
-                                            <th>Under fair</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(b => (
-                                            <tr key={b}>
-                                                <td>{b}</td>
-                                                <td>{pct(empiricalProbability(analysis.digits, 'over', b))}</td>
-                                                <td>{pct(theoreticalProbability('over', b))}</td>
-                                                <td>{pct(empiricalProbability(analysis.digits, 'under', b))}</td>
-                                                <td>{pct(theoreticalProbability('under', b))}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                    {tab === 'match_diff' && (
+                        <div className='sig-matchctl'>
+                            <span className='sig-matchctl__mode'>
+                                Mode: Dynamic AI Frequency Optimization (Per Index)
+                            </span>
+                            <button
+                                type='button'
+                                className={`sig-auto ${autoDigit ? 'is-active' : ''}`}
+                                onClick={() => setAutoDigit(v => !v)}
+                                aria-pressed={autoDigit}
+                            >
+                                Auto AI
+                            </button>
+                            <div className='sig-digitrow' role='group' aria-label='Target digit'>
+                                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(d => (
+                                    <button
+                                        key={d}
+                                        type='button'
+                                        className={`sig-digitrow__d ${!autoDigit && manualDigit === d ? 'is-active' : ''}`}
+                                        onClick={() => {
+                                            setAutoDigit(false);
+                                            setManualDigit(d);
+                                        }}
+                                    >
+                                        {d}
+                                    </button>
+                                ))}
                             </div>
-                        </div>
-                    )}
-
-                    {detail.id === 'match_diff' && (
-                        <div className='sig-detail__body'>
-                            <SplitBar
-                                left={analysis.differ}
-                                right={analysis.match}
-                                leftLabel='DIFFERS'
-                                rightLabel='MATCHES'
-                                accent={detail.accent}
-                            />
-                            <p className='sig-detail__note'>
-                                Target digit <strong>#{barrier}</strong>. Hot digit #{analysis.hotDigit}, cold digit #
-                                {analysis.coldDigit}. Matches {pct(analysis.match)} vs Differs {pct(analysis.differ)} over
-                                the last {WINDOW} ticks.
-                            </p>
-                        </div>
-                    )}
-
-                    {detail.id === 'rise_fall' && (
-                        <div className='sig-detail__body'>
-                            <SplitBar
-                                left={analysis.rise}
-                                right={analysis.fall}
-                                leftLabel='RISE ▲'
-                                rightLabel='FALL ▼'
-                                accent={detail.accent}
-                            />
-                            <p className='sig-detail__note'>
-                                Of the last {WINDOW} tick-to-tick moves, {pct(analysis.rise)} were up and{' '}
-                                {pct(analysis.fall)} were down.
-                            </p>
                         </div>
                     )}
                 </section>
+            )}
+
+            {tab === 'hub' ? (
+                <div className='sig-grid'>
+                    {hubCards.map(c => {
+                        const meta = CATEGORY_META.find(m => m.id === c.id)!;
+                        return (
+                            <article key={c.id} className='sig-card' style={{ ['--sig-accent' as never]: meta.accent }}>
+                                <div className='sig-card__top'>
+                                    <span className='sig-card__tag'>{meta.tag}</span>
+                                    <span className='sig-card__live'>
+                                        <i /> LIVE DERIV
+                                    </span>
+                                </div>
+                                <SplitBar
+                                    left={c.left}
+                                    right={c.right}
+                                    leftLabel={c.leftLabel}
+                                    rightLabel={c.rightLabel}
+                                    accent={meta.accent}
+                                />
+                                <p className='sig-card__foot'>{c.foot}</p>
+                                <h3 className='sig-card__title'>{meta.title}</h3>
+                                <p className='sig-card__blurb'>{meta.blurb}</p>
+                                <button type='button' className='sig-card__cta' onClick={() => setTab(c.id)}>
+                                    View Signals
+                                </button>
+                            </article>
+                        );
+                    })}
+                </div>
+            ) : (
+                <>
+                    <div className='sig-board' style={{ ['--sig-accent' as never]: accent }}>
+                        {visible.map(m => (
+                            <MarketCard
+                                key={m.symbol}
+                                market={m}
+                                live={markets[m.symbol]}
+                                id={active!.id}
+                                accent={accent}
+                                targetDigit={targetDigit}
+                            />
+                        ))}
+                        {visible.length === 0 && <p className='sig-board__empty'>No index matches “{query}”.</p>}
+                    </div>
+                    <footer className='sig-engine'>
+                        <span>
+                            {active!.engine} · Deriv Real-Time WebSocket Feeds · Strict {SCAN_WINDOW}-Tick Window
+                        </span>
+                        <span>
+                            {connected ? 'Connected' : 'Reconnecting'} · {hub ? hub.ready : 0}/{MARKETS.length} indexes
+                            warmed
+                        </span>
+                    </footer>
+                </>
             )}
         </HubPage>
     );

@@ -10,11 +10,21 @@ export interface SymbolSeries {
     lastTickAt: number;
     tickCount: number;
     stale: boolean;
+    /** True once historical ticks have been pre-loaded for this symbol. */
+    seeded?: boolean;
+    /**
+     * True when Deriv rejected this symbol (`InvalidSymbol`). Some 1s indexes
+     * (e.g. 1HZ200V/1HZ300V) are not streamable on the public tick API, so the
+     * card must say so instead of sitting blank forever.
+     */
+    unsupported?: boolean;
 }
 
 export interface TickFeedEvents {
     onTick?: (symbol: string, point: TickPoint, series: SymbolSeries) => void;
     onStatus?: (connected: boolean, error?: string) => void;
+    /** A single symbol was rejected by the server — never a connection failure. */
+    onUnavailable?: (symbol: string, reason: string) => void;
 }
 
 const MAX_DIGITS = 2000;
@@ -42,9 +52,20 @@ export class TickFeed {
     private disposed = false;
     private events: TickFeedEvents;
     private reconnectAttempts = 0;
+    private seedCount = 0;
 
     constructor(events: TickFeedEvents = {}) {
         this.events = events;
+    }
+
+    /**
+     * Pre-load `count` historical ticks for every subscribed symbol, over the
+     * SAME socket, when it next opens. Seeding this way (instead of one
+     * `ticks_history` connection per symbol) keeps a scanner that watches all
+     * 17 indexes down to a single WebSocket.
+     */
+    setSeedCount(count: number) {
+        this.seedCount = Math.max(0, count);
     }
 
     setSymbols(symbols: string[]) {
@@ -96,6 +117,7 @@ export class TickFeed {
         if (series.digits.length > MAX_DIGITS) series.digits = series.digits.slice(-MAX_DIGITS);
         if (series.quotes.length > MAX_QUOTES) series.quotes = series.quotes.slice(-MAX_QUOTES);
         if (!series.lastTickAt) series.lastTickAt = Date.now();
+        series.unsupported = false;
     }
 
     getAll(): SymbolSeries[] {
@@ -128,6 +150,7 @@ export class TickFeed {
         ws.onopen = () => {
             this.reconnectAttempts = 0;
             this.events.onStatus?.(true);
+            this.requestSeedHistory();
             this.resubscribe();
             if (!this.staleTimer) {
                 this.staleTimer = setInterval(() => this.markStale(), 2000);
@@ -151,12 +174,67 @@ export class TickFeed {
         };
     }
 
+    private requestSeedHistory() {
+        const ws = this.socket;
+        if (!ws || ws.readyState !== WebSocket.OPEN || this.seedCount <= 0) return;
+        for (const s of this.symbols) {
+            ws.send(
+                JSON.stringify({ ticks_history: s, count: this.seedCount, end: 'latest', style: 'ticks' })
+            );
+        }
+    }
+
+    private applyHistory(symbol: string, pipSize: number, prices: unknown[]) {
+        let series = this.series.get(symbol);
+        if (!series) {
+            series = {
+                symbol,
+                pipSize: pipSize || 2,
+                digits: [],
+                quotes: [],
+                lastEpoch: 0,
+                lastTickAt: 0,
+                tickCount: 0,
+                stale: false,
+            };
+            this.series.set(symbol, series);
+        }
+        // Guard against a reconnect replaying the same history twice.
+        if (series.seeded) return;
+        series.seeded = true;
+        if (typeof pipSize === 'number' && pipSize >= 0) series.pipSize = pipSize;
+        for (const p of prices) {
+            const q = Number(p);
+            if (!Number.isFinite(q)) continue;
+            series.digits.push(lastDigitOf(q, series.pipSize));
+            series.quotes.push(q);
+        }
+        if (series.digits.length > MAX_DIGITS) series.digits = series.digits.slice(-MAX_DIGITS);
+        if (series.quotes.length > MAX_QUOTES) series.quotes = series.quotes.slice(-MAX_QUOTES);
+        if (!series.lastTickAt) series.lastTickAt = Date.now();
+    }
+
     private handleMessage(msg: any) {
         if (msg?.error) {
             const code = msg.error.code;
             if (code && code !== 'AlreadySubscribed') {
-                this.events.onStatus?.(false, msg.error.message || code);
+                // A per-symbol rejection (e.g. InvalidSymbol) is NOT a lost
+                // connection. Reporting it as one made the whole board read
+                // "RECONNECTING" while every other market streamed fine.
+                const symbol = msg.echo_req?.ticks || msg.echo_req?.ticks_history;
+                if (symbol && this.series.has(symbol)) {
+                    const series = this.series.get(symbol)!;
+                    series.unsupported = true;
+                    this.events.onUnavailable?.(symbol, msg.error.message || code);
+                } else {
+                    this.events.onStatus?.(false, msg.error.message || code);
+                }
             }
+            return;
+        }
+        if (msg?.msg_type === 'history' && Array.isArray(msg.history?.prices)) {
+            const symbol = msg.echo_req?.ticks_history || msg.echo_req?.ticks;
+            if (symbol) this.applyHistory(symbol, msg.history.pip_size, msg.history.prices);
             return;
         }
         if (!msg?.tick) return;
@@ -185,6 +263,7 @@ export class TickFeed {
         series.lastEpoch = epoch;
         series.lastTickAt = Date.now();
         series.stale = false;
+        series.unsupported = false;
         series.tickCount += 1;
         const digit = lastDigitOf(quote, series.pipSize);
         series.digits.push(digit);
@@ -198,6 +277,8 @@ export class TickFeed {
         const ws = this.socket;
         if (!ws || ws.readyState !== WebSocket.OPEN) return;
         for (const s of this.symbols) {
+            // Don't re-ask for a symbol the server already rejected.
+            if (this.series.get(s)?.unsupported) continue;
             ws.send(JSON.stringify({ ticks: s, subscribe: 1 }));
         }
     }
@@ -205,7 +286,7 @@ export class TickFeed {
     private markStale() {
         const now = Date.now();
         for (const series of this.series.values()) {
-            if (!series.lastTickAt) continue;
+            if (series.unsupported || !series.lastTickAt) continue;
             const wasStale = series.stale;
             series.stale = now - series.lastTickAt > STALE_MS;
             if (!wasStale && series.stale) {

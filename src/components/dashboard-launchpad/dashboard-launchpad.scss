@@ -129,6 +129,12 @@
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 1.4rem;
+        /* width:100% is REQUIRED: this grid is a flex item of the column-flex
+           hero, and `margin: auto` on the cross axis cancels `align-items:
+           stretch`, collapsing the grid to its content width (a 204px sliver on
+           phones). width:100% restores full-bleed; max-width + auto margins
+           still centre it on wide screens. */
+        width: 100%;
         max-width: 126rem;
         margin: 2rem auto 0;
 
@@ -391,10 +397,15 @@
         }
 
         &__cards {
-            grid-template-columns: minmax(0, 1fr);
+            /* Tablets (641-860px) keep a 2-up grid; only true phones go 1-up. */
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 1rem;
             margin-top: 1.4rem;
             padding: 0;
+
+            @media (max-width: 640px) {
+                grid-template-columns: minmax(0, 1fr);
+            }
         }
 
         &__card {

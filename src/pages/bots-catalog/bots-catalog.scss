@@ -114,6 +114,20 @@
     justify-content: space-between;
     margin-bottom: 12px;
 }
+.bots-card__icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--bot-color) 35%, transparent);
+}
+.bots-card__icon {
+    width: 20px;
+    height: 20px;
+    color: var(--bot-color);
+    filter: drop-shadow(0 0 5px color-mix(in srgb, var(--bot-color) 40%, transparent));
+}
 .bots-card__tag {
     color: var(--bot-color);
     letter-spacing: 1px;

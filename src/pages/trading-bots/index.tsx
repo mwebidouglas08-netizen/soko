@@ -8,6 +8,7 @@ import {
 import { VERTEX_DIGITS, QUANTUM_EDGE } from '@/pages/quick-bot';
 import { navigateToHubView } from '@/services/hub-navigation';
 import { HubNote, HubPage, HubPageHeader } from '@/components/hub-page';
+import { botVisual, botIcon, botGradient } from '@/components/bot-visuals';
 import './trading-bots.scss';
 
 type CardBadge = 'QUICK' | 'PREMIUM' | 'FREE';
@@ -38,25 +39,6 @@ const REFERENCE_CARDS: BotCard[] = [
     { id: 'zenith', name: 'Zenith Flow Premium', description: 'Free zenith flow rider. Two-tick Rise contracts on Volatility 25 (1s) Index.', kind: 'hub', badge: 'FREE', hubId: 'zenith' },
     { id: 'quantum', name: '🥉 Quantum Edge AI', description: 'Quick extreme-digit bot. Stake 0.8, recovery ×2, Over/Under on every trade plus a percentage reversal after every 3 trades.', kind: 'quick', badge: 'QUICK', preset: 'quantum' },
 ];
-
-/** Per-card accent + glyph so every bot is bright, distinct and easy to spot
- *  on both the dark and light themes (the reference grid is colourful, not a
- *  wall of near-black cards). */
-const CARD_VISUALS: Record<string, { accent: string; glyph: string }> = {
-    vertex: { accent: '#22e7ff', glyph: '\u{1F4D0}' },
-    digit_nexus: { accent: '#7c5cff', glyph: '\u{1F9E0}' },
-    volt_scalper: { accent: '#ffd23f', glyph: '\u26A1' },
-    apex_ai: { accent: '#ff7a45', glyph: '\u{1F3D4}\uFE0F' },
-    neutrade: { accent: '#2fd6a5', glyph: '\u2696\uFE0F' },
-    straddle: { accent: '#ff5c8a', glyph: '\u{1F3AF}' },
-    aurora: { accent: '#4dd0ff', glyph: '\u{1F30C}' },
-    obsidian: { accent: '#9b8cff', glyph: '\u{1F5A4}' },
-    prism: { accent: '#ffb020', glyph: '\u{1F53A}' },
-    pulsetrader: { accent: '#ff4d6d', glyph: '\u{1F493}' },
-    titan: { accent: '#3fa9f5', glyph: '\u{1F6E1}\uFE0F' },
-    zenith: { accent: '#b06bff', glyph: '\u{1F680}' },
-    quantum: { accent: '#00e0b8', glyph: '\u{1F9EA}' },
-};
 
 const TradingBotsPage = observer(() => {
     const [query, setQuery] = useState('');
@@ -157,39 +139,35 @@ const TradingBotsPage = observer(() => {
             ) : (
                 <div className='bots-grid'>
                     {visible.map(card => {
-                        const vis = CARD_VISUALS[card.id] ?? { accent: '#22e7ff', glyph: '\u{1F916}' };
+                        const theme = botVisual(card.id === 'vertex' ? 'vertex' : card.id === 'quantum' ? 'quantum' : card.id);
                         return (
-                        <article
-                            key={card.id}
-                            className='hub-panel hub-lift bots-card'
-                            style={{ ['--bot-accent' as string]: vis.accent }}
-                        >
-                            <div className='bots-card__top'>
-                                <span className='bots-card__icon' aria-hidden='true'>
-                                    {vis.glyph}
-                                </span>
-                                <h3>{card.name}</h3>
-                                <div className='bots-card__tags'>
-                                    <span className={`bots-card__badge bots-card__badge--${card.badge.toLowerCase()}`}>
-                                        {card.badge}
+                            <article key={card.id} className='hub-panel hub-lift bots-card' style={{ '--bot-color': theme.color } as React.CSSProperties}>
+                                <div className='bots-card__top'>
+                                    <div className='bots-card__icon-wrap' style={{ background: `color-mix(in srgb, ${theme.color} 18%, transparent)` }}>
+                                        <span className='bots-card__icon' dangerouslySetInnerHTML={{ __html: botIcon(theme.kind) }} />
+                                    </div>
+                                    <div className='bots-card__tags'>
+                                        <span className={`bots-card__badge bots-card__badge--${card.badge.toLowerCase()}`}>
+                                            {card.badge}
+                                        </span>
+                                    </div>
+                                </div>
+                                <h3 className='bots-card__name'>{card.name}</h3>
+                                <p className='bots-card__desc'>{card.description}</p>
+                                <div className='bots-card__foot'>
+                                    <button
+                                        type='button'
+                                        className='hub-btn hub-btn--primary bots-card__load'
+                                        disabled={busyId !== null}
+                                        onClick={() => onLoad(card)}
+                                    >
+                                        {busyId === card.id ? 'Loading…' : 'LOAD BOT'}
+                                    </button>
+                                    <span className='bots-paper' title='Practise on a demo account before risking real funds.'>
+                                        Try paper
                                     </span>
                                 </div>
-                            </div>
-                            <p className='bots-card__desc'>{card.description}</p>
-                            <div className='bots-card__foot'>
-                                <button
-                                    type='button'
-                                    className='hub-btn hub-btn--primary bots-card__load'
-                                    disabled={busyId !== null}
-                                    onClick={() => onLoad(card)}
-                                >
-                                    {busyId === card.id ? 'Loading…' : 'LOAD BOT'}
-                                </button>
-                                <span className='bots-paper' title='Practise on a demo account before risking real funds.'>
-                                    Try paper
-                                </span>
-                            </div>
-                        </article>
+                            </article>
                         );
                     })}
                 </div>

@@ -12,11 +12,8 @@
 
     .bots-count {
         margin-left: auto;
-        /* Secondary but must stay legible on both the dark hub shell and the
-           light canvas — plain --text-general was near-invisible at 1.05rem. */
-        color: color-mix(in srgb, var(--text-prominent) 72%, var(--text-general));
+        color: var(--text-general);
         font-size: 1.05rem;
-        font-weight: 600;
     }
 
     .bots-error,
@@ -41,66 +38,63 @@
 
     .bots-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-        gap: 1.1rem;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.4rem;
     }
 
     .bots-card {
-        --bot-accent: #22e7ff;
-
-        position: relative;
         display: flex;
         flex-direction: column;
-        gap: 0.8rem;
-        padding: 1.2rem 1.3rem;
-        min-height: 250px;
-        overflow: hidden;
-        /* Bright, per-bot tinted surface so each card is clearly visible and
-           distinguishable instead of a near-black slab. On the light canvas the
-           white glass base gets a stronger accent wash plus a corner glow, so
-           13 cards never read as a flat grey grid. */
+        gap: 0.9rem;
+        padding: 1.4rem 1.5rem 1.6rem;
+        min-height: 320px;
+        border-radius: 20px;
+        border: 1px solid color-mix(in srgb, var(--border-normal, #cbd5e1) 45%, transparent);
         background:
-            radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--bot-accent) 22%, transparent), transparent 62%),
-            linear-gradient(160deg, color-mix(in srgb, var(--bot-accent) 18%, transparent), transparent 64%),
-            var(--surface-glass, rgb(15 23 42 / 72%));
-        border-color: color-mix(in srgb, var(--bot-accent) 46%, var(--card-border, rgb(148 163 184 / 14%)));
+            radial-gradient(150% 130% at 100% 0%, color-mix(in srgb, var(--bot-color, #60a5fa) 12%, transparent), transparent 60%),
+            var(--surface-panel, #0f172a);
+        transition:
+            transform 0.25s ease,
+            border-color 0.25s ease,
+            box-shadow 0.25s ease;
 
-        &::before {
-            content: '';
-            position: absolute;
-            inset: 0 0 auto 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--bot-accent), transparent);
-            box-shadow: 0 0 18px color-mix(in srgb, var(--bot-accent) 55%, transparent);
+        &:hover {
+            transform: translateY(-4px);
+            border-color: color-mix(in srgb, var(--bot-color, #60a5fa) 55%, transparent);
+            box-shadow: 0 16px 40px color-mix(in srgb, var(--bot-color, #60a5fa) 18%, transparent);
         }
 
         h3 {
             margin: 0;
-            font-size: 1.3rem;
+            font-size: 1.35rem;
             line-height: 1.3;
             color: var(--text-prominent);
+            letter-spacing: -0.01em;
         }
 
         &__top {
             display: flex;
-            align-items: center;
-            gap: 0.7rem;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.6rem;
             flex-wrap: wrap;
+            margin-bottom: 0.2rem;
+        }
+
+        &__icon-wrap {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            border: 1px solid color-mix(in srgb, var(--bot-color, #60a5fa) 45%, transparent);
         }
 
         &__icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex: none;
-            width: 3.4rem;
-            height: 3.4rem;
-            border-radius: 0.9rem;
-            font-size: 1.7rem;
-            line-height: 1;
-            background: color-mix(in srgb, var(--bot-accent) 22%, transparent);
-            border: 1px solid color-mix(in srgb, var(--bot-accent) 45%, transparent);
-            box-shadow: 0 0 16px color-mix(in srgb, var(--bot-accent) 30%, transparent);
+            width: 22px;
+            height: 22px;
+            color: var(--bot-color, #60a5fa);
+            filter: drop-shadow(0 0 6px color-mix(in srgb, var(--bot-color, #60a5fa) 45%, transparent));
         }
 
         &__tags {
@@ -114,12 +108,13 @@
         &__badge {
             display: inline-flex;
             align-items: center;
-            padding: 0.28rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.92rem;
-            font-weight: 800;
-            letter-spacing: 0.07em;
+            padding: 0.3rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
             border: 1px solid transparent;
+            text-transform: uppercase;
 
             &--quick,
             &--free {
@@ -142,11 +137,11 @@
         }
 
         &__desc {
-            margin: 0;
+            margin: 0.4rem 0 0;
             flex: 1;
             color: var(--text-general);
-            font-size: 1.1rem;
-            line-height: 1.55;
+            font-size: 1.05rem;
+            line-height: 1.6;
         }
 
         &__foot {
@@ -155,9 +150,10 @@
             justify-content: space-between;
             gap: 0.6rem;
             flex-wrap: wrap;
+            margin-top: auto;
 
             .hub-btn {
-                min-width: 9.5rem;
+                min-width: 10rem;
             }
         }
     }
@@ -167,6 +163,11 @@
         font-size: 1rem;
         border-bottom: 1px dashed var(--border-normal);
         cursor: help;
+
+        &:hover {
+            color: var(--text-prominent);
+            border-color: var(--text-general);
+        }
     }
 
     .bots-empty {

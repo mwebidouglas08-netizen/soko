@@ -14,15 +14,16 @@ import SpeedbotPage from '@/pages/speedbot';
 import AutomatedPage from '@/pages/automated';
 import HedgingToolPage from '@/pages/hedging-tool';
 import ManualTraderPage from '@/pages/manual-trader';
-import BotsCatalogPage from '@/pages/bots-catalog';
 import VersionBanner from '@/components/version-banner';
 import { type HubViewId } from '@/components/hub-sidebar';
 import HubTabNav from '@/components/hub-tab-nav';
 import DbotRuntime from '@/components/dbot-runtime';
 import AiScanner from '@/components/ai-scanner';
 import RiskPill from '@/components/risk-pill';
+import AIBotDock from '@/components/ai-bot';
 import { subscribeHubNavigation } from '@/services/hub-navigation';
 import DashboardLaunchpad from '@/components/dashboard-launchpad';
+import BotsCatalog from '@/pages/bots-catalog';
 import Landing from '@/pages/landing';
 import { DBOT_TABS } from '@/constants/bot-contents';
 import './main.scss';
@@ -94,6 +95,15 @@ const Main = observer(() => {
 
     useEffect(() => subscribeHubNavigation(setRequestedView), []);
 
+    // When a bot is loaded from Bots Catalog (or anywhere that dispatches
+    // mwx:go-bot-builder), switch to the Bot Builder view so the Run button
+    // becomes visible and the loaded strategy can be executed.
+    useEffect(() => {
+        const onGoBotBuilder = () => setRequestedView('bot-builder');
+        document.addEventListener('mwx:go-bot-builder', onGoBotBuilder);
+        return () => document.removeEventListener('mwx:go-bot-builder', onGoBotBuilder);
+    }, []);
+
     const enterAnim = (view: HubViewId): { animation?: string } =>
         activeView === view
             ? { animation: 'hubEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both' }
@@ -152,7 +162,7 @@ const Main = observer(() => {
                             {mount('copy-trader', <CopyTradingPage />)}
                             {mount('speedbot', <SpeedbotPage />)}
                             {mount('automated', <AutomatedPage />)}
-                            {mount('bots-catalog', <BotsCatalogPage />)}
+                            {mount('bots-catalog', <BotsCatalog />)}
                             {mount(
                                 'chart',
                                 <Suspense fallback={<div className='main-hub__fallback'>Loading chart…</div>}>
@@ -163,6 +173,7 @@ const Main = observer(() => {
                     </div>
                     <AiScanner />
                     <RiskPill />
+                    <AIBotDock />
                     <DbotRuntime />
                 </div>
             )}

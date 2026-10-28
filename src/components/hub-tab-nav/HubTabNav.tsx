@@ -138,6 +138,16 @@ const TabIcon = ({ view }: { view: HubViewId }) => {
                     <path d='M9 21h6' />
                 </svg>
             );
+        case 'bots-catalog':
+            return (
+                <svg {...ico}>
+                    <rect x='2' y='3' width='20' height='18' rx='2' ry='2' />
+                    <circle cx='7' cy='8' r='1' />
+                    <circle cx='12' cy='8' r='1' />
+                    <circle cx='17' cy='8' r='1' />
+                    <path d='M4 13h16M7 17l3-3 3 3' />
+                </svg>
+            );
         default:
             return (
                 <svg {...ico}>

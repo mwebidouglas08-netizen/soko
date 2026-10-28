@@ -127,10 +127,20 @@ const subscribe = (listener: () => void): (() => void) => {
     return () => listeners.delete(listener);
 };
 
-const getSnapshot = (): { settings: ScannerSettings; history: HistoryRecord[] } => ({
-    settings: { ...settings },
-    history: [...history],
-});
+// Cached snapshot to keep useSyncExternalStore stable between renders.
+let cachedSnapshot: { settings: ScannerSettings; history: HistoryRecord[] } | null = null;
+let cachedSettingsRef: ScannerSettings | null = null;
+let cachedHistoryRef: HistoryRecord[] | null = null;
+
+const getSnapshot = (): { settings: ScannerSettings; history: HistoryRecord[] } => {
+    if (cachedSnapshot && cachedSettingsRef === settings && cachedHistoryRef === history) {
+        return cachedSnapshot;
+    }
+    cachedSettingsRef = settings;
+    cachedHistoryRef = history;
+    cachedSnapshot = { settings: { ...settings }, history: [...history] };
+    return cachedSnapshot;
+};
 
 /** Live view over settings + history (React 18 external store). */
 export const useScannerStore = () => useSyncExternalStore(subscribe, getSnapshot, getSnapshot);

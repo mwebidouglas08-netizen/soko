@@ -17,7 +17,7 @@ class ErrorBoundary extends React.Component {
             info,
         });
     };
-    render = () => (this.state.hasError ? <ErrorComponent should_show_refresh={true} /> : this.props.children);
+    render = () => (this.state.hasError ? <ErrorComponent should_show_refresh={true} message={this.state.error?.message} header={this.state.error?.message} /> : this.props.children);
 }
 
 ErrorBoundary.propTypes = {

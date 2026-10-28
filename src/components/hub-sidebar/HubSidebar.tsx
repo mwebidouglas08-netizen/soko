@@ -49,7 +49,6 @@ export const HUB_VIEW_LABELS: Record<HubViewId, string> = {
     automated: 'Automated',
     'bots-catalog': 'AI Bots Catalog',
     chart: 'Chart',
-    'bots-catalog': 'Bots Catalog',
     'ai-hub': 'AI Trading Hub',
     'ou-bot': 'Over / Under Bot',
     'ai-scanner': 'AI Signal Scanner',

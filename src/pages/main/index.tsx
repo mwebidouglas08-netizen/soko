@@ -20,7 +20,6 @@ import HubTabNav from '@/components/hub-tab-nav';
 import DbotRuntime from '@/components/dbot-runtime';
 import AiScanner from '@/components/ai-scanner';
 import RiskPill from '@/components/risk-pill';
-import AIBotDock from '@/components/ai-bot';
 import { subscribeHubNavigation } from '@/services/hub-navigation';
 import DashboardLaunchpad from '@/components/dashboard-launchpad';
 import BotsCatalog from '@/pages/bots-catalog';
@@ -173,7 +172,6 @@ const Main = observer(() => {
                     </div>
                     <AiScanner />
                     <RiskPill />
-                    <AIBotDock />
                     <DbotRuntime />
                 </div>
             )}

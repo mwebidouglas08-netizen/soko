@@ -691,16 +691,18 @@ const AIBotDock = () => {
         try {
             // Hand the strategy to the DBot builder if available.
             const w = window as any;
-            if (w.Blockly && w.Blockly.utils?.xml?.textToDom) {
+            const workspace = w.Blockly?.derivWorkspace;
+            if (w.Blockly && w.Blockly.utils?.xml?.textToDom && workspace) {
                 const dom = w.Blockly.utils.xml.textToDom(xml);
-                w.Blockly.Xml?.clearWorkspaceAndLoadFromXml?.(dom, w.__droidWorkspace);
+                w.Blockly.Xml?.clearWorkspaceAndLoadFromXml?.(dom, workspace);
             }
         } catch {
             /* noop */
         }
         setView(null);
-        // Navigate to Bot Builder tab if a handler is exposed.
-        (window as any).__loadScannerBot?.(xml, name);
+        // Navigate to Bot Builder tab.
+        (window as any).__goToBotBuilder?.();
+        document.dispatchEvent(new CustomEvent('mwx:go-bot-builder'));
     }, []);
 
     return (

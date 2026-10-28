@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { load } from '@/external/bot-skeleton';
 import { save_types } from '@/external/bot-skeleton/constants/save-type';
 import { botVisual, botIcon } from '@/components/bot-visuals';
+import { botImage } from '@/components/bot-images';
 import './bots-catalog.scss';
 
 type Bot = {
@@ -82,6 +83,9 @@ const BotsCatalog = () => {
                     const theme = botVisual(bot.file);
                     return (
                         <article key={bot.file} className='bots-card' style={{ '--bot-color': theme.color } as React.CSSProperties}>
+                            <div className='bots-card__image'>
+                                <img src={`data:image/svg+xml;base64,${btoa(botImage(bot.file as any))}`} alt={bot.name} loading='lazy' decoding='async' />
+                            </div>
                             <div className='bots-card__top'>
                                 <div className='bots-card__icon-wrap' style={{ background: `color-mix(in srgb, ${theme.color} 18%, transparent)` }}>
                                     <span className='bots-card__icon' dangerouslySetInnerHTML={{ __html: botIcon(theme.kind) }} />

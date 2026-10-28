@@ -92,6 +92,24 @@
     transition:
         transform 0.2s,
         border-color 0.2s;
+    min-height: 420px;
+
+    &__image {
+        width: 100%;
+        height: 120px;
+        overflow: hidden;
+        border-radius: 14px;
+        background: linear-gradient(135deg, color-mix(in srgb, var(--bot-color) 15%, transparent), transparent);
+        margin-bottom: 0.6rem;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: drop-shadow(0 4px 12px color-mix(in srgb, var(--bot-color) 30%, transparent));
+        }
+    }
 
     &::before {
         content: '';

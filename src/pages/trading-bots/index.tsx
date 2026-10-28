@@ -9,6 +9,7 @@ import { VERTEX_DIGITS, QUANTUM_EDGE } from '@/pages/quick-bot';
 import { navigateToHubView } from '@/services/hub-navigation';
 import { HubNote, HubPage, HubPageHeader } from '@/components/hub-page';
 import { botVisual, botIcon, botGradient } from '@/components/bot-visuals';
+import { botImage, type BotImageId } from '@/components/bot-images';
 import './trading-bots.scss';
 
 type CardBadge = 'QUICK' | 'PREMIUM' | 'FREE';
@@ -40,6 +41,22 @@ const REFERENCE_CARDS: BotCard[] = [
     { id: 'quantum', name: '🥉 Quantum Edge AI', description: 'Quick extreme-digit bot. Stake 0.8, recovery ×2, Over/Under on every trade plus a percentage reversal after every 3 trades.', kind: 'quick', badge: 'QUICK', preset: 'quantum' },
 ];
 
+const IMAGE_MAP: Record<string, BotImageId> = {
+    vertex: 'vertex',
+    quantum: 'quantum',
+    digit_nexus: 'digit-nexus-ai',
+    volt_scalper: 'volt-scalper',
+    apex_ai: 'apex-ai',
+    neutrade: 'neutrade-ai',
+    straddle: 'straddle-edge',
+    aurora: 'aurora-parity',
+    obsidian: 'obsidian-parity',
+    prism: 'prism-extremes',
+    pulsetrader: 'pulsetrader-ai',
+    titan: 'titan-range',
+    zenith: 'zenith-flow',
+};
+
 const TradingBotsPage = observer(() => {
     const [query, setQuery] = useState('');
     const [busyId, setBusyId] = useState<string | null>(null);
@@ -53,6 +70,8 @@ const TradingBotsPage = observer(() => {
         if (!needle) return cards;
         return cards.filter(card => card.name.toLowerCase().includes(needle));
     }, [cards, query]);
+
+    const imageId = (cardId: string): BotImageId => IMAGE_MAP[cardId] ?? 'vertex';
 
     const onLoad = async (card: BotCard) => {
         setError(null);
@@ -142,6 +161,9 @@ const TradingBotsPage = observer(() => {
                         const theme = botVisual(card.id === 'vertex' ? 'vertex' : card.id === 'quantum' ? 'quantum' : card.id);
                         return (
                             <article key={card.id} className='hub-panel hub-lift bots-card' style={{ '--bot-color': theme.color } as React.CSSProperties}>
+                                <div className='bots-card__image'>
+                                    <img src={`data:image/svg+xml;base64,${btoa(botImage(imageId(card.id)))}`} alt={card.name} loading='lazy' decoding='async' />
+                                </div>
                                 <div className='bots-card__top'>
                                     <div className='bots-card__icon-wrap' style={{ background: `color-mix(in srgb, ${theme.color} 18%, transparent)` }}>
                                         <span className='bots-card__icon' dangerouslySetInnerHTML={{ __html: botIcon(theme.kind) }} />

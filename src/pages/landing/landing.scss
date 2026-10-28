@@ -870,6 +870,21 @@ body.landing-open {
         flex-direction: column;
         text-align: center;
     }
+
+    /* Ensure dashboard image fills the phone fully */
+    .lp__hero-image-wrap {
+        width: 100%;
+        max-width: 100%;
+        height: 180px;
+        margin: 0 auto 24px;
+    }
+
+    .lp__hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        max-height: 180px;
+    }
 }
 
 /* ======================================================================

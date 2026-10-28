@@ -58,6 +58,11 @@
             border-color 0.25s ease,
             box-shadow 0.25s ease;
 
+        @media (max-width: 560px) {
+            min-height: auto;
+            padding: 1rem;
+        }
+
         &:hover {
             transform: translateY(-4px);
             border-color: color-mix(in srgb, var(--bot-color, #60a5fa) 55%, transparent);
@@ -97,6 +102,11 @@
             border-radius: 14px;
             background: linear-gradient(135deg, color-mix(in srgb, var(--bot-color, #60a5fa) 15%, transparent), transparent);
             margin-bottom: 0.6rem;
+
+            @media (max-width: 560px) {
+                height: 100px;
+                margin-bottom: 0.4rem;
+            }
 
             img {
                 width: 100%;

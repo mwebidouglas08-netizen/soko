@@ -1,12 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import './landing.scss';
 
-/**
- * Dollarvault landing (lp__ structure): topbar nav, live market ticker, hero,
- * 3-step get-started, 6-feature workspace grid, 12 verified reviews, free course,
- * FAQ and footer — dismissing into the trading hub via onEnter.
- */
-
 const NAV = [
     { label: 'How it works', href: '#lp-how' },
     { label: 'Bots', href: '#lp-features' },
@@ -79,6 +73,13 @@ const FEATURES = [
     },
 ];
 
+const STATS = [
+    { label: 'Free Bots', value: '13+' },
+    { label: 'Markets', value: '17+' },
+    { label: 'Win Strategies', value: '94%' },
+    { label: 'Active Traders', value: '10K+' },
+];
+
 const REVIEWS = [
     { name: 'James Ochieng', quote: 'This platform completely changed how I trade. The free bot library alone is worth it.' },
     { name: 'Amina Hassan', quote: 'The Smart AI recovery bot is absolutely insane. It pulled me out of a bad streak twice.' },
@@ -86,12 +87,6 @@ const REVIEWS = [
     { name: 'Fatima Al-Rashid', quote: 'The analysis tools here are on another level. Dcircles alone changed my entries.' },
     { name: 'Peter Kamau', quote: 'Speedbot is incredible. It catches signals faster than I can even spot them.' },
     { name: 'Grace Njeri', quote: 'I was a complete beginner. The free course plus the bot builder tutorials got me trading.' },
-    { name: 'Emmanuel Owusu', quote: 'The Apex Bot 2026 is seriously on another level. It adapts to the market in real time.' },
-    { name: 'Mercy Wanjiku', quote: 'The live charts with full technical indicators make me feel like a professional.' },
-    { name: 'Ibrahim Diallo', quote: 'Bot Builder is so intuitive. I built a custom Martingale strategy in minutes.' },
-    { name: 'Stella Achieng', quote: 'What I love most is everything is in one place. No switching between apps.' },
-    { name: 'Kofi Asante', quote: 'The community channel on Telegram led me here and I have never looked back.' },
-    { name: 'Priya Sharma', quote: 'Customer support guided me through everything. Within a week I was confident.' },
 ];
 
 const COURSE = [
@@ -173,6 +168,9 @@ const Landing = ({ onEnter }: LandingProps) => {
 
     return (
         <div className='lp' ref={rootRef}>
+            {/* Scroll Progress */}
+            <div className='lp__progress'><span /></div>
+
             {/* Topbar */}
             <header className='lp__topbar'>
                 <div className='lp__brand'>
@@ -194,7 +192,7 @@ const Landing = ({ onEnter }: LandingProps) => {
                 </div>
             </header>
 
-            {/* Market ticker */}
+            {/* Market Ticker */}
             <div className='lp__ticker' aria-hidden='true'>
                 <div className='lp__ticker-track'>
                     {ticker.map((m, i) => (
@@ -214,52 +212,77 @@ const Landing = ({ onEnter }: LandingProps) => {
                     <span className='lp__hero-orb lp__hero-orb--2' />
                     <span className='lp__hero-orb lp__hero-orb--3' />
                 </div>
-                <div className='lp__hero-inner'>
-                    <span className='lp__hero-eyebrow' data-reveal>FREE STRATEGIES. REAL MARKET TOOLS.</span>
-                    <h1 className='lp__hero-h1' data-reveal>
-                        Free<br />bots<br />ready<br />to<br />load
-                    </h1>
-                    <p className='lp__hero-sub' data-reveal>
-                        Search proven templates, open tutorial guides, and move directly into the bot builder when you are ready to test.
-                    </p>
-                    <div className='lp__hero-cta' data-reveal>
-                        <button type='button' className='lp__hero-btn lp__hero-btn--primary' onClick={onEnter}>Log In and Trade</button>
-                        <button type='button' className='lp__hero-btn lp__hero-btn--outline' onClick={onEnter}>Create Free Account</button>
+                <div className='lp__hero-content'>
+                    <div className='lp__hero-text'>
+                        <span className='lp__hero-eyebrow' data-reveal>
+                            <i /> FREE STRATEGIES. REAL MARKET TOOLS.
+                        </span>
+                        <h1 className='lp__hero-h1' data-reveal>
+                            <span className='lp__word reveal-1'>Free</span>
+                            <span className='lp__word reveal-2'>bots</span>
+                            <span className='lp__word reveal-3'>ready</span>
+                            <span className='lp__word reveal-4'>to load</span>
+                        </h1>
+                        <p className='lp__hero-sub' data-reveal>
+                            Search proven templates, open tutorial guides, and move directly into the bot builder when you are ready to test.
+                        </p>
+                        <div className='lp__hero-cta' data-reveal>
+                            <button type='button' className='lp__hero-btn lp__hero-btn--primary' onClick={onEnter}>
+                                Log In and Trade
+                            </button>
+                            <button type='button' className='lp__hero-btn lp__hero-btn--outline' onClick={onEnter}>
+                                Create Free Account
+                            </button>
+                        </div>
+                        <div className='lp__hero-trust' data-reveal>
+                            <span>🔒 Deriv OAuth Secure</span>
+                            <span>📊 Demo Accounts Supported</span>
+                            <span>📱 Mobile Responsive</span>
+                        </div>
+                        <a href='#lp-course-hero' className='lp__hero-link' data-reveal>
+                            Explore the course ↓
+                        </a>
                     </div>
-                    <a href='#lp-course-hero' className='lp__hero-link' data-reveal>Explore the course ↓</a>
-
-                    {/* Dashboard image — fits phone fully on mobile, desktop-hero on desktop */}
-                    <div className='lp__hero-image-wrap' data-reveal style={{ transitionDelay: '120ms' }}>
-                        <img
-                            className='lp__hero-image'
-                            src='/ref-assets/dashboard-blue-background.png'
-                            alt='Dollarvault trading dashboard with live charts, bot runner, and trade panel'
-                            loading='eager'
-                            decoding='async'
-                            width='720'
-                            height='480'
-                        />
-                    </div>
-
-                    <div className='lp__hero-badges' data-reveal>
-                        <div className='lp__badge'>
-                            <strong>Free</strong>
-                            <span>BOT TEMPLATES</span>
+                    <div className='lp__hero-visual' data-reveal style={{ transitionDelay: '120ms' }}>
+                        <div className='lp__hero-image-wrap'>
+                            <img
+                                className='lp__hero-image'
+                                src='/ref-assets/dashboard-blue-background.png'
+                                alt='Dollarvault trading dashboard with live charts, bot runner, and trade panel'
+                                loading='eager'
+                                decoding='async'
+                            />
                         </div>
-                        <div className='lp__badge'>
-                            <strong>24/7</strong>
-                            <span>SYNTHETIC MARKET FOCUS</span>
-                        </div>
-                        <div className='lp__badge'>
-                            <strong>www.dollarvault.com</strong>
-                            <span>BRANDED WORKSPACE</span>
-                        </div>
-                        <div className='lp__badge'>
-                            <strong>Live</strong>
-                            <span>MARKET STATUS</span>
+                        <div className='lp__hero-badges'>
+                            <div className='lp__badge'>
+                                <strong>13+</strong>
+                                <span>FREE BOT TEMPLATES</span>
+                            </div>
+                            <div className='lp__badge'>
+                                <strong>24/7</strong>
+                                <span>SYNTHETIC MARKETS</span>
+                            </div>
+                            <div className='lp__badge'>
+                                <strong>17+</strong>
+                                <span>MARKETS AVAILABLE</span>
+                            </div>
+                            <div className='lp__badge'>
+                                <strong>🔒</strong>
+                                <span>DERIV OAUTH SECURE</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </section>
+
+            {/* Animated Stats */}
+            <section className='lp__stats' data-reveal>
+                {STATS.map((s, i) => (
+                    <div key={s.label} className='lp__stat'>
+                        <strong className='lp__stat-value'>0</strong>
+                        <span className='lp__stat-label'>{s.label}</span>
+                    </div>
+                ))}
             </section>
 
             {/* Get started */}
@@ -300,23 +323,56 @@ const Landing = ({ onEnter }: LandingProps) => {
 
             {/* Reviews */}
             <section className='lp__section' id='lp-reviews'>
-                <div className='lp__section-head' data-reveal>
-                    <span className='lp__eyebrow'>VERIFIED TRADERS</span>
-                    <h2 className='lp__section-title'>Loved by traders worldwide</h2>
+                <div className='lp__section-head--row' data-reveal>
+                    <div>
+                        <span className='lp__eyebrow'>VERIFIED TRADERS</span>
+                        <h2 className='lp__section-title'>Loved by traders worldwide</h2>
+                    </div>
+                    <div className='lp__carousel-nav'>
+                        <button aria-label='Previous review'>‹</button>
+                        <span>1 / {Math.ceil(REVIEWS.length / 3)}</span>
+                        <button aria-label='Next review'>›</button>
+                    </div>
                 </div>
-                <div className='lp__reviews'>
-                    {REVIEWS.map((r, i) => (
-                        <article key={r.name} className={`lp__review-card ${i === 0 ? 'lp__review-card--active' : ''}`} data-reveal style={{ transitionDelay: `${(i % 6) * 60}ms` }}>
-                            <div className='lp__review-top'>
-                                <span className='lp__review-avatar'>{r.name.charAt(0)}</span>
-                                <div className='lp__review-meta'>
-                                    <strong>{r.name}</strong>
-                                    <span>Verified Trader ✓</span>
-                                </div>
+                <div className='lp__carousel'>
+                    <div className='lp__carousel-track'>
+                        <div className='lp__carousel-page'>
+                            {REVIEWS.slice(0, 3).map((r, i) => (
+                                <article key={r.name} className={`lp__review-card ${i === 0 ? 'lp__review-card--active' : ''}`} data-reveal style={{ transitionDelay: `${(i % 6) * 60}ms` }}>
+                                    <div className='lp__review-top'>
+                                        <span className='lp__review-avatar'>{r.name.charAt(0)}</span>
+                                        <div className='lp__review-meta'>
+                                            <strong>{r.name}</strong>
+                                            <span>Verified Trader ✓</span>
+                                        </div>
+                                    </div>
+                                    <div className='lp__review-stars' aria-label='5 stars'>★★★★★</div>
+                                    <p className='lp__review-quote'>“{r.quote}”</p>
+                                </article>
+                            ))}
+                        </div>
+                        {REVIEWS.slice(3).length > 0 && (
+                            <div className='lp__carousel-page'>
+                                {REVIEWS.slice(3).map((r, i) => (
+                                    <article key={r.name} className={`lp__review-card ${i === 0 ? 'lp__review-card--active' : ''}`} data-reveal style={{ transitionDelay: `${(i % 6) * 60}ms` }}>
+                                        <div className='lp__review-top'>
+                                            <span className='lp__review-avatar'>{r.name.charAt(0)}</span>
+                                            <div className='lp__review-meta'>
+                                                <strong>{r.name}</strong>
+                                                <span>Verified Trader ✓</span>
+                                            </div>
+                                        </div>
+                                        <div className='lp__review-stars' aria-label='5 stars'>★★★★★</div>
+                                        <p className='lp__review-quote'>“{r.quote}”</p>
+                                    </article>
+                                ))}
                             </div>
-                            <div className='lp__review-stars' aria-label='5 stars'>★★★★★</div>
-                            <p className='lp__review-quote'>“{r.quote}”</p>
-                        </article>
+                        )}
+                    </div>
+                </div>
+                <div className='lp__carousel-dots' data-reveal>
+                    {[0, Math.ceil(REVIEWS.length / 3) - 1].filter((v, i, a) => a.indexOf(v) === i).map((_, i) => (
+                        <button key={i} className='lp__carousel-dot' />
                     ))}
                 </div>
             </section>
@@ -359,7 +415,9 @@ const Landing = ({ onEnter }: LandingProps) => {
                 <div className='lp__final-inner' data-reveal>
                     <h2 className='lp__section-title'>Ready to transform your trading?</h2>
                     <p className='lp__final-text'>Open the workspace, load a free bot, and trade with structure today.</p>
-                    <button type='button' className='lp__hero-btn lp__hero-btn--primary' onClick={onEnter}>Get Started Free</button>
+                    <button type='button' className='lp__hero-btn lp__hero-btn--primary' onClick={onEnter}>
+                        Get Started Free
+                    </button>
                 </div>
                 <footer className='lp__footer'>
                     <span>© 2026 Dollarvault · Powered by Deriv</span>

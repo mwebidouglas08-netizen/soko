@@ -104,9 +104,12 @@ export const generateOAuthURL = async (prompt?: string): Promise<string> => {
         const clientId = process.env.NEXT_PUBLIC_DERIV_APP_ID;
         if (!clientId) return '';
 
+        const redirectUri =
+            process.env.NEXT_PUBLIC_DERIV_REDIRECT_URI ?? window.location.origin;
+
         const config: AuthConfig = {
             clientId,
-            redirectUri: window.location.origin,
+            redirectUri,
             scopes: 'trade',
             // Without this a Bot deployed in ES/FR/PT sends its clients to an
             // English login (#804). `getInitialLanguage()` is the same reader

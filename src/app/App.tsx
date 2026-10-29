@@ -97,9 +97,11 @@ function App() {
 
         const handleCallback = async () => {
             try {
+                const redirectUri =
+                    process.env.NEXT_PUBLIC_DERIV_REDIRECT_URI ?? window.location.origin;
                 const authInfo = await handleOAuthCallback(window.location.href, {
                     clientId: process.env.NEXT_PUBLIC_DERIV_APP_ID || '',
-                    redirectUri: window.location.origin,
+                    redirectUri,
                     scopes: 'trade',
                 });
 

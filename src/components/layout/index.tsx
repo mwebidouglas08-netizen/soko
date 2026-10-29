@@ -18,10 +18,22 @@ const Layout = observer(() => {
     const is_quick_strategy_active = store?.quick_strategy?.is_open;
     const isCallbackPage = window.location.pathname === '/callback';
 
-    const checkClientAccount = JSON.parse(localStorage.getItem('clientAccounts') ?? '{}');
     const getQueryParams = new URLSearchParams(window.location.search);
     const currency = getQueryParams.get('account') ?? '';
-    const accountsList = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
+
+    // Safely parse localStorage — corrupted values must not crash startup.
+    let checkClientAccount: Record<string, any> = {};
+    try {
+        checkClientAccount = JSON.parse(localStorage.getItem('clientAccounts') ?? '{}');
+    } catch {
+        checkClientAccount = {};
+    }
+    let accountsList: Record<string, any> = {};
+    try {
+        accountsList = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
+    } catch {
+        accountsList = {};
+    }
     const isClientAccountsPopulated = Object.keys(accountsList).length > 0;
     const ifClientAccountHasCurrency =
         Object.values(checkClientAccount).some((account: any) => account.currency === currency) ||

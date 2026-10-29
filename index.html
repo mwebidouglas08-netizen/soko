@@ -189,11 +189,45 @@
         <meta name="apple-mobile-web-app-title" content="Dollarvault" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <meta name="theme-color" content="#f2f3f4" />
-        <meta name="title" content="Dollarvault - Free Deriv Bots, Smart Trading Tools and Automation" />
-        <meta name="description" content="Dollarvault is a trusted, premium third-party Deriv trading platform offering free bots, an AI market scanner, automated and manual trading tools, and in-depth analysis - built to help beginners and pros trade smarter and grow their profits." />
-        <meta property="og:title" content="Dollarvault Trading Workspace" />
-        <meta property="og:description" content="Dollarvault is a trusted, premium third-party Deriv trading platform offering free bots, an AI market scanner, automated and manual trading tools, and in-depth analysis - built to help beginners and pros trade smarter and grow their profits." />
-        <title>Dollarvault - Free Deriv Bots, Smart Trading Tools and Automation</title>
+        <meta name="title" content="Dollarvault — Free Deriv Bots & Smart Trading Automation" />
+        <meta name="description" content="Dollarvault — Free Deriv bots, AI market scanner, automated and manual trading tools. Trade smarter on Volatility, Boom/Crash, Step and more synthetic markets." />
+        <meta property="og:title" content="Dollarvault — Free Deriv Bots & Smart Trading Automation" />
+        <meta property="og:description" content="Dollarvault — Free Deriv bots, AI market scanner, automated and manual trading tools. Trade smarter on Volatility, Boom/Crash, Step and more synthetic markets." />
+        <meta property="og:type" content="website" />
+        <meta property="theme-color" content="#001840" />
+        <title id="page-title">Dollarvault — Free Deriv Bots & Smart Trading Automation</title>
+        <script>
+            // Animated page title — cycles through eye-catching variants in a single line.
+            (function () {
+                var titleEl = document.getElementById('page-title');
+                var originalTitle = titleEl ? titleEl.textContent : '';
+                var variants = [
+                    'Dollarvault — Free Deriv Bots & Smart Trading Automation',
+                    '🤖 Load Free Bots • Trade Smarter • Dollarvault',
+                    '📈 AI Market Scanner • Deriv Trading Workspace',
+                    '⚡ Speedbot & Bot Builder • No Code Required',
+                    'Dollarvault — Free Deriv Bots & Smart Trading Automation'
+                ];
+                var idx = 0;
+                var paused = false;
+
+                // Pause title animation when user is active on the tab.
+                var handleVisibility = function () {
+                    paused = document.hidden;
+                };
+                document.addEventListener('visibilitychange', handleVisibility);
+
+                var cycle = function () {
+                    if (paused || !titleEl) return;
+                    idx = (idx + 1) % variants.length;
+                    titleEl.textContent = variants[idx];
+                    setTimeout(cycle, 3200);
+                };
+
+                // Start after a short delay so the initial title reads clearly first.
+                setTimeout(cycle, 3000);
+            })();
+        </script>
         <style>
             :root {
                 font-size: 62.5%;

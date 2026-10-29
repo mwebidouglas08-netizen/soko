@@ -188,43 +188,41 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Dollarvault" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-        <meta name="theme-color" content="#f2f3f4" />
+        <meta name="theme-color" content="#001840" />
         <meta name="title" content="Dollarvault — Free Deriv Bots & Smart Trading Automation" />
         <meta name="description" content="Dollarvault — Free Deriv bots, AI market scanner, automated and manual trading tools. Trade smarter on Volatility, Boom/Crash, Step and more synthetic markets." />
         <meta property="og:title" content="Dollarvault — Free Deriv Bots & Smart Trading Automation" />
         <meta property="og:description" content="Dollarvault — Free Deriv bots, AI market scanner, automated and manual trading tools. Trade smarter on Volatility, Boom/Crash, Step and more synthetic markets." />
         <meta property="og:type" content="website" />
-        <meta property="theme-color" content="#001840" />
         <title id="page-title">Dollarvault — Free Deriv Bots & Smart Trading Automation</title>
         <script>
-            // Animated page title — cycles through eye-catching variants in a single line.
+            // Animated page title — eye-catching single-line text that cycles
+            // through compelling variants. Pauses when the tab is hidden.
             (function () {
                 var titleEl = document.getElementById('page-title');
-                var originalTitle = titleEl ? titleEl.textContent : '';
+                if (!titleEl) return;
+
                 var variants = [
                     'Dollarvault — Free Deriv Bots & Smart Trading Automation',
                     '🤖 Load Free Bots • Trade Smarter • Dollarvault',
                     '📈 AI Market Scanner • Deriv Trading Workspace',
-                    '⚡ Speedbot & Bot Builder • No Code Required',
-                    'Dollarvault — Free Deriv Bots & Smart Trading Automation'
+                    '⚡ Speedbot & Bot Builder • No Code Required'
                 ];
                 var idx = 0;
                 var paused = false;
 
-                // Pause title animation when user is active on the tab.
-                var handleVisibility = function () {
+                document.addEventListener('visibilitychange', function () {
                     paused = document.hidden;
-                };
-                document.addEventListener('visibilitychange', handleVisibility);
+                    if (!paused) cycle();
+                });
 
-                var cycle = function () {
-                    if (paused || !titleEl) return;
+                function cycle() {
+                    if (paused) return;
                     idx = (idx + 1) % variants.length;
                     titleEl.textContent = variants[idx];
-                    setTimeout(cycle, 3200);
-                };
+                    setTimeout(cycle, 3500);
+                }
 
-                // Start after a short delay so the initial title reads clearly first.
                 setTimeout(cycle, 3000);
             })();
         </script>

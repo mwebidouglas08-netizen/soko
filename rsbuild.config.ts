@@ -44,6 +44,11 @@ export default defineConfig({
         NEXT_PUBLIC_DERIV_ENV: JSON.stringify(process.env.NEXT_PUBLIC_DERIV_ENV ?? ''),
         // Partner referral link for affiliate attribution on OAuth login/sign-up.
         NEXT_PUBLIC_DERIV_REFERRAL_LINK: JSON.stringify(process.env.NEXT_PUBLIC_DERIV_REFERRAL_LINK ?? ''),
+        // OAuth redirect URI — must EXACTLY match one of the redirect URIs
+        // pre-registered with the Deriv OAuth app identified by
+        // NEXT_PUBLIC_DERIV_APP_ID. Without this, Deriv rejects the
+        // authorization request with error=invalid_request.
+        NEXT_PUBLIC_DERIV_REDIRECT_URI: JSON.stringify(process.env.NEXT_PUBLIC_DERIV_REDIRECT_URI ?? ''),
         // Partner app name. The BFF writes this into .env.production at deploy time; the header
         // logo+name mark and the document title read it (with brand.config / default fallback).
         NEXT_PUBLIC_DERIV_APP_NAME: JSON.stringify(process.env.NEXT_PUBLIC_DERIV_APP_NAME ?? ''),

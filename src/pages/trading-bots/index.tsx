@@ -9,6 +9,7 @@ import { VERTEX_DIGITS, QUANTUM_EDGE } from '@/pages/quick-bot';
 import { navigateToHubView } from '@/services/hub-navigation';
 import { HubNote, HubPage, HubPageHeader } from '@/components/hub-page';
 import { botVisual, botIcon } from '@/components/bot-visuals';
+import { botImage, type BotImageId } from '@/components/bot-images';
 import './trading-bots.scss';
 
 type CardBadge = 'QUICK' | 'PREMIUM' | 'FREE';
@@ -40,6 +41,38 @@ const REFERENCE_CARDS: BotCard[] = [
     { id: 'quantum', name: 'Quantum Edge', description: 'Extreme-digit bot. Stake 0.8, recovery ×2, Over/Under on every trade.', kind: 'quick', badge: 'FREE', preset: 'quantum' },
 ];
 
+const IMAGE_MAP: Record<string, BotImageId> = {
+    vertex: 'vertex',
+    quantum: 'quantum',
+    digit_nexus: 'digit-nexus-ai',
+    volt_scalper: 'volt-scalper',
+    apex_ai: 'apex-ai',
+    neutrade: 'neutrade-ai',
+    straddle: 'straddle-edge',
+    aurora: 'aurora-parity',
+    obsidian: 'obsidian-parity',
+    prism: 'prism-extremes',
+    pulsetrader: 'pulsetrader-ai',
+    titan: 'titan-range',
+    zenith: 'zenith-flow',
+};
+
+const THEME_MAP: Record<string, string> = {
+    vertex: 'vertex',
+    quantum: 'quantum',
+    digit_nexus: 'digit-nexus-ai',
+    volt_scalper: 'volt-scalper',
+    apex_ai: 'apex-ai',
+    neutrade: 'neutrade-ai',
+    straddle: 'straddle-edge',
+    aurora: 'aurora-parity',
+    obsidian: 'obsidian-parity',
+    prism: 'prism-extremes',
+    pulsetrader: 'pulsetrader-ai',
+    titan: 'titan-range',
+    zenith: 'zenith-flow',
+};
+
 const TradingBotsPage = observer(() => {
     const [query, setQuery] = useState('');
     const [busyId, setBusyId] = useState<string | null>(null);
@@ -53,6 +86,9 @@ const TradingBotsPage = observer(() => {
         if (!needle) return cards;
         return cards.filter(card => card.name.toLowerCase().includes(needle));
     }, [cards, query]);
+
+    const imageId = (cardId: string): BotImageId => IMAGE_MAP[cardId] ?? 'vertex';
+    const themeId = (cardId: string): string => THEME_MAP[cardId] ?? cardId;
 
     const onLoad = async (card: BotCard) => {
         setError(null);
@@ -137,11 +173,12 @@ const TradingBotsPage = observer(() => {
             ) : (
                 <div className='bots-grid'>
                     {visible.map(card => {
-                        const theme = botVisual(card.id);
+                        const theme = botVisual(themeId(card.id));
+                        const imgId = imageId(card.id);
                         return (
                             <article key={card.id} className='bots-card' style={{ '--bot-color': theme.color } as React.CSSProperties}>
-                                <div className='bots-card__icon'>
-                                    <span className='bots-card__icon-symbol' dangerouslySetInnerHTML={{ __html: botIcon(theme.kind) }} />
+                                <div className='bots-card__image'>
+                                    <img src={`data:image/svg+xml;base64,${btoa(botImage(imgId))}`} alt={card.name} loading='lazy' decoding='async' />
                                 </div>
                                 <div className='bots-card__content'>
                                     <div className='bots-card__header'>

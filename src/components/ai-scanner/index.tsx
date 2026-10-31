@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAIBot, useOUBotEngine } from '@/bot/use-engine';
 import { aiBot } from '@/bot/engine/ai-bot';
 import { ouBotEngine } from '@/bot/engine/engine';
+import { load } from '@/external/bot-skeleton';
+import { save_types } from '@/external/bot-skeleton/constants/save-type';
 import { soundService } from '@/services/sound-service';
 import { voiceService } from '@/services/voice-service';
 import './ai-scanner.scss';
@@ -689,13 +691,24 @@ const AIBotDock = () => {
 
     const loadBot = useCallback((xml: string, name: string) => {
         try {
-            // Hand the strategy to the DBot builder if available.
+            // Hand the strategy to the DBot builder via the same load() pipeline
+            // used by the Bot Builder load modal and deploy-strategy.ts.
             const w = window as any;
             const workspace = w.Blockly?.derivWorkspace;
-            if (w.Blockly && w.Blockly.utils?.xml?.textToDom && workspace) {
-                const dom = w.Blockly.utils.xml.textToDom(xml);
-                w.Blockly.Xml?.clearWorkspaceAndLoadFromXml?.(dom, workspace);
+            if (!workspace) {
+                console.error('Bot Builder workspace not ready yet.');
+                return;
             }
+            void load({
+                block_string: xml,
+                workspace,
+                file_name: name,
+                strategy_id: undefined,
+                from: save_types.UNSAVED,
+                drop_event: null,
+                showIncompatibleStrategyDialog: null,
+                show_snackbar: false,
+            });
         } catch {
             /* noop */
         }

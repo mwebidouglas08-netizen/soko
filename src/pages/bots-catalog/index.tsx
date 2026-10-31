@@ -15,15 +15,15 @@ type Bot = {
 };
 
 const BOTS: Bot[] = [
-    { file: 'digit-nexus-ai', name: 'Digit Nexus AI', tag: 'DIGITS', desc: 'Scans last-digit frequencies and fires Over/Under entries on a confirmed edge.', color: '#22e7ff' },
+    { file: 'digit-nexus-ai', name: 'Digit Nexus', tag: 'DIGITS', desc: 'Scans last-digit frequencies and fires Over/Under entries on a confirmed edge.', color: '#22e7ff' },
     { file: 'volt-scalper', name: 'Volt Scalper', tag: 'SCALP', desc: 'Fast volatility scalping with tight recovery and session take-profit.', color: '#7effd8' },
     { file: 'apex-ai', name: 'Apex AI', tag: 'PREMIUM', desc: 'Adaptive multi-market AI with automatic recovery selection.', color: '#FFD700', premium: true },
-    { file: 'neutrade-ai', name: 'Neutrade AI', tag: 'BALANCED', desc: 'Balanced risk engine that sizes stakes from live confidence scores.', color: '#60a5fa' },
+    { file: 'neutrade-ai', name: 'Neutrade', tag: 'BALANCED', desc: 'Balanced risk engine that sizes stakes from live confidence scores.', color: '#60a5fa' },
     { file: 'straddle-edge', name: 'Straddle Edge', tag: 'STRADDLE', desc: 'Straddles Rise/Fall around a digit bias with dual-direction protection.', color: '#a78bfa' },
     { file: 'aurora-parity', name: 'Aurora Parity', tag: 'PARITY', desc: 'Even/Odd parity hunter with streak-aware recovery.', color: '#f093fb', premium: true },
     { file: 'obsidian-parity', name: 'Obsidian Parity', tag: 'PARITY', desc: 'Deep-sample even/odd engine tuned for sustained sessions.', color: '#c084fc', premium: true },
     { file: 'prism-extremes', name: 'Prism Extremes', tag: 'EXTREMES', desc: 'Trades extreme digit outliers with hard stop-loss guardrails.', color: '#fb7185', premium: true },
-    { file: 'pulsetrader-ai', name: 'PulseTrader AI', tag: 'MOMENTUM', desc: 'Momentum-driven entries synced to tick velocity.', color: '#34d399' },
+    { file: 'pulsetrader-ai', name: 'PulseTrader', tag: 'MOMENTUM', desc: 'Momentum-driven entries synced to tick velocity.', color: '#34d399' },
     { file: 'titan-range', name: 'Titan Range', tag: 'RANGE', desc: 'Range Break strategy with volatility-scaled stake sizing.', color: '#fbbf24', premium: true },
     { file: 'zenith-flow', name: 'Zenith Flow', tag: 'FLOW', desc: 'Flow-based direction engine with adaptive barriers.', color: '#38bdf8', premium: true },
 ];
@@ -83,23 +83,22 @@ const BotsCatalog = () => {
                     const theme = botVisual(bot.file);
                     return (
                         <article key={bot.file} className='bots-card' style={{ '--bot-color': theme.color } as React.CSSProperties}>
-                            <div className='bots-card__image'>
-                                <img src={`data:image/svg+xml;base64,${btoa(botImage(bot.file as any))}`} alt={bot.name} loading='lazy' decoding='async' />
+                            <div className='bots-card__icon'>
+                                <span className='bots-card__icon-symbol' dangerouslySetInnerHTML={{ __html: botIcon(theme.kind) }} />
                             </div>
-                            <div className='bots-card__top'>
-                                <div className='bots-card__icon-wrap' style={{ background: `color-mix(in srgb, ${theme.color} 18%, transparent)` }}>
-                                    <span className='bots-card__icon' dangerouslySetInnerHTML={{ __html: botIcon(theme.kind) }} />
-                                </div>
-                                <div className='bots-card__labels'>
+                            <div className='bots-card__content'>
+                                <div className='bots-card__header'>
                                     <span className='bots-card__tag'>{theme.tag}</span>
                                     {theme.premium && <span className='bots-card__premium'>PREMIUM</span>}
                                 </div>
+                                <h3 className='bots-card__name'>{bot.name}</h3>
+                                <p className='bots-card__desc'>{bot.desc}</p>
                             </div>
-                            <h3 className='bots-card__name'>{bot.name}</h3>
-                            <p className='bots-card__desc'>{bot.desc}</p>
-                            <button type='button' className='bots-card__load' onClick={() => onLoad(bot)} disabled={loading === bot.file}>
-                                {loading === bot.file ? 'Loading…' : 'Load Bot'}
-                            </button>
+                            <div className='bots-card__footer'>
+                                <button type='button' className='bots-card__load' onClick={() => onLoad(bot)} disabled={loading === bot.file}>
+                                    {loading === bot.file ? 'Loading…' : 'Load Bot'}
+                                </button>
+                            </div>
                         </article>
                     );
                 })}

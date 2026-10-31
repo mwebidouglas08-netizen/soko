@@ -16,7 +16,7 @@ jest.mock('../../../../utils/branding', () => {
 });
 
 // No NEXT_PUBLIC_DERIV_APP_NAME / preview name in the test env, so getAppName()
-// resolves to brand.config.json platform.name ("Dollarvault"); show_name is
+// resolves to brand.config.json platform.name ("TradingHub.site"); show_name is
 // false, so the name text stays hidden (the wordmark image carries the name).
 describe('LogoMark', () => {
     const originalAppBuild = process.env.NEXT_PUBLIC_APP_BUILD;
@@ -31,8 +31,8 @@ describe('LogoMark', () => {
 
     it('resolves the app name for alt text and hides the name text when show_name is false', () => {
         render(<LogoMark />);
-        expect(screen.getByRole('img')).toHaveAttribute('alt', 'Dollarvault');
-        expect(screen.queryByText('Dollarvault')).not.toBeInTheDocument();
+        expect(screen.getByRole('img')).toHaveAttribute('alt', 'TradingHub.site');
+        expect(screen.queryByText('TradingHub.site')).not.toBeInTheDocument();
     });
 
     it('renders the logo image (first candidate) by default', () => {
@@ -50,7 +50,7 @@ describe('LogoMark', () => {
         }
         expect(screen.queryByRole('img')).not.toBeInTheDocument();
         // Letter badge shows the first letter of the app name.
-        expect(screen.getByText('D')).toBeInTheDocument();
+        expect(screen.getByText('T')).toBeInTheDocument();
     });
 
     it('skips logo file probing in the preview build and renders the letter badge', () => {
@@ -60,7 +60,7 @@ describe('LogoMark', () => {
         process.env.NEXT_PUBLIC_APP_BUILD = 'true';
         render(<LogoMark />);
         expect(screen.queryByRole('img')).not.toBeInTheDocument();
-        expect(screen.getByText('D')).toBeInTheDocument();
+        expect(screen.getByText('T')).toBeInTheDocument();
     });
 
     it('hides the name text when preview showAppName is false', () => {
@@ -73,7 +73,7 @@ describe('LogoMark', () => {
             setPreviewShowAppName(false);
         });
         render(<LogoMark />);
-        expect(screen.queryByText('Dollarvault')).not.toBeInTheDocument();
+        expect(screen.queryByText('TradingHub.site')).not.toBeInTheDocument();
         act(() => {
             setPreviewShowAppName(true);
         });
@@ -84,7 +84,7 @@ describe('LogoMark', () => {
         render(<LogoMark />);
         // The BFF said no logo ships â€” no <img> probe (which would 404), only the badge.
         expect(screen.queryByRole('img')).not.toBeInTheDocument();
-        expect(screen.getByText('D')).toBeInTheDocument();
+        expect(screen.getByText('T')).toBeInTheDocument();
     });
 
     it('renders exactly the recorded logo_path when the BFF wrote one', () => {
@@ -94,6 +94,6 @@ describe('LogoMark', () => {
         // A failed load falls straight to the badge â€” no other extensions to guess.
         fireEvent.error(screen.getByRole('img'));
         expect(screen.queryByRole('img')).not.toBeInTheDocument();
-        expect(screen.getByText('D')).toBeInTheDocument();
+        expect(screen.getByText('T')).toBeInTheDocument();
     });
 });

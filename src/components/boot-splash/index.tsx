@@ -26,7 +26,7 @@ const TILES = [
     { label: 'Backtest', icon: '🧪' },
 ];
 
-const BRAND = 'Dollarvault';
+const BRAND = 'TradingHub.site';
 /** Typewriter cadence: type fast, hold, (loader hides before delete). */
 const TYPE_MS = 70;
 
@@ -83,7 +83,7 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
     const status = STATUS[Math.min(STATUS.length - 1, step)];
 
     return (
-        <div className={`boot-splash sf-cinematic ${leaving ? 'sf-cinematic--leave' : ''}`} role='status' aria-label='Loading Dollarvault'>
+        <div className={`boot-splash sf-cinematic ${leaving ? 'sf-cinematic--leave' : ''}`} role='status' aria-label='Loading TradingHub.site'>
             <div className='sf-cinematic__grid' aria-hidden='true' />
             <div className='sf-cinematic__glow' aria-hidden='true' />
             <div className='sf-cinematic__wrap'>
@@ -140,7 +140,7 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
                         </div>
                         <div className='sf-cinematic__progress-counter'>{progress}%</div>
                     </div>
-                    <div className='sf-cinematic__footer'>© 2026 Dollarvault · Powered by Deriv</div>
+                    <div className='sf-cinematic__footer'>© 2026 TradingHub.site · Powered by Deriv</div>
                 </div>
             </div>
         </div>

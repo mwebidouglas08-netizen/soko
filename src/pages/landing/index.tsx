@@ -100,7 +100,7 @@ const COURSE = [
 
 const FAQ = [
     {
-        q: 'Is Dollarvault free to use?',
+        q: 'Is TradingHub.site free to use?',
         a: 'Yes. The bot library, course and core trading tools are free. You only need a Deriv account to trade.',
     },
     {
@@ -175,7 +175,7 @@ const Landing = ({ onEnter }: LandingProps) => {
             <header className='lp__topbar'>
                 <div className='lp__brand'>
                     <span className='lp__brand-mark' aria-hidden>DV</span>
-                    <span className='lp__brand-word'>Dollarvault</span>
+                    <span className='lp__brand-word'>TradingHub.site</span>
                 </div>
                 <nav className='lp__nav'>
                     {NAV.map(n => (
@@ -248,7 +248,7 @@ const Landing = ({ onEnter }: LandingProps) => {
                             <img
                                 className='lp__hero-image'
                                 src='/ref-assets/dashboard-blue-background.png'
-                                alt='Dollarvault trading dashboard with live charts, bot runner, and trade panel'
+                                alt='TradingHub.site trading dashboard with live charts, bot runner, and trade panel'
                                 loading='eager'
                                 decoding='async'
                             />
@@ -420,7 +420,7 @@ const Landing = ({ onEnter }: LandingProps) => {
                     </button>
                 </div>
                 <footer className='lp__footer'>
-                    <span>© 2026 Dollarvault · Powered by Deriv</span>
+                    <span>© 2026 TradingHub.site · Powered by Deriv</span>
                     <span>Trading involves risk of loss</span>
                 </footer>
             </section>

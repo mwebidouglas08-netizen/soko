@@ -1,5 +1,5 @@
 /**
- * Dollarvault AI Voice Module — Web Speech API (speechSynthesis) announcements
+ * TradingHub.site AI Voice Module — Web Speech API (speechSynthesis) announcements
  * for favourable signals and trade settlements across every bot engine.
  *
  * Design goals:
@@ -127,7 +127,7 @@ const DETECTION_GLOBAL_MS = 6000;
 
 /** Spoken once when the app opens (or refreshes) — intense, inviting, short. */
 const WELCOME_TEXT =
-    'Welcome to Dollarvault. Your AI trading terminal is live. ' +
+    'Welcome to TradingHub.site. Your AI trading terminal is live. ' +
     'The markets are moving, the engines are armed, and the next strong signal is already forming. ' +
     'Trade smart. Trade with confidence.';
 

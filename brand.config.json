@@ -1,11 +1,11 @@
 {
-    "brand_name": "Dollarvault",
-    "brand_domain": "Dollarvault.com",
+    "brand_name": "TradingHub.site",
+    "brand_domain": "tradinghub.site",
     "brand_hostname": {
-        "staging": "staging.Dollarvault.com/dashboard",
-        "production": "Dollarvault.com/dashboard"
+        "staging": "staging.tradinghub.site/dashboard",
+        "production": "tradinghub.site/dashboard"
     },
-    "domain_name": "Dollarvault.com",
+    "domain_name": "tradinghub.site",
     "colors": {
         "primary": "#03054f",
         "secondary": "#64748b",
@@ -20,7 +20,7 @@
         "grey": {
             "50": "#f8fafc",
             "100": "#f1f5f9",
-            "200": "#e2e8f0",
+            "200": "#e288f0",
             "300": "#cbd5e1",
             "400": "#94a3b8",
             "500": "#64748b",
@@ -79,7 +79,7 @@
         "css_variable_prefix": "--brand"
     },
     "platform": {
-        "name": "Dollarvault",
+        "name": "TradingHub.site",
         "i18n": {
             "default_language": "EN"
         },
@@ -89,10 +89,10 @@
         },
         "hostname": {
             "production": {
-                "com": "bot.Dollarvault.com"
+                "com": "bot.tradinghub.site"
             },
             "staging": {
-                "com": "staging-bot.Dollarvault.com"
+                "com": "staging-bot.tradinghub.site"
             }
         },
         "auth2_url": {

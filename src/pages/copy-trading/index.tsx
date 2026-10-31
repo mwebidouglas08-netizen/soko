@@ -72,8 +72,6 @@ const CopyTradingPage = observer(() => {
             return;
         }
         if (!token) return;
-        // The token is handed to the engine once and cleared from the field —
-        // it is never rendered back or stored anywhere in this page.
         copyTrading.start(token);
         setMasterToken('');
     };
@@ -98,8 +96,6 @@ const CopyTradingPage = observer(() => {
         const value = Number(raw);
         if (raw.trim() === '' || !Number.isFinite(value)) return null;
         const clamped = Math.min(10, Math.max(0.1, value));
-        // While typing, ignore values outside the allowed band so the field does
-        // not jump mid-edit; blur applies the clamp.
         if (commitOnType && (value < 0.1 || value > 10)) return null;
         if (clamped !== state.settings.stakeMultiplier) copyTrading.setSettings({ stakeMultiplier: clamped });
         return clamped;
@@ -119,14 +115,13 @@ const CopyTradingPage = observer(() => {
         if (value !== state.settings.stakeCap) copyTrading.setSettings({ stakeCap: value });
     };
 
-    const exampleMasterStake = 10;
-    const exampleCopied = exampleMasterStake * state.settings.stakeMultiplier;
+    const money = (n: number) => n.toFixed(2);
 
     return (
         <HubPage className='copy-page'>
             <HubPageHeader
                 title='Copy Trading'
-                subtitle='Mirror a master account&#39;s trades into one or more copier accounts with a stake multiplier and cap. The engine watches the master and replays each proposal downstream.'
+                subtitle='Mirror a master account&#39;s trades into copier accounts with a stake multiplier and cap.'
                 badge={
                     <>
                         <span className={`hub-badge ${STATUS_TONE[state.status] ?? 'hub-badge--idle'}`}>
@@ -147,16 +142,13 @@ const CopyTradingPage = observer(() => {
             />
 
             <HubNote tone='risk'>
-                By default only demo (virtual) copier accounts are accepted by the engine — real-money copiers are
-                rejected unless you explicitly enable <strong>Allow real copiers</strong> below. The stake multiplier
-                scales losses as well as wins: a master staking 10 USD at ×1.5 becomes {money(exampleCopied)} per
-                trade here, losing streaks included.
+                Demo copiers only by default. Enable <strong>Allow real copiers</strong> to mirror to real accounts.
+                The stake multiplier scales both wins and losses.
             </HubNote>
 
             {!isLoggedIn && (
                 <HubNote tone='info'>
-                    You can configure copiers and settings while logged out, but connecting a master requires a
-                    session.{' '}
+                    Connect your Deriv account to start copy trading.{' '}
                     <button type='button' className='hub-btn hub-btn--primary hub-btn--sm' onClick={() => run_panel?.showLoginDialog?.()}>
                         Log in to connect
                     </button>
@@ -171,7 +163,7 @@ const CopyTradingPage = observer(() => {
                         <input
                             type='password'
                             autoComplete='off'
-                            placeholder='Paste the master token (never shown again)'
+                            placeholder='Paste the master token'
                             value={masterToken}
                             onChange={e => setMasterToken(e.target.value)}
                         />
@@ -245,7 +237,7 @@ const CopyTradingPage = observer(() => {
                 </div>
 
                 {state.copiers.length === 0 ? (
-                    <p className='hub-empty'>No copiers yet — add a copier account token (demo, or real with the opt-in) to start mirroring.</p>
+                    <p className='hub-empty'>No copiers yet — add a copier account token to start mirroring.</p>
                 ) : (
                     <div className='copy-copiers'>
                         {state.copiers.map(copier => (
@@ -314,7 +306,7 @@ const CopyTradingPage = observer(() => {
                             onChange={e => {
                                 if (e.target.checked) {
                                     const ok = window.confirm(
-                                        'Allow REAL-money copier accounts? Replicated orders will spend real funds on every copier account you add. Continue?'
+                                        'Allow REAL-money copier accounts? Replicated orders will spend real funds. Continue?'
                                     );
                                     if (!ok) return;
                                 }
@@ -354,14 +346,6 @@ const CopyTradingPage = observer(() => {
                         />
                     </label>
                 </div>
-                <p className='copy-example'>
-                    Example: master 10 USD × {state.settings.stakeMultiplier} ={' '}
-                    <strong>{money(exampleCopied)} USD</strong> per copied trade
-                    {state.settings.stakeCap !== null
-                        ? `, capped at ${money(state.settings.stakeCap)} USD.`
-                        : ' (no cap applied).'}{' '}
-                    The same multiplier applies when the master loses.
-                </p>
             </section>
 
             <p className='copy-msg' aria-live='polite'>
@@ -411,9 +395,8 @@ const CopyTradingPage = observer(() => {
             </section>
 
             <HubNote tone='risk'>
-                Honest note: copying replicates the master&apos;s decisions, not their results — the master may be
-                on a demo account, may change strategy at any time, and a multiplier raises the cost of every loss
-                it mirrors. Start with a multiplier of 1 and a tight stake cap.
+                Honest note: copying replicates the master&#39;s decisions, not their results. Start with a multiplier
+                of 1 and a tight stake cap.
             </HubNote>
         </HubPage>
     );

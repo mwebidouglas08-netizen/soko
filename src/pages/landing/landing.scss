@@ -115,6 +115,7 @@ body.landing-open {
     gap: 10px;
     font-weight: 800;
     letter-spacing: 0.2px;
+    min-width: 0;
 }
 
 .lp__brand-mark {
@@ -133,6 +134,10 @@ body.landing-open {
 .lp__brand-word {
     font-size: 17px;
     color: #fff;
+    max-width: clamp(120px, 35vw, 200px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .lp__nav {
@@ -997,6 +1002,7 @@ body.landing-open {
 
     .lp__brand-word {
         font-size: 14px;
+        max-width: 120px;
     }
 
     .lp__topbar-btn {

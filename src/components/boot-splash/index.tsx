@@ -82,6 +82,12 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
 
     const status = STATUS[Math.min(STATUS.length - 1, step)];
 
+    // Take over from the static splash in index.html. It is removed on the
+    // very next tick so the two full-screen layers never overlap.
+    useEffect(() => {
+        if (typeof window.__hideBootSplash === 'function') window.__hideBootSplash();
+    }, []);
+
     return (
         <div className={`boot-splash sf-cinematic ${leaving ? 'sf-cinematic--leave' : ''}`} role='status' aria-label='Loading TradingHubs.site'>
             <div className='sf-cinematic__grid' aria-hidden='true' />

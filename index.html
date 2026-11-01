@@ -254,6 +254,9 @@
 
             /* Boot splash Ã¢â‚¬â€ cinematic startup while the bundle parses.
                Adapts to the resolved theme (light by default, dark on request). */
+            /* Always dark: the pre-hydration splash hands off to the dark
+               cinematic React splash, so both must share the same canvas or
+               the swap flashes light -> dark. */
             #boot-splash {
                 position: fixed;
                 inset: 0;
@@ -262,11 +265,13 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
+                padding: 16px;
+                box-sizing: border-box;
+                text-align: center;
                 background:
-                    radial-gradient(90% 60% at 18% -10%, rgba(20, 184, 166, 0.16), transparent 60%),
-                    radial-gradient(80% 55% at 88% 0%, rgba(99, 102, 241, 0.14), transparent 55%),
-                    radial-gradient(120% 90% at 50% 6%, #ffffff 0%, #f2f3f4 55%, #e9edf7 100%);
-                transition: opacity 0.65s ease, visibility 0.65s ease;
+                    radial-gradient(90% 60% at 18% -10%, rgba(20, 184, 166, 0.2), transparent 60%),
+                    radial-gradient(80% 55% at 88% 0%, rgba(99, 102, 241, 0.18), transparent 55%),
+                    radial-gradient(120% 90% at 50% 6%, #0b1728 0%, #050a14 55%, #030710 100%);
             }
             html[data-theme='dark'] #boot-splash {
                 background:
@@ -294,9 +299,9 @@
                 height: 92px;
                 transform: rotate(45deg);
                 border-radius: 22px;
-                border: 1px solid rgba(14, 154, 167, 0.55);
-                background: linear-gradient(145deg, rgba(20, 184, 166, 0.16), rgba(255, 255, 255, 0.9));
-                box-shadow: 0 18px 50px rgba(15, 118, 110, 0.18);
+                border: 1px solid rgba(75, 180, 179, 0.6);
+                background: linear-gradient(145deg, rgba(75, 180, 179, 0.2), rgba(5, 10, 20, 0.92));
+                box-shadow: none;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -312,7 +317,7 @@
                 font-size: 42px;
                 font-weight: 800;
                 letter-spacing: 0.04em;
-                background: linear-gradient(120deg, #0b7280, #14b8a6 55%, #0e9aa7);
+                background: linear-gradient(120deg, #eafcff, #4bb4b3 55%, #9df1e5);
                 -webkit-background-clip: text;
                 background-clip: text;
                 color: transparent;
@@ -330,7 +335,7 @@
                 font-weight: 700;
                 letter-spacing: 0.44em;
                 text-indent: 0.44em;
-                color: #0b1220;
+                color: #eaf6f6;
             }
             html[data-theme='dark'] .boot-splash__word {
                 color: #eaf6f6;
@@ -355,7 +360,7 @@
                 letter-spacing: 0.52em;
                 text-indent: 0.52em;
                 text-transform: uppercase;
-                color: rgba(14, 154, 167, 0.85);
+                color: rgba(140, 195, 193, 0.8);
             }
             html[data-theme='dark'] .boot-splash__tag {
                 color: rgba(140, 195, 193, 0.8);
@@ -365,7 +370,7 @@
                 min-height: 16px;
                 font-size: 11.5px;
                 letter-spacing: 0.06em;
-                color: rgba(80, 96, 128, 0.9);
+                color: rgba(148, 163, 184, 0.75);
                 transition: opacity 0.35s ease;
             }
             html[data-theme='dark'] .boot-splash__status {
@@ -378,7 +383,7 @@
                 margin-top: 34px;
                 width: 190px;
                 height: 2px;
-                background: rgba(15, 23, 42, 0.08);
+                background: rgba(255, 255, 255, 0.08);
                 border-radius: 2px;
                 overflow: hidden;
             }
@@ -501,9 +506,10 @@
             <div class="boot-splash__bar"><i></i></div>
         </div>
         <script>
-            // Hide the splash once the page (bundle + assets) has loaded. The
-            // 6s failsafe guarantees the app is never trapped behind it, and
-            // __showFatalError removes it immediately on a boot crash.
+            // The pre-hydration splash is removed the instant the React
+            // cinematic splash mounts (see BootSplash), so the two full-screen
+            // layers never overlap. The 6s failsafe guarantees the app is never
+            // trapped behind it, and __showFatalError removes it on a boot crash.
             (function () {
                 var splash = document.getElementById('boot-splash');
                 if (!splash) return;
@@ -512,10 +518,9 @@
                     if (hidden) return;
                     hidden = true;
                     clearInterval(copyTimer);
-                    splash.className = 'boot-splash boot-splash--out';
-                    setTimeout(function () {
-                        if (splash.parentNode) splash.parentNode.removeChild(splash);
-                    }, 800);
+                    // Hard cut, not a fade: the React splash is already painted
+                    // underneath, so fading would show both layers at once.
+                    if (splash.parentNode) splash.parentNode.removeChild(splash);
                 };
                 window.__hideBootSplash = hide;
                 // Rotating boot copy (SmartFlip-style loader, richer cadence).
@@ -536,9 +541,6 @@
                         el.className = 'boot-splash__status';
                     }, 350);
                 }, 1600);
-                window.addEventListener('load', function () {
-                    setTimeout(hide, 450);
-                });
                 setTimeout(hide, 6000);
             })();
         </script>

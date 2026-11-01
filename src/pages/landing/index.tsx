@@ -218,9 +218,9 @@ const Landing = ({ onEnter }: LandingProps) => {
                             <i /> FREE STRATEGIES. REAL MARKET TOOLS.
                         </span>
                         <h1 className='lp__hero-h1' data-reveal>
-                            <span className='lp__word reveal-1'>Free</span>
-                            <span className='lp__word reveal-2'>bots</span>
-                            <span className='lp__word reveal-3'>ready</span>
+                            <span className='lp__word reveal-1'>Free</span>{' '}
+                            <span className='lp__word reveal-2'>bots</span>{' '}
+                            <span className='lp__word reveal-3'>ready</span>{' '}
                             <span className='lp__word reveal-4'>to load</span>
                         </h1>
                         <p className='lp__hero-sub' data-reveal>

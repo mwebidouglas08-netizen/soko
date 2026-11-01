@@ -94,7 +94,7 @@ const Footer = observer(() => {
             <div className='app-footer__copyright' data-testid='dt_copyright'>
                 <span className='deriv-text'>
                     {/* [AI] Reference footer copyright */}
-                    {`(c) ${new Date().getFullYear()} ${brandConfig.platform.name ?? 'TradingHub.site'}`}
+                    {`(c) ${new Date().getFullYear()} ${brandConfig.platform.name ?? 'TradingHubs.site'}`}
                 </span>
             </div>
 

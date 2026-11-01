@@ -369,8 +369,8 @@ export class ActiveSymbolsProcessorService {
                 ...symbol,
                 underlying_symbol: symbol.underlying_symbol || symbol.symbol,
                 display_name: symbol.display_name || symbol.symbol,
-                market_display_name: symbol.market_display_name || symbol.market,
-                submarket_display_name: symbol.submarket_display_name || symbol.submarket,
+                market_display_name: symbol.market_display_name || symbol.market || 'Synthetic',
+                submarket_display_name: symbol.submarket_display_name || symbol.submarket || 'Synthetic',
             })) as ProcessedActiveSymbol[];
         }
     }

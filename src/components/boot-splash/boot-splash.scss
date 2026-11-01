@@ -1,5 +1,5 @@
 /* Cinematic boot loader — SmartFlip-class card over a dark aurora canvas,
-   TradingHub.site identity. Overlays both themes. */
+   TradingHubs.site identity. Overlays both themes. */
 .sf-cinematic {
     position: fixed;
     inset: 0;
@@ -51,6 +51,9 @@
     display: grid;
     place-items: center;
     width: 100%;
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow-y: auto;
     padding: 2rem;
 }
 
@@ -354,5 +357,75 @@
 
     .sf-cinematic__step-label {
         font-size: 8px;
+    }
+
+    .sf-cinematic__brand-title {
+        font-size: 21px;
+    }
+}
+
+/* Short phones (e.g. iPhone SE, landscape) — tighten vertical rhythm so the
+   whole card, including the footer, stays visible without clipping. */
+@media (max-height: 700px) {
+    .sf-cinematic__wrap {
+        padding: 0.75rem;
+    }
+
+    .sf-cinematic__card {
+        padding: 20px 18px 12px;
+    }
+
+    .sf-cinematic__badge {
+        width: 58px;
+        height: 58px;
+        margin-bottom: 10px;
+    }
+
+    .sf-cinematic__badge-mono {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        border-radius: 12px;
+    }
+
+    .sf-cinematic__brand-title {
+        font-size: 20px;
+    }
+
+    .sf-cinematic__welcome {
+        margin: 8px auto 2px;
+        font-size: 11px;
+    }
+
+    .sf-cinematic__steps {
+        margin: 12px 0 10px;
+    }
+
+    .sf-cinematic__step-dot {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+
+    .sf-cinematic__tiles {
+        margin: 4px 0 10px;
+    }
+
+    .sf-cinematic__tile {
+        padding: 8px 6px;
+    }
+
+    .sf-cinematic__tile-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+
+    .sf-cinematic__status {
+        margin-bottom: 8px;
+    }
+
+    .sf-cinematic__footer {
+        margin-top: 8px;
     }
 }

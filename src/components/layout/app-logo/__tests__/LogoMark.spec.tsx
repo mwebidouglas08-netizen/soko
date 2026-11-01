@@ -16,7 +16,7 @@ jest.mock('../../../../utils/branding', () => {
 });
 
 // No NEXT_PUBLIC_DERIV_APP_NAME / preview name in the test env, so getAppName()
-// resolves to brand.config.json platform.name ("TradingHub.site"); show_name is
+// resolves to brand.config.json platform.name ("TradingHubs.site"); show_name is
 // false, so the name text stays hidden (the wordmark image carries the name).
 describe('LogoMark', () => {
     const originalAppBuild = process.env.NEXT_PUBLIC_APP_BUILD;
@@ -31,8 +31,8 @@ describe('LogoMark', () => {
 
     it('resolves the app name for alt text and hides the name text when show_name is false', () => {
         render(<LogoMark />);
-        expect(screen.getByRole('img')).toHaveAttribute('alt', 'TradingHub.site');
-        expect(screen.queryByText('TradingHub.site')).not.toBeInTheDocument();
+        expect(screen.getByRole('img')).toHaveAttribute('alt', 'TradingHubs.site');
+        expect(screen.queryByText('TradingHubs.site')).not.toBeInTheDocument();
     });
 
     it('renders the logo image (first candidate) by default', () => {
@@ -73,7 +73,7 @@ describe('LogoMark', () => {
             setPreviewShowAppName(false);
         });
         render(<LogoMark />);
-        expect(screen.queryByText('TradingHub.site')).not.toBeInTheDocument();
+        expect(screen.queryByText('TradingHubs.site')).not.toBeInTheDocument();
         act(() => {
             setPreviewShowAppName(true);
         });

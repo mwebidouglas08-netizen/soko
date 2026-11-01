@@ -1,5 +1,5 @@
 /**
- * TradingHub.site currency conversion — view account balances in both US Dollars
+ * TradingHubs.site currency conversion — view account balances in both US Dollars
  * (USD) and Kenyan Shillings (KSH / KES).
  *
  * Design:

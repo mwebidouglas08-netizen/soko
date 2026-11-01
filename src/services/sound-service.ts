@@ -1,5 +1,5 @@
 /**
- * TradingHub.site Sound FX — Web Audio API sound effects for critical interactions
+ * TradingHubs.site Sound FX — Web Audio API sound effects for critical interactions
  * (bot start/stop, welcome fanfare, strong-signal blips, wins).
  *
  * Design goals:

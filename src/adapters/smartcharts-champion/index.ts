@@ -127,14 +127,22 @@ const transformations = {
 
         for (const symbol of activeSymbolsData) {
             const symbolCode = symbol.underlying_symbol || symbol.symbol;
+            if (!symbolCode) continue;
+            // SmartCharts sorts symbols with `submarket_display_name.localeCompare(...)`.
+            // Raw/fallback active-symbol payloads can omit these display fields, so
+            // always hand the chart strings — otherwise it crashes with
+            // "Cannot read properties of undefined (reading 'localeCompare')".
+            const market = symbol.market || 'synthetic_index';
+            const submarket = symbol.submarket || symbol.subgroup || market;
+            const subgroup = symbol.subgroup || submarket;
             symbols.push({
                 display_name: symbol.display_name || symbolCode,
-                market: symbol.market,
-                market_display_name: symbol.market_display_name,
-                subgroup: symbol.subgroup, // Map submarket to subgroup
-                subgroup_display_name: symbol.subgroup_display_name, // Map submarket_display_name to subgroup_display_name
-                submarket: symbol.submarket,
-                submarket_display_name: symbol.submarket_display_name,
+                market,
+                market_display_name: symbol.market_display_name || market,
+                subgroup, // Map submarket to subgroup
+                subgroup_display_name: symbol.subgroup_display_name || subgroup, // Map submarket_display_name to subgroup_display_name
+                submarket,
+                submarket_display_name: symbol.submarket_display_name || submarket,
                 symbol: symbolCode,
                 symbol_type: symbol.symbol_type || '',
                 pip: symbol.pip || symbol.pip_size || 0.01,

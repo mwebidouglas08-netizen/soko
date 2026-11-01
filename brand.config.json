@@ -1,11 +1,11 @@
 {
-    "brand_name": "TradingHub.site",
-    "brand_domain": "tradinghub.site",
+    "brand_name": "TradingHubs.site",
+    "brand_domain": "tradinghubs.site",
     "brand_hostname": {
-        "staging": "staging.tradinghub.site/dashboard",
-        "production": "tradinghub.site/dashboard"
+        "staging": "staging.tradinghubs.site/dashboard",
+        "production": "tradinghubs.site/dashboard"
     },
-    "domain_name": "tradinghub.site",
+    "domain_name": "tradinghubs.site",
     "colors": {
         "primary": "#03054f",
         "secondary": "#64748b",
@@ -79,7 +79,7 @@
         "css_variable_prefix": "--brand"
     },
     "platform": {
-        "name": "TradingHub.site",
+        "name": "TradingHubs.site",
         "i18n": {
             "default_language": "EN"
         },
@@ -89,10 +89,10 @@
         },
         "hostname": {
             "production": {
-                "com": "bot.tradinghub.site"
+                "com": "bot.tradinghubs.site"
             },
             "staging": {
-                "com": "staging-bot.tradinghub.site"
+                "com": "staging-bot.tradinghubs.site"
             }
         },
         "auth2_url": {

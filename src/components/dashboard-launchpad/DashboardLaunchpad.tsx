@@ -8,7 +8,7 @@ import './dashboard-launchpad.scss';
 /** Reference dashboard rotation: 10 greeting strings (first carries the
  *  account loginid) and 6 rotating quotes, typed out character by character. */
 const FIXED_HEADINGS = [
-    'Welcome to TradingHub.site',
+    'Welcome to TradingHubs.site',
     'Your ultimate trading tool',
     'Center for automations',
     'Your strategies. Your control.',
@@ -157,7 +157,7 @@ const DashboardLaunchpad = observer(() => {
                 <div className='launchpad__sweep' aria-hidden='true' />
                 <p className='launchpad__kicker'>
                     <span className='launchpad__kicker-dot' aria-hidden='true' />
-                    TradingHub.site <span aria-hidden='true'>/</span> Your trading workspace
+                    TradingHubs.site <span aria-hidden='true'>/</span> Your trading workspace
                 </p>
                 <h1 className='launchpad__greeting' aria-live='polite'>
                     {headline.slice(0, typed)}

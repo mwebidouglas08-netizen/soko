@@ -87,7 +87,7 @@ export const discoverSyntheticSymbols = async (): Promise<SyntheticSymbol[]> => 
             isSuspended: s.is_trading_suspended === 1 || s.is_trading_suspended === true,
         });
     }
-    return out.sort((a, b) => a.category.localeCompare(b.category) || a.symbol.localeCompare(b.symbol));
+    return out.sort((a, b) => (a.category || '').localeCompare(b.category || '') || (a.symbol || '').localeCompare(b.symbol || ''));
 };
 
 const DIGIT_TYPES = new Set(['DIGITOVER', 'DIGITUNDER']);

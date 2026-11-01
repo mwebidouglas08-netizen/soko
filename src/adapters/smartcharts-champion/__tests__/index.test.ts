@@ -364,6 +364,34 @@ describe('SmartCharts Champion Adapter', () => {
             });
         });
 
+        it('should never emit undefined display names that crash SmartCharts sorting', async () => {
+            const rawSymbols = [
+                {
+                    symbol: 'R_100',
+                    // Deliberately missing display_name / market_display_name /
+                    // submarket_display_name. SmartCharts calls
+                    // `submarket_display_name.localeCompare(...)` internally, so
+                    // undefined here used to throw after login.
+                    market: 'synthetic_index',
+                    submarket: 'random_index',
+                    pip: 0.01,
+                },
+            ];
+
+            (mockServices.getActiveSymbols as jest.Mock).mockResolvedValue(rawSymbols);
+            (mockServices.getTradingTimes as jest.Mock).mockResolvedValue({});
+
+            const adapter = buildSmartchartsChampionAdapter(mockTransport, mockServices);
+            const result = await adapter.getChartData();
+
+            expect(result.activeSymbols).toHaveLength(1);
+            const sym = result.activeSymbols[0];
+            expect(typeof sym.market_display_name).toBe('string');
+            expect(typeof sym.submarket_display_name).toBe('string');
+            expect(typeof sym.subgroup_display_name).toBe('string');
+            expect(sym.submarket_display_name).toBeTruthy();
+        });
+
         it('should transform trading times with open/close arrays', async () => {
             const mockTradingTimes = {
                 R_50: {

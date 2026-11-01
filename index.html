@@ -186,15 +186,15 @@
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="TradingHub.site" />
+        <meta name="apple-mobile-web-app-title" content="TradingHubs.site" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <meta name="theme-color" content="#001840" />
-        <meta name="title" content="TradingHub.site — Free Deriv Bots & Smart Trading Automation" />
-        <meta name="description" content="TradingHub.site — Free Deriv bots, AI market scanner, automated and manual trading tools. Trade smarter on Volatility, Boom/Crash, Step and more synthetic markets." />
-        <meta property="og:title" content="TradingHub.site — Free Deriv Bots & Smart Trading Automation" />
-        <meta property="og:description" content="TradingHub.site — Free Deriv bots, AI market scanner, automated and manual trading tools. Trade smarter on Volatility, Boom/Crash, Step and more synthetic markets." />
+        <meta name="title" content="TradingHubs.site — Free Deriv Bots & Smart Trading Automation" />
+        <meta name="description" content="TradingHubs.site — Free Deriv bots, AI market scanner, automated and manual trading tools. Trade smarter on Volatility, Boom/Crash, Step and more synthetic markets." />
+        <meta property="og:title" content="TradingHubs.site — Free Deriv Bots & Smart Trading Automation" />
+        <meta property="og:description" content="TradingHubs.site — Free Deriv bots, AI market scanner, automated and manual trading tools. Trade smarter on Volatility, Boom/Crash, Step and more synthetic markets." />
         <meta property="og:type" content="website" />
-        <title id="page-title">TradingHub.site — Free Deriv Bots & Smart Trading Automation</title>
+        <title id="page-title">TradingHubs.site — Free Deriv Bots & Smart Trading Automation</title>
         <script>
             // Animated page title — eye-catching single-line text that cycles
             // through compelling variants. Pauses when the tab is hidden.
@@ -203,8 +203,8 @@
                 if (!titleEl) return;
 
                 var variants = [
-                    'TradingHub.site — Free Deriv Bots & Smart Trading Automation',
-                    '🤖 Load Free Bots • Trade Smarter • TradingHub.site',
+                    'TradingHubs.site — Free Deriv Bots & Smart Trading Automation',
+                    '🤖 Load Free Bots • Trade Smarter • TradingHubs.site',
                     '📈 AI Market Scanner • Deriv Trading Workspace',
                     '⚡ Speedbot & Bot Builder • No Code Required'
                 ];
@@ -430,6 +430,55 @@
                     transform: translateX(330%);
                 }
             }
+            /* Phone fit: the desktop wordmark is 26px + 0.44em tracking (~430px
+               wide) and overflows a 375px viewport. Scale it so the full
+               "TRADINGHUBS.SITE" name stays visible and centred on phones. */
+            @media (max-width: 560px) {
+                .boot-splash__glow {
+                    width: 240px;
+                    height: 240px;
+                }
+                .boot-splash__mark {
+                    width: 72px;
+                    height: 72px;
+                    border-radius: 18px;
+                }
+                .boot-splash__mark span {
+                    font-size: 32px;
+                }
+                .boot-splash__word {
+                    margin-top: 28px;
+                    font-size: 17px;
+                    letter-spacing: 0.22em;
+                    text-indent: 0.22em;
+                    max-width: calc(100vw - 24px);
+                    text-align: center;
+                }
+                .boot-splash__tag {
+                    margin-top: 10px;
+                    font-size: 9.5px;
+                    letter-spacing: 0.34em;
+                    text-indent: 0.34em;
+                }
+                .boot-splash__bar {
+                    margin-top: 26px;
+                    width: 150px;
+                }
+            }
+            @media (max-width: 360px) {
+                .boot-splash__mark {
+                    width: 64px;
+                    height: 64px;
+                }
+                .boot-splash__mark span {
+                    font-size: 28px;
+                }
+                .boot-splash__word {
+                    font-size: 15px;
+                    letter-spacing: 0.16em;
+                    text-indent: 0.16em;
+                }
+            }
             @media (prefers-reduced-motion: reduce) {
                 #boot-splash,
                 #boot-splash * {
@@ -443,10 +492,10 @@
         <div id="modal_root" class="modal-root"></div>
         <div id="popup_root" class="popup-root"></div>
         <div id="root"></div>
-        <div id="boot-splash" role="status" aria-label="Loading TradingHub.site">
+        <div id="boot-splash" role="status" aria-label="Loading TradingHubs.site">
             <div class="boot-splash__glow"></div>
             <div class="boot-splash__mark"><span>T</span></div>
-            <div class="boot-splash__word">TRADINGHUB.SITE</div>
+            <div class="boot-splash__word">TRADINGHUBS.SITE</div>
             <div class="boot-splash__tag">AI Trading Terminal</div>
             <div class="boot-splash__status" id="boot-splash-status">Warming up the bot engine…</div>
             <div class="boot-splash__bar"><i></i></div>

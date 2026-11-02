@@ -180,8 +180,8 @@ const AutoAIPage = observer(() => {
                     </div>
                 </div>
                 <div className='auto-ai__list'>
-                    {STRATEGIES.map(s => (
-                        <article key={s.id} className='auto-ai__card'>
+                    {STRATEGIES.map((s, i) => (
+                        <article key={s.id} className='auto-ai__card' style={{ animationDelay: `${i * 100}ms` }}>
                             <header>
                                 <h2>{s.name}</h2>
                                 {s.popular && <span className='hub-pill'>Popular</span>}

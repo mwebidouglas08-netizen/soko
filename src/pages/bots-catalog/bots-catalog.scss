@@ -65,6 +65,8 @@
     flex-direction: column;
     gap: 0.75rem;
     transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    animation: lp-card-rise 0.5s ease-out forwards;
+    opacity: 0;
 }
 
 .bots-card:hover {
@@ -185,4 +187,9 @@
     .bots-catalog__grid {
         grid-template-columns: repeat(2, minmax(240px, 1fr));
     }
+}
+
+@keyframes lp-card-rise {
+    0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }

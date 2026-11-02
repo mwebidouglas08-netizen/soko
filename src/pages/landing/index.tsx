@@ -4,7 +4,6 @@ import './landing.scss';
 const NAV = [
     { label: 'How it works', href: '#lp-how' },
     { label: 'Bots', href: '#lp-features' },
-    { label: 'Reviews', href: '#lp-reviews' },
     { label: 'Course', href: '#lp-course-hero' },
     { label: 'FAQ', href: '#lp-faq' },
 ];
@@ -26,50 +25,50 @@ const STEPS = [
     {
         n: '01',
         title: 'Create your free account',
-        body: 'Sign in with your Deriv account in seconds. No card required, no commitment.',
+        body: 'Sign in with your Deriv account. No card needed, no commitment.',
     },
     {
         n: '02',
-        title: 'Pick a bot or build your own',
-        body: 'Load a proven strategy from the free bot library, or use the visual bot builder — no coding needed.',
+        title: 'Pick a bot',
+        body: 'Choose a proven strategy from the free bot library, or build your own visually.',
     },
     {
         n: '03',
-        title: 'Trade with structure',
-        body: 'Run it manually, automate it, or copy a top strategy. Track everything from one workspace.',
+        title: 'Start trading',
+        body: 'Run your bot on a demo account first. Go live only when you are ready.',
     },
 ];
 
 const FEATURES = [
     {
-        icon: '📚',
+        icon: '🤖',
         title: 'Free Bot Library',
-        body: 'Dozens of proven strategies, ready to load in one click. No coding required.',
+        body: 'Proven strategies ready in one click. No coding required.',
     },
     {
         icon: '🧠',
         title: 'Smart AI Recovery',
-        body: 'AI-driven recovery selection that adapts to losing streaks and protects your session limits.',
+        body: 'AI adapts to losing streaks and protects your session limits.',
     },
     {
         icon: '📊',
         title: 'Market Analysis',
-        body: 'Live digit distributions, momentum and confidence scores for every synthetic market.',
+        body: 'Live digit stats and confidence scores for every market.',
     },
     {
         icon: '⚡',
-        title: 'Speedbot',
-        body: 'One-click automated trading that catches signals faster than you can click.',
+        title: 'Speed Bot',
+        body: 'One-click automated trading that acts fast on signals.',
     },
     {
         icon: '📈',
         title: 'Pro Charts',
-        body: 'Full technical indicators on live charts — read the market your way.',
+        body: 'Full technical indicators on live trading charts.',
     },
     {
         icon: '🛠️',
         title: 'Bot Builder',
-        body: 'A visual Blockly builder with quick strategies and custom blocks. No code, all control.',
+        body: 'Visual builder to create your own strategy. No code, all control.',
     },
 ];
 
@@ -90,34 +89,34 @@ const REVIEWS = [
 ];
 
 const COURSE = [
-    { n: '01', t: 'Introduction to Deriv' },
+    { n: '01', t: 'Getting started with Deriv' },
     { n: '02', t: 'Understanding synthetic indices' },
     { n: '03', t: 'Setting up your workspace' },
-    { n: '04', t: 'Reading digit distributions' },
+    { n: '04', t: 'Reading digit patterns' },
     { n: '05', t: 'Your first bot strategy' },
     { n: '06', t: 'Risk management basics' },
 ];
 
 const FAQ = [
     {
-        q: 'Is TradingHubs.site free to use?',
-        a: 'Yes. The bot library, course and core trading tools are free. You only need a Deriv account to trade.',
+        q: 'Is TradingHubs.site free?',
+        a: 'Yes. The bot library, course, and core tools are free. You only need a Deriv account to trade.',
     },
     {
         q: 'Do I need to know how to code?',
-        a: 'No. Every free bot loads in one click, and the visual Bot Builder lets you build strategies without writing code.',
+        a: 'No. Every free bot loads in one click, and the visual Bot Builder lets you build without code.',
     },
     {
-        q: 'Can I trade on a demo account first?',
-        a: 'Absolutely. Start on a Deriv demo account, paper-trade the signals, and go live only when the edge is proven.',
+        q: 'Can I try it on a demo account?',
+        a: 'Yes. Start on a Deriv demo account, test the signals, and go live only when you are ready.',
     },
     {
         q: 'What markets can I trade?',
-        a: 'Volatility, Boom/Crash, Step, Range Break and Jump indices — synthetic markets that trade 24/7.',
+        a: 'Volatility, Boom/Crash, Step, Range Break and Jump indices — synthetic markets trading 24/7.',
     },
     {
-        q: 'How does the Smart AI recovery work?',
-        a: 'It analyzes recent outcomes and automatically selects a recovery path that respects your session stop-loss and take-profit.',
+        q: 'How does Smart AI recovery work?',
+        a: 'It reviews recent results and picks a recovery path that respects your stop-loss and take-profit.',
     },
     {
         q: 'Is my Deriv account secure?',
@@ -215,20 +214,20 @@ const Landing = ({ onEnter }: LandingProps) => {
                 <div className='lp__hero-content'>
                     <div className='lp__hero-text'>
                         <span className='lp__hero-eyebrow' data-reveal>
-                            <i /> FREE STRATEGIES. REAL MARKET TOOLS.
+                            <i /> Free trading bots for everyone
                         </span>
                         <h1 className='lp__hero-h1' data-reveal>
-                            <span className='lp__word reveal-1'>Free</span>{' '}
-                            <span className='lp__word reveal-2'>bots</span>{' '}
-                            <span className='lp__word reveal-3'>ready</span>{' '}
-                            <span className='lp__word reveal-4'>to load</span>
+                            <span className='lp__word reveal-1'>Trade</span>{' '}
+                            <span className='lp__word reveal-2'>smarter</span>{' '}
+                            <span className='lp__word reveal-3'>with</span>{' '}
+                            <span className='lp__word reveal-4'>TradingHubs</span>
                         </h1>
                         <p className='lp__hero-sub' data-reveal>
-                            Search proven templates, open tutorial guides, and move directly into the bot builder when you are ready to test.
+                            Load proven bots in one click. No coding. No experience needed. Start on a free Deriv demo account.
                         </p>
                         <div className='lp__hero-cta' data-reveal>
                             <button type='button' className='lp__hero-btn lp__hero-btn--primary' onClick={onEnter}>
-                                Log In and Trade
+                                Get Started Free
                             </button>
                             <button type='button' className='lp__hero-btn lp__hero-btn--outline' onClick={onEnter}>
                                 Create Free Account
@@ -237,7 +236,7 @@ const Landing = ({ onEnter }: LandingProps) => {
                         <div className='lp__hero-trust' data-reveal>
                             <span>🔒 Deriv OAuth Secure</span>
                             <span>📊 Demo Accounts Supported</span>
-                            <span>📱 Mobile Responsive</span>
+                            <span>📱 Mobile Friendly</span>
                         </div>
                         <a href='#lp-course-hero' className='lp__hero-link' data-reveal>
                             Explore the course ↓
@@ -413,7 +412,7 @@ const Landing = ({ onEnter }: LandingProps) => {
             {/* Final CTA + footer */}
             <section className='lp__final'>
                 <div className='lp__final-inner' data-reveal>
-                    <h2 className='lp__section-title'>Ready to transform your trading?</h2>
+                    <h2 className='lp__section-title'>Ready to start trading?</h2>
                     <p className='lp__final-text'>Open the workspace, load a free bot, and trade with structure today.</p>
                     <button type='button' className='lp__hero-btn lp__hero-btn--primary' onClick={onEnter}>
                         Get Started Free

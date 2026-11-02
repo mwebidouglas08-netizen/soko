@@ -210,6 +210,14 @@
             background: linear-gradient(150deg, rgb(20 43 67 / 52%), rgb(4 13 28 / 28%));
         }
 
+        &:hover &__card-icon {
+            animation: lp-card-pulse 2s ease-in-out infinite;
+        }
+
+        &:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+
         &:focus-visible {
             outline: 2px solid var(--nav-color);
             outline-offset: 4px;
@@ -455,4 +463,9 @@
     50% {
         opacity: 0;
     }
+}
+
+@keyframes lp-card-pulse {
+    0%, to { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.9; }
 }

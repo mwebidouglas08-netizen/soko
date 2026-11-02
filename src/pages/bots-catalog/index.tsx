@@ -79,10 +79,14 @@ const BotsCatalog = () => {
             </header>
 
             <div className='bots-catalog__grid'>
-                {bots.map(bot => {
+                {bots.map((bot, i) => {
                     const theme = botVisual(bot.file);
+                    const cardStyle = {
+                        '--bot-color': theme.color as string,
+                        animationDelay: `${i * 80}ms`,
+                    } as React.CSSProperties;
                     return (
-                        <article key={bot.file} className='bots-card' style={{ '--bot-color': theme.color } as React.CSSProperties}>
+                        <article key={bot.file} className='bots-card' style={cardStyle}>
                             <div className='bots-card__icon'>
                                 <span className='bots-card__icon-symbol' dangerouslySetInnerHTML={{ __html: botIcon(theme.kind) }} />
                             </div>

@@ -172,11 +172,12 @@ const DashboardLaunchpad = observer(() => {
                 </p>
 
                 <div className='launchpad__cards'>
-                    {CARDS.map(card => (
+                    {CARDS.map((card, i) => (
                         <button
                             key={card.number}
                             type='button'
                             className={`launchpad__card launchpad__card--${card.tone}`}
+                            style={{ animationDelay: `${i * 120}ms` }}
                             onClick={() => navigateToHubView(card.view)}
                         >
                             <span className='launchpad__card-top'>

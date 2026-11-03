@@ -81,7 +81,7 @@ const BotsCatalog = () => {
             <div className='bots-catalog__grid'>
                 {bots.map((bot, i) => {
                     const theme = botVisual(bot.file);
-                    const cardStyle: React.CSSProperties = {
+                    const cardStyle: React.CSSProperties & { '--bot-color'?: string } = {
                         '--bot-color': theme.color as string,
                         animationDelay: `${i * 80}ms`,
                     };

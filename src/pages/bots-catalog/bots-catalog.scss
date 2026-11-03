@@ -1,3 +1,4 @@
+/* Bot catalog — freebots grid, card animations, loaders. Matches reference app freebots screen design. */
 .bots-catalog {
     padding: 8px 4px 40px;
     max-width: 1200px;
@@ -34,7 +35,7 @@
 .bots-catalog__filter {
     cursor: pointer;
     background: #0a1a2f;
-    border: 1px solid #143154;
+    border: 1px solid color-mix(in srgb, #143154 30%, transparent);
     color: #9fb6d4;
     border-radius: 999px;
     padding: 8px 16px;
@@ -46,140 +47,15 @@
         background 0.2s;
 
     &.is-active {
-        background: linear-gradient(135deg, #22e7ff, #2563eb);
-        color: #02121f;
-        border-color: transparent;
-    }
-}
-.bots-catalog__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1.2rem;
-}
-.bots-card {
-    background: var(--surface-panel, #0f172a);
-    border: 1px solid color-mix(in srgb, var(--border-normal, #cbd5e1) 30%, transparent);
-    border-radius: 12px;
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-    animation: lp-card-rise 0.5s ease-out forwards;
-    opacity: 0;
-}
-
-.bots-card:hover {
-    transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--bot-color, #60a5fa) 40%, transparent);
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--bot-color, #60a5fa) 15%, transparent);
-}
-
-.bots-card__icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: color-mix(in srgb, var(--bot-color, #60a5fa) 12%, transparent);
-    border: 1px solid color-mix(in srgb, var(--bot-color, #60a5fa) 25%, transparent);
-}
-
-.bots-card__icon-symbol {
-    font-size: 20px;
-    color: var(--bot-color, #60a5fa);
-}
-
-.bots-card__content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.bots-card__header {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.bots-card__tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.15rem 0.5rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background: color-mix(in srgb, var(--bot-color) 15%, transparent);
-    color: var(--bot-color);
-    border: 1px solid color-mix(in srgb, var(--bot-color) 35%, transparent);
-}
-
-.bots-card__premium {
-    color: #ffd700;
-    letter-spacing: 1px;
-    font-size: 0.7rem;
-    font-weight: 900;
-    background: #2a2200;
-    border: 1px solid #6b5a00;
-    border-radius: 6px;
-    padding: 0.15rem 0.5rem;
-}
-
-.bots-card__name {
-    margin: 0;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--text-prominent);
-    letter-spacing: -0.01em;
-}
-
-.bots-card__desc {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-    flex: 1;
-}
-
-.bots-card__footer {
-    margin-top: auto;
-}
-
-.bots-card__load {
-    width: 100%;
-    padding: 0.7rem;
-    background: linear-gradient(135deg, var(--bot-color, #60a5fa), color-mix(in srgb, var(--bot-color, #60a5fa) 80%, #2563eb));
-    color: #02121f;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.2s;
-}
-
-.bots-card__load:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--bot-color, #60a5fa) 30%, transparent);
-}
-
-.bots-card__load:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-@media (max-width: 560px) {
-    .bots-catalog__grid {
-        grid-template-columns: 1fr;
+        background: color-mix(in srgb, #001840 40%, transparent);
+        border-color: #22e7ff;
+        color: #fff;
     }
 
-    .bots-card {
-        padding: 1rem;
+    &:hover:not(.is-active) {
+        border-color: #22e7ff;
+        color: #fff;
+        background: color-mix(in srgb, #001840 30%, transparent);
     }
 }
 
@@ -187,6 +63,130 @@
     .bots-catalog__grid {
         grid-template-columns: repeat(2, minmax(240px, 1fr));
     }
+}
+
+@media (min-width: 861px) {
+    .bots-catalog__grid {
+        grid-template-columns: repeat(3, minmax(200px, 1fr));
+    }
+}
+
+.bots-card {
+    background: var(--surface-panel, #0f172a);
+    border: 1px solid color-mix(in srgb, #cbd5e1 30%, transparent);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    animation: lp-card-rise 0.5s ease-out forwards both;
+    opacity: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.bots-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(34, 231, 255, 0.03), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.bots-card:hover::before {
+    opacity: 1;
+}
+
+.bots-card:hover {
+    transform: translateY(-2px);
+    border-color: #22e7ff;
+    box-shadow: 0 8px 24px color-mix(in srgb, #22e7ff 15%, transparent);
+}
+
+.bots-card__icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 12px;
+    background: color-mix(in srgb, var(--bot-color, #22e7ff) 10%, transparent);
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--bot-color, #22e7ff) 15%, transparent);
+}
+
+.bots-card__icon-symbol {
+    font-size: 24px;
+    color: var(--bot-color, #22e7ff);
+}
+
+.bots-card__content {
+    text-align: center;
+}
+
+.bots-card__tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+    background: color-mix(in srgb, var(--bot-color, #22e7ff) 15%, transparent);
+    color: var(--bot-color, #22e7ff);
+}
+
+.bots-card__tag.premium {
+    background: color-mix(in srgb, #ffd700 20%, transparent);
+    color: #fff;
+}
+
+.bots-card__name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.bots-card__desc {
+    font-size: 12px;
+    color: #9fb6d4;
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+
+.bots-card__load {
+    width: 100%;
+    padding: 8px;
+    background: var(--bot-color, #22e7ff);
+    color: #020a16;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.bots-card__load:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--bot-color, #22e7ff) 80%, transparent);
+    transform: translateY(-1px);
+}
+
+.bots-card__load:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+}
+
+.bots-card__load:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.bots-card__load.lp-loading {
+    pointer-events: none;
+    background: color-mix(in srgb, var(--bot-color, #22e7ff) 40%, transparent);
 }
 
 @keyframes lp-card-rise {

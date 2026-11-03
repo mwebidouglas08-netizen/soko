@@ -67,7 +67,7 @@ const BotsCatalog = () => {
         <div className='bots-catalog'>
             <header className='bots-catalog__head'>
                 <span className='bots-catalog__eyebrow'>FREE WORKSPACE</span>
-                <h2 className='bots-catalog__title'>Free &amp; Premium AI Bots</h2>
+                <h2 className='bots-catalog__title'>Free & Premium AI Bots</h2>
                 <p className='bots-catalog__sub'>Load a proven strategy straight into your bot builder — no coding required.</p>
                 <div className='bots-catalog__filters'>
                     {(['all', 'free', 'premium'] as const).map(f => (
@@ -81,10 +81,10 @@ const BotsCatalog = () => {
             <div className='bots-catalog__grid'>
                 {bots.map((bot, i) => {
                     const theme = botVisual(bot.file);
-                    const cardStyle = {
+                    const cardStyle: React.CSSProperties = {
                         '--bot-color': theme.color as string,
                         animationDelay: `${i * 80}ms`,
-                    } as React.CSSProperties;
+                    };
                     return (
                         <article key={bot.file} className='bots-card' style={cardStyle}>
                             <div className='bots-card__icon'>
@@ -106,6 +106,11 @@ const BotsCatalog = () => {
                         </article>
                     );
                 })}
+                {loading && (
+                    <div className='bots-card__load lp-loading' style={{ textAlign: 'center', marginTop: '1rem', fontSize: '12px', color: '#9fb6d4' }}>
+                        Loading bot…
+                    </div>
+                )}
             </div>
         </div>
     );

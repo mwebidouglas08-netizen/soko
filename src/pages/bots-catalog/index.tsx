@@ -19,6 +19,7 @@ const BOTS: Bot[] = [
     { file: 'volt-scalper', name: 'Volt Scalper', tag: 'SCALP', desc: 'Fast volatility scalping with tight recovery and session take-profit.', color: '#7effd8' },
     { file: 'apex-ai', name: 'Apex AI', tag: 'PREMIUM', desc: 'Adaptive multi-market AI with automatic recovery selection.', color: '#FFD700', premium: true },
     { file: 'neutrade-ai', name: 'Neutrade', tag: 'BALANCED', desc: 'Balanced risk engine that sizes stakes from live confidence scores.', color: '#60a5fa' },
+    { file: 'dollar-printer-ai', name: 'Dollar Printer', tag: 'PREMIUM', desc: 'AI-powered volatility analyzer that identifies favorable market opportunities and trades over/under 4/5/6/7/8 signals with intelligent stake management and martingale recovery.', color: '#10b981', premium: true },
     { file: 'straddle-edge', name: 'Straddle Edge', tag: 'STRADDLE', desc: 'Straddles Rise/Fall around a digit bias with dual-direction protection.', color: '#a78bfa' },
     { file: 'aurora-parity', name: 'Aurora Parity', tag: 'PARITY', desc: 'Even/Odd parity hunter with streak-aware recovery.', color: '#f093fb', premium: true },
     { file: 'obsidian-parity', name: 'Obsidian Parity', tag: 'PARITY', desc: 'Deep-sample even/odd engine tuned for sustained sessions.', color: '#c084fc', premium: true },

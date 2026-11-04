@@ -41,6 +41,7 @@ export const BOT_VISUALS: Record<string, BotTheme> = {
     vertex: { tag: 'QUICK', kind: 'vertex', color: '#22e7ff', color2: '#2563eb', glow: '#22e7ff' },
     quantum: { tag: 'QUICK', kind: 'quantum', color: '#ffd700', color2: '#f59e0b', glow: '#ffd700' },
     // bots-catalog
+    'dollar-printer-ai': { tag: 'PREMIUM', kind: 'balanced', color: '#10b981', color2: '#059669', glow: '#10b981' },
     'digit-nexus-ai': { tag: 'DIGITS', kind: 'digits', color: '#22e7ff', color2: '#2563eb', glow: '#22e7ff' },
     'volt-scalper': { tag: 'SCALP', kind: 'scalp', color: '#7effd8', color2: '#10b981', glow: '#7effd8' },
     'apex-ai': { tag: 'PREMIUM', kind: 'premium', color: '#ffd700', color2: '#f59e0b', glow: '#ffd700', premium: true },

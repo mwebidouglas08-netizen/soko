@@ -1,0 +1,466 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="dp_stake">Stake</variable>
+    <variable id="dp_martingale">Martingale</variable>
+    <variable id="dp_signal">Entry Signal</variable>
+    <variable id="dp_take_profit">Take Profit</variable>
+    <variable id="dp_stop_loss">Stop Loss</variable>
+    <variable id="dp_runs">Runs</variable>
+    <variable id="dp_direction">Trade Direction</variable>
+  </variables>
+  <block type="trade_definition" id="dp_trade_definition" deletable="false" x="0" y="60">
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="dp_market" deletable="false" movable="false">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">random_index</field>
+        <field name="SYMBOL_LIST">R_100</field>
+        <field name="ALTERNATE_MARKETS">FALSE</field>
+        <field name="ALTERNATE_EVERY">1</field>
+        <field name="MULTI_MARKET">FALSE</field>
+        <field name="VH_ENABLED">FALSE</field>
+        <field name="VH_SETTINGS_BTN">VH Settings</field>
+        <next>
+          <block type="trade_definition_tradetype" id="dp_trade_type" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">digits</field>
+            <field name="TRADETYPE_LIST">overunder</field>
+            <next>
+              <block type="trade_definition_contracttype" id="dp_contract_type" deletable="false" movable="false">
+                <field name="TYPE_LIST">both</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="dp_interval" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="dp_restart_buy_sell" deletable="false" movable="false">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="dp_restart_error" deletable="false" movable="false">
+                            <field name="RESTARTONERROR">TRUE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="dp_set_stake">
+        <field name="VAR" id="dp_stake">Stake</field>
+        <value name="VALUE">
+          <block type="math_number" id="dp_stake_value">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="dp_set_martingale">
+            <field name="VAR" id="dp_martingale">Martingale</field>
+            <value name="VALUE">
+              <block type="math_number" id="dp_martingale_value">
+                <field name="NUM">2</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="dp_set_take_profit">
+                <field name="VAR" id="dp_take_profit">Take Profit</field>
+                <value name="VALUE">
+                  <block type="math_number" id="dp_take_profit_value">
+                    <field name="NUM">15</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="dp_set_stop_loss">
+                    <field name="VAR" id="dp_stop_loss">Stop Loss</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="dp_stop_loss_value">
+                        <field name="NUM">50</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="dp_reset_runs_start" collapsed="true">
+                        <field name="VAR" id="dp_runs">Runs</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="dp_zero_start">
+                            <field name="NUM">0</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="dp_reset_signal_start" collapsed="true">
+                            <field name="VAR" id="dp_signal">Entry Signal</field>
+                            <value name="VALUE">
+                              <block type="logic_boolean" id="dp_false_start">
+                                <field name="BOOL">FALSE</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="variables_set" id="dp_initial_state">
+                                <field name="VAR" id="dp_direction">Trade Direction</field>
+                                <value name="VALUE">
+                                  <block type="logic_boolean" id="dp_direction_false">
+                                    <field name="BOOL">FALSE</field>
+                                  </block>
+                                </value>
+                                <next>
+                                  <block type="trade_definition_tradeoptions" id="dp_trade_options">
+                                    <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>
+                                    <field name="DURATIONTYPE_LIST">t</field>
+                                    <value name="DURATION">
+                                      <shadow type="math_number_positive" id="dp_duration">
+                                        <field name="NUM">1</field>
+                                      </shadow>
+                                    </value>
+                                    <value name="AMOUNT">
+                                      <shadow type="math_number_positive" id="dp_amount_shadow">
+                                        <field name="NUM">1</field>
+                                      </shadow>
+                                      <block type="variables_get" id="dp_get_stake">
+                                        <field name="VAR" id="dp_stake">Stake</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="controls_whileUntil" id="dp_initial_scan_loop" collapsed="true">
+        <field name="MODE">UNTIL</field>
+        <value name="BOOL">
+          <block type="variables_get" id="dp_initial_signal_read">
+            <field name="VAR" id="dp_signal">Entry Signal</field>
+          </block>
+        </value>
+        <statement name="DO">
+          <block type="timeout" id="dp_initial_scan_delay">
+            <statement name="TIMEOUTSTACK">
+              <block type="controls_if" id="dp_initial_pattern_choice">
+                <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="3"></mutation>
+                <value name="IF0">
+                  <block type="dp_over_condition" id="dp_over_4">
+                    <field name="CONDITION">OVER_4</field>
+                    <value name="N">
+                      <shadow type="math_number" id="dp_odd_count">
+                        <field name="NUM">4</field>
+                      </shadow>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="variables_set" id="dp_direction_over">
+                    <field name="VAR" id="dp_direction">Trade Direction</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="dp_over_direction_value">
+                        <field name="NUM">1</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="dp_signal_over">
+                        <field name="VAR" id="dp_signal">Entry Signal</field>
+                        <value name="VALUE">
+                          <block type="logic_boolean" id="dp_true_over">
+                            <field name="BOOL">TRUE</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <value name="IF1">
+                  <block type="dp_under_condition" id="dp_under_8">
+                    <field name="CONDITION">UNDER_8</field>
+                    <value name="N">
+                      <shadow type="math_number" id="dp_even_count">
+                        <field name="NUM">4</field>
+                      </shadow>
+                    </value>
+                  </block>
+                </statement>
+                <statement name="DO1">
+                  <block type="variables_set" id="dp_direction_under">
+                    <field name="VAR" id="dp_direction">Trade Direction</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="dp_under_direction_value">
+                        <field name="NUM">-1</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="dp_signal_under">
+                        <field name="VAR" id="dp_signal">Entry Signal</field>
+                        <value name="VALUE">
+                          <block type="logic_boolean" id="dp_true_under">
+                            <field name="BOOL">TRUE</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <value name="IF2">
+                  <block type="dp_equal_condition" id="dp_equal_4">
+                    <field name="CONDITION">EQUAL_4</field>
+                    <value name="N">
+                      <shadow type="math_number" id="dp_equal_count">
+                        <field name="NUM">4</field>
+                      </shadow>
+                    </value>
+                  </block>
+                </statement>
+                <statement name="DO2">
+                  <block type="variables_set" id="dp_direction_equal">
+                    <field name="VAR" id="dp_direction">Trade Direction</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="dp_equal_direction_value">
+                        <field name="NUM">0</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="dp_signal_equal">
+                        <field name="VAR" id="dp_signal">Entry Signal</field>
+                        <value name="VALUE">
+                          <block type="logic_boolean" id="dp_true_equal">
+                            <field name="BOOL">TRUE</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <value name="IF3">
+                  <block type="dp_exit_condition" id="dp_exit_profit">
+                    <field name="CONDITION">PROFIT_TARGET</field>
+                  </block>
+                </statement>
+                <statement name="DO3">
+                  <block type="variables_set" id="dp_signal_exit">
+                    <field name="VAR" id="dp_signal">Entry Signal</field>
+                    <value name="VALUE">
+                      <block type="logic_boolean" id="dp_exit_true">
+                        <field name="BOOL">TRUE</field>
+                      </block>
+                    </value>
+                  </block>
+                </statement>
+              </block>
+            </statement>
+            <value name="SECONDS">
+              <block type="math_number" id="dp_initial_delay_value">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <next>
+          <block type="trade_definition_tradeoptions" id="dp_trade_options_2">
+            <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>
+            <field name="DURATIONTYPE_LIST">t</field>
+            <value name="DURATION">
+              <shadow type="math_number_positive" id="dp_duration_2">
+                <field name="NUM">1</field>
+              </shadow>
+            </value>
+            <value name="AMOUNT">
+              <shadow type="math_number_positive" id="dp_amount_shadow_2">
+                <field name="NUM">1</field>
+              </shadow>
+              <block type="variables_get" id="dp_get_stake_2">
+                <field name="VAR" id="dp_stake">Stake</field>
+              </block>
+            </value>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="after_purchase" id="dp_after_purchase" x="714" y="60">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="controls_if" id="dp_result_check" collapsed="true">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+        <value name="IF0">
+          <block type="contract_check_result" id="dp_is_win">
+            <field name="CHECK_RESULT">win</field>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="variables_set" id="dp_reset_stake_on_win">
+            <field name="VAR" id="dp_stake">Stake</field>
+            <value name="VALUE">
+              <block type="variables_get" id="dp_base_stake_on_win">
+                <field name="VAR" id="Kc3A+R7Kq]/a=$ACDW!y">Stake []</field>
+              </block>
+            </value>
+            <next>
+              <block type="math_change" id="dp_increment_wins">
+                <field name="VAR" id="dp_runs">Runs</field>
+                <value name="DELTA">
+                  <shadow type="math_number" id="dp_one_win">
+                    <field name="NUM">1</field>
+                  </shadow>
+                </value>
+                <next>
+                  <block type="controls_if" id="dp_three_wins_check">
+                    <value name="IF0">
+                      <block type="logic_compare" id="dp_three_wins_value">
+                        <field name="OP">GTE</field>
+                        <value name="A">
+                          <block type="variables_get" id="dp_wins_read">
+                            <field name="VAR" id="dp_runs">Runs</field>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="math_number" id="dp_three_wins_value_num">
+                            <field name="NUM">3</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="variables_set" id="dp_disable_signal_after_three">
+                        <field name="VAR" id="dp_signal">Entry Signal</field>
+                        <value name="VALUE">
+                          <block type="logic_boolean" id="dp_signal_false_after_three">
+                            <field name="BOOL">FALSE</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="dp_reset_wins_after_three">
+                            <field name="VAR" id="dp_runs">Runs</field>
+                            <value name="VALUE">
+                              <block type="math_number" id="dp_zero_wins_after_three">
+                                <field name="NUM">0</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="variables_set" id="dp_reset_stake_after_three">
+                                <field name="VAR" id="dp_stake">Stake</field>
+                                <value name="VALUE">
+                                  <block type="variables_get" id="dp_base_stake_after_three">
+                                    <field name="VAR" id="Kc3A+R7Kq]/a=$ACDW!y">Stake []</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+  <block type="before_purchase" id="dp_purchase" collapsed="true" deletable="false" x="0" y="1150">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="controls_if" id="dp_direction_choice">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="3"></mutation>
+        <value name="IF0">
+          <block type="logic_compare" id="dp_direction_is_even">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="variables_get" id="dp_direction_read">
+                <field name="VAR" id="dp_direction">Trade Direction</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="dp_even_direction_number">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="apollo_purchase2" id="dp_buy_even">
+            <field name="PURCHASE_LIST">DIGITEVEN</field>
+          </block>
+        </statement>
+        <value name="IF1">
+          <block type="logic_compare" id="dp_direction_is_odd">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="variables_get" id="dp_direction_read_odd">
+                <field name="VAR" id="dp_direction">Trade Direction</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="dp_odd_direction_number">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <statement name="DO1">
+          <block type="apollo_purchase2" id="dp_buy_odd">
+            <field name="PURCHASE_LIST">DIGITODD</field>
+          </block>
+        </statement>
+        <value name="IF2">
+          <block type="logic_compare" id="dp_direction_is_over">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="variables_get" id="dp_direction_read_over">
+                <field name="VAR" id="dp_direction">Trade Direction</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="dp_over_direction_number">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <statement name="DO2">
+          <block type="apollo_purchase2" id="dp_buy_over">
+            <field name="PURCHASE_LIST">DIGITOVER</field>
+            <value name="PREDICTION">
+              <shadow type="math_number_positive" id="dp_prediction_over">
+                <field name="NUM">4</field>
+              </shadow>
+            </value>
+          </block>
+        </statement>
+        <value name="IF3">
+          <block type="logic_compare" id="dp_direction_is_under">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="variables_get" id="dp_direction_read_under">
+                <field name="VAR" id="dp_direction">Trade Direction</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="dp_under_direction_number">
+                <field name="NUM">-1</field>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <statement name="DO3">
+          <block type="apollo_purchase2" id="dp_buy_under">
+            <field name="PURCHASE_LIST">DIGITUNDER</field>
+            <value name="PREDICTION">
+              <shadow type="math_number_positive" id="dp_prediction_under">
+                <field name="NUM">5</field>
+              </shadow>
+            </value>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+</xml>

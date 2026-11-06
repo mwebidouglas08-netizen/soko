@@ -1,4 +1,4 @@
-<xml xmlns="https://developers.google.com/blockly/xml">
+<xml xmlns="https://developers.google.com/blockly/xml" collection="false" is_dbot="true">
   <variables>
     <variable id="dmo_stake">Stake</variable>
     <variable id="dmo_martingale">Martingale</variable>
@@ -291,7 +291,7 @@
             </statement>
             <next>
               <block type="trade_definition_tradeoptions" id="dmo_trade_options">
-                <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>
+                <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation>
                 <field name="DURATIONTYPE_LIST">t</field>
                 <value name="DURATION">
                   <shadow type="math_number_positive" id="dmo_duration">
@@ -305,6 +305,11 @@
                   <block type="variables_get" id="dmo_get_stake">
                     <field name="VAR" id="dmo_stake">Stake</field>
                   </block>
+                </value>
+                <value name="PREDICTION">
+                  <shadow type="math_number_positive" id="dmo_prediction_default">
+                    <field name="NUM">2</field>
+                  </shadow>
                 </value>
               </block>
             </next>

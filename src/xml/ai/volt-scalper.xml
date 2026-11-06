@@ -1,4 +1,4 @@
-<xml xmlns="https://developers.google.com/blockly/xml">
+<xml xmlns="https://developers.google.com/blockly/xml" collection="false" is_dbot="true">
   <variables>
     <variable id="L@/b)sz/N}%09a72BPX;">Stake</variable>
     <variable id="c5=hz$~!=]^.)CA:21Zd">Martangle</variable>

@@ -1,4 +1,4 @@
-<xml xmlns="https://developers.google.com/blockly/xml">
+<xml xmlns="https://developers.google.com/blockly/xml" collection="false" is_dbot="true">
   <variables>
     <variable id="stake_var">Stake</variable>
     <variable id="trade_count_var">Trade Count</variable>

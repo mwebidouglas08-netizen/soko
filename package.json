@@ -68,6 +68,10 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "core-js@3.47.0": true
+  },
   "devDependencies": {
     "@babel/core": "^7.29.6",
     "@babel/plugin-proposal-class-properties": "^7.18.6",

@@ -24,16 +24,16 @@
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(circle at 18% 12%, rgba(0, 196, 255, 0.18), transparent 32%),
-        radial-gradient(circle at 86% 18%, rgba(255, 193, 7, 0.15), transparent 28%),
-        linear-gradient(#020810cc, #020810f2);
+        radial-gradient(circle at 18% 12%, rgba(0, 196, 255, 0.22), transparent 30%),
+        radial-gradient(circle at 86% 18%, rgba(255, 193, 7, 0.18), transparent 30%);
     pointer-events: none;
+    mix-blend-mode: overlay;
 }
 .bt-splash::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(2, 8, 16, 0.55);
+    background: rgba(2, 8, 16, 0.35);
     pointer-events: none;
 }
 .bt-splash > * {
@@ -48,16 +48,17 @@
 }
 .bt-loader-content {
     text-align: left;
-    background: linear-gradient(135deg, rgba(7, 15, 29, 0.92), rgba(4, 9, 18, 0.9));
-    border: 1px solid rgba(138, 216, 255, 0.2);
-    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(7, 15, 29, 0.78), rgba(4, 9, 18, 0.72));
+    border: 1px solid rgba(138, 216, 255, 0.35);
+    border-radius: 16px;
     width: 100%;
     max-width: 560px;
-    padding: 34px;
+    padding: 40px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 26px 90px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    box-shadow: 0 32px 110px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 .bt-loader-content::before {
     content: '';

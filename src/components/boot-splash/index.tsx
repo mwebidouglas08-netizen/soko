@@ -73,7 +73,6 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
     return (
         <div className={`bt-splash ${leaving ? 'bt-splash--leave' : ''}`} role='status' aria-label='Loading TradingHubs'>
             <div className='bt-loader-content'>
-                <div className='bt-halo'></div>
                 <div className='bt-status-row'><span>Initializing</span><strong>Core</strong></div>
                 <div className='bt-logo-container'>
                     <div className='bt-logo-mark'>
@@ -87,12 +86,6 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
                     <div className='bt-welcome-subtext'>{BRAND_SUBTEXT}</div>
                     <div className='bt-welcome-tagline'>{BRAND_TAGLINE}</div>
                 </div>
-                <div className='bt-orbiter'>
-                    <span /><span /><span />
-                </div>
-                <div className='bt-activity'>
-                    <span /><span /><span /><span />
-                </div>
                 <div className='bt-progress-bar'>
                     <div className='bt-progress-fill' style={{ width: `${progress}%` }} />
                 </div>
@@ -100,7 +93,7 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
                     <span>Boot sequence</span>
                     <span>{progress}%</span>
                 </div>
-                <div className='bt-status-row'><span>Status</span><strong>{status}</strong></div>
+                <div className='bt-status-row bt-status-row--bottom'><span>Status</span><strong>{status}</strong></div>
             </div>
         </div>
     );

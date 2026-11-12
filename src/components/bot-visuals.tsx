@@ -1,26 +1,23 @@
 /**
  * Bot visual themes — attractive icons + gradient palettes for free-bot
- * cards. Every bot gets a distinct visual identity so the catalog is
- * eye-catching and scannable at a glance.
+ * cards. Matches the reference app (binarytool.site) design: cyan #00c4ff
+ * and amber #ffc107 accent colors on a dark canvas.
  */
 export type BotTheme = {
-    /** Short tag shown on the card (e.g. 'DIGITS', 'SCALP'). */
     tag: string;
-    /** Bot category used for the icon. */
     kind: 'digits' | 'scalp' | 'premium' | 'balanced' | 'straddle' | 'parity' | 'extremes' | 'momentum' | 'range' | 'flow' | 'vertex' | 'quantum';
-    /** Primary gradient color. */
     color: string;
-    /** Secondary gradient color. */
     color2: string;
-    /** Glow color for shadows/highlights. */
     glow: string;
-    /** Whether this is a premium/paid bot. */
     premium?: boolean;
 };
 
 const GRAD = (c1: string, c2: string) => `linear-gradient(135deg, ${c1}, ${c2})`;
 
-/** Inline SVG icons for each bot kind — no external image dependencies. */
+const CYAN = '#00c4ff';
+const AMBER = '#ffc107';
+const GREEN = '#27e49c';
+
 const ICON: Record<BotTheme['kind'], string> = {
     digits: `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><rect x='3' y='3' width='18' height='18' rx='2'/><path d='M12 9l3 3 5-5'/><circle cx='9' cy='9' r='1' fill='currentColor'/></svg>`,
     scalp: `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><path d='M12 2l4 20l-8-10z'/><path d='M12 8l4 4l-4 4'/></svg>`,
@@ -38,27 +35,26 @@ const ICON: Record<BotTheme['kind'], string> = {
 
 export const BOT_VISUALS: Record<string, BotTheme> = {
     // trading-bots (quick bots)
-    vertex: { tag: 'QUICK', kind: 'vertex', color: '#22e7ff', color2: '#2563eb', glow: '#22e7ff' },
-    quantum: { tag: 'QUICK', kind: 'quantum', color: '#ffd700', color2: '#f59e0b', glow: '#ffd700' },
+    vertex: { tag: 'QUICK', kind: 'vertex', color: CYAN, color2: '#2563eb', glow: CYAN },
+    quantum: { tag: 'QUICK', kind: 'quantum', color: AMBER, color2: '#f59e0b', glow: AMBER },
     // bots-catalog
-    'dmo-bot': { tag: 'PREMIUM', kind: 'balanced', color: '#f472b6', color2: '#db2777', glow: '#f472b6' },
-    'dollar-printer-ai': { tag: 'PREMIUM', kind: 'balanced', color: '#10b981', color2: '#059669', glow: '#10b981' },
-    'digit-nexus-ai': { tag: 'DIGITS', kind: 'digits', color: '#22e7ff', color2: '#2563eb', glow: '#22e7ff' },
-    'volt-scalper': { tag: 'SCALP', kind: 'scalp', color: '#7effd8', color2: '#10b981', glow: '#7effd8' },
-    'apex-ai': { tag: 'PREMIUM', kind: 'premium', color: '#ffd700', color2: '#f59e0b', glow: '#ffd700', premium: true },
-    'neutrade-ai': { tag: 'BALANCED', kind: 'balanced', color: '#60a5fa', color2: '#3b82f6', glow: '#60a5fa' },
+    'dmo-bot': { tag: 'PREMIUM', kind: 'balanced', color: AMBER, color2: '#d97706', glow: AMBER },
+    'dollar-printer-ai': { tag: 'PREMIUM', kind: 'balanced', color: GREEN, color2: '#059669', glow: GREEN },
+    'digit-nexus-ai': { tag: 'DIGITS', kind: 'digits', color: CYAN, color2: '#2563eb', glow: CYAN },
+    'volt-scalper': { tag: 'SCALP', kind: 'scalp', color: CYAN, color2: '#2563eb', glow: CYAN },
+    'apex-ai': { tag: 'PREMIUM', kind: 'premium', color: AMBER, color2: '#f59e0b', glow: AMBER, premium: true },
+    'neutrade-ai': { tag: 'BALANCED', kind: 'balanced', color: CYAN, color2: '#2563eb', glow: CYAN },
     'straddle-edge': { tag: 'STRADDLE', kind: 'straddle', color: '#a78bfa', color2: '#7c3aed', glow: '#a78bfa' },
-    'aurora-parity': { tag: 'PARITY', kind: 'parity', color: '#f093fb', color2: '#ec4899', glow: '#f093fb', premium: true },
+    'aurora-parity': { tag: 'PARITY', kind: 'parity', color: CYAN, color2: '#2563eb', glow: CYAN, premium: true },
     'obsidian-parity': { tag: 'PARITY', kind: 'parity', color: '#c084fc', color2: '#a855f7', glow: '#c084fc', premium: true },
     'prism-extremes': { tag: 'EXTREMES', kind: 'extremes', color: '#fb7185', color2: '#e11d48', glow: '#fb7185', premium: true },
-    'pulsetrader-ai': { tag: 'MOMENTUM', kind: 'momentum', color: '#34d399', color2: '#10b981', glow: '#34d399' },
-    'titan-range': { tag: 'RANGE', kind: 'range', color: '#fbbf24', color2: '#d97706', glow: '#fbbf24', premium: true },
-    'zenith-flow': { tag: 'FLOW', kind: 'flow', color: '#38bdf8', color2: '#0ea5e9', glow: '#38bdf8', premium: true },
+    'pulsetrader-ai': { tag: 'MOMENTUM', kind: 'momentum', color: GREEN, color2: '#10b981', glow: GREEN },
+    'titan-range': { tag: 'RANGE', kind: 'range', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
+    'zenith-flow': { tag: 'FLOW', kind: 'flow', color: CYAN, color2: '#0ea5e9', glow: CYAN, premium: true },
 };
 
-/** Resolve a bot's visual theme by its file/preset id. */
 export const botVisual = (id: string): BotTheme =>
-    BOT_VISUALS[id] ?? { tag: 'BOT', kind: 'balanced', color: '#60a5fa', color2: '#3b82f6', glow: '#60a5fa' };
+    BOT_VISUALS[id] ?? { tag: 'BOT', kind: 'balanced', color: CYAN, color2: '#2563eb', glow: CYAN };
 
 export const botIcon = (kind: BotTheme['kind']): string => ICON[kind] ?? ICON.balanced;
 export const botGradient = (theme: BotTheme): string => GRAD(theme.color, theme.color2);

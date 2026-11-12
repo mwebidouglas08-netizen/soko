@@ -16,15 +16,15 @@ const STATUS = [
 
 const BRAND_PRIMARY = 'TRADING';
 const BRAND_SECONDARY = 'HUBS';
-const BRAND_TAGLINE = 'Build and run trading bots without coding.';
-const BRAND_SUBTEXT = 'Your Deriv automation companion';
+const BRAND_TAGLINE = 'Build and run trading bots without code.';
+const BRAND_SUBTEXT = 'Precision Trading Workspace';
 /** Typewriter cadence. */
 const TYPE_MS = 70;
 
 /**
- * BinaryTool-style cinematic boot loader. Cyan + amber brand mark, welcome
- * message, activity bars, gradient progress bar, live status row — matches
- * the reference app startup screen exactly.
+ * Dollarprinter-style cinematic boot loader. Indigo #6366f1 to cyan #22d3ee
+ * brand mark, glassmorphic floating card, animated logo rings, live status row.
+ * Classic, professional, human-designed startup screen.
  */
 const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
     const [typed, setTyped] = useState('');
@@ -76,7 +76,8 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
                 <div className='bt-status-row'><span>Initializing</span><strong>Core</strong></div>
                 <div className='bt-logo-container'>
                     <div className='bt-logo-mark'>
-                        <span className='bt-logo-ring'></span>
+                        <div className='bt-logo-ring'></div>
+                        <div className='bt-logo-ring-inner'></div>
                         <img className='bt-logo-image' src='/loader.jpg' alt='' />
                     </div>
                     <span className='bt-binary-part'>{typed}</span>

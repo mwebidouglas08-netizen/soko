@@ -1,4 +1,4 @@
-/* BinaryTool-style startup loader — matches reference app exactly. */
+/* TradingHubs startup loader — matches reference app design with our brand. */
 .bt-splash {
     position: fixed;
     inset: 0;
@@ -56,6 +56,19 @@
     z-index: 1;
     position: relative;
 }
+.bt-halo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(0, 196, 255, 0.12) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    filter: blur(24px);
+    pointer-events: none;
+    animation: btHaloPulse 4s ease-in-out infinite;
+}
 .bt-status-row {
     color: #8fa5b9;
     text-transform: uppercase;
@@ -75,9 +88,32 @@
     flex-wrap: wrap;
     justify-content: flex-start;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     margin-bottom: 22px;
     display: flex;
+}
+.bt-logo-mark {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+}
+.bt-logo-ring {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(0, 196, 255, 0.35);
+    border-radius: 50%;
+    animation: btRingSpin 1.6s linear infinite;
+}
+.bt-logo-image {
+    position: absolute;
+    inset: 4px;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 193, 7, 0.35);
+    box-shadow: 0 0 16px rgba(255, 193, 7, 0.25);
 }
 .bt-binary-part {
     color: #0ff;
@@ -114,6 +150,22 @@
     font-weight: 700;
     line-height: 1.32;
 }
+.bt-orbiter {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 22px;
+}
+.bt-orbiter span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00c4ff;
+    box-shadow: 0 0 12px #00c4ff;
+    animation: btOrbiter 1.4s ease-in-out infinite;
+}
+.bt-orbiter span:nth-child(2) { animation-delay: 0.2s; }
+.bt-orbiter span:nth-child(3) { animation-delay: 0.4s; }
 .bt-activity {
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
@@ -136,7 +188,7 @@
     border-radius: 999px;
     width: 100%;
     height: 8px;
-    margin-bottom: 14px;
+    margin-bottom: 8px;
     overflow: hidden;
 }
 .bt-progress-fill {
@@ -145,9 +197,30 @@
     height: 100%;
     transition: width 0.1s linear;
 }
+.bt-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #8fa5b9;
+    text-transform: uppercase;
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+}
 @keyframes btFadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+@keyframes btHaloPulse {
+    0%, to { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.9; }
+}
+@keyframes btRingSpin {
+    to { transform: rotate(360deg); }
+}
+@keyframes btOrbiter {
+    0%, to { transform: scale(0.6); opacity: 0.6; }
+    50% { transform: scale(1.2); opacity: 1; }
 }
 @keyframes btLoaderBars {
     0%, to { opacity: 0.52; transform: scaleY(0.45); }
@@ -158,6 +231,7 @@
     .bt-loader-content { padding: 26px; }
     .bt-binary-part, .bt-fx-part { font-size: 2.55rem; }
     .bt-welcome-tagline { font-size: 1.25rem; }
+    .bt-halo { width: 180px; height: 180px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .bt-splash, .bt-splash * { animation: none !important; transition-duration: 0.01s !important; }

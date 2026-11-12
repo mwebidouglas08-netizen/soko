@@ -14,8 +14,10 @@ const STATUS = [
     'Preparing your dashboard…',
 ];
 
-const BRAND_PRIMARY = 'BINARY';
-const BRAND_SECONDARY = 'TOOL';
+const BRAND_PRIMARY = 'TRADING';
+const BRAND_SECONDARY = 'HUBS';
+const BRAND_TAGLINE = 'Build and run trading bots without coding.';
+const BRAND_SUBTEXT = 'Your Deriv automation companion';
 /** Typewriter cadence. */
 const TYPE_MS = 70;
 
@@ -69,22 +71,34 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
     }, []);
 
     return (
-        <div className={`bt-splash ${leaving ? 'bt-splash--leave' : ''}`} role='status' aria-label='Loading BinaryTool'>
+        <div className={`bt-splash ${leaving ? 'bt-splash--leave' : ''}`} role='status' aria-label='Loading TradingHubs'>
             <div className='bt-loader-content'>
+                <div className='bt-halo'></div>
                 <div className='bt-status-row'><span>Initializing</span><strong>Core</strong></div>
                 <div className='bt-logo-container'>
+                    <div className='bt-logo-mark'>
+                        <span className='bt-logo-ring'></span>
+                        <img className='bt-logo-image' src='/loader.jpg' alt='' />
+                    </div>
                     <span className='bt-binary-part'>{typed}</span>
                     <span className='bt-fx-part'>{BRAND_SECONDARY}</span>
                 </div>
                 <div className='bt-welcome'>
-                    <div className='bt-welcome-subtext'>Your Deriv automation companion</div>
-                    <div className='bt-welcome-tagline'>Build and run trading bots without coding.</div>
+                    <div className='bt-welcome-subtext'>{BRAND_SUBTEXT}</div>
+                    <div className='bt-welcome-tagline'>{BRAND_TAGLINE}</div>
+                </div>
+                <div className='bt-orbiter'>
+                    <span /><span /><span />
                 </div>
                 <div className='bt-activity'>
                     <span /><span /><span /><span />
                 </div>
                 <div className='bt-progress-bar'>
                     <div className='bt-progress-fill' style={{ width: `${progress}%` }} />
+                </div>
+                <div className='bt-progress-meta'>
+                    <span>Boot sequence</span>
+                    <span>{progress}%</span>
                 </div>
                 <div className='bt-status-row'><span>Status</span><strong>{status}</strong></div>
             </div>

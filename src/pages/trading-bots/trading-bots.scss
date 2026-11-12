@@ -46,35 +46,59 @@
 
     .bots-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        grid-template-columns: repeat(1, 1fr);
         gap: 1.2rem;
+
+        @media (min-width: 561px) and (max-width: 860px) {
+            grid-template-columns: repeat(2, minmax(240px, 1fr));
+        }
+
+        @media (min-width: 861px) {
+            grid-template-columns: repeat(3, minmax(200px, 1fr));
+        }
     }
 
     .bots-card {
-        background: var(--surface-panel, #0f172a);
-        border: 1px solid color-mix(in srgb, var(--border-normal, #cbd5e1) 25%, transparent);
-        border-radius: 12px;
-        padding: 1.25rem;
+        background: linear-gradient(180deg, rgba(34, 10, 10, 0.9), rgba(24, 8, 8, 0.8));
+        border: 1px solid color-mix(in srgb, var(--bot-color, #00c4ff) 16%, transparent);
+        border-radius: 30px;
+        padding: 1.5rem;
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
-        transition: transform 0.15s ease, border-color 0.15s ease;
+        gap: 1rem;
+        transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
         height: 100%;
-    }
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+            0 28px 90px rgba(12, 2, 2, 0.6),
+            0 0 44px color-mix(in srgb, var(--bot-color, #00c4ff) 22%, transparent),
+            inset 0 1px 0 rgba(255, 245, 245, 0.05);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    animation: bt-rise 0.8s ease-out forwards both;
+}
 
     .bots-card:hover {
-        transform: translateY(-1px);
-        border-color: color-mix(in srgb, var(--bot-color, #00c4ff) 35%, transparent);
+        transform: translateY(-2px);
+        border-color: var(--bot-color, #00c4ff);
+        box-shadow:
+            0 28px 90px rgba(12, 2, 2, 0.6),
+            0 0 44px var(--bot-color, #00c4ff),
+            inset 0 1px 0 rgba(255, 245, 245, 0.05);
     }
 
     .bots-card__image {
         width: 100%;
-        height: 120px;
-        border-radius: 10px;
+        height: 160px;
+        border-radius: 20px;
         overflow: hidden;
         background: #0b111e;
         border: 1px solid color-mix(in srgb, var(--bot-color, #00c4ff) 20%, transparent);
         margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .bots-card__image img {
@@ -94,36 +118,38 @@
         display: flex;
         gap: 0.5rem;
         align-items: center;
+        justify-content: center;
         flex-wrap: wrap;
+        margin-bottom: 2px;
     }
 
     .bots-card__badge {
         display: inline-flex;
         align-items: center;
-        padding: 0.15rem 0.5rem;
-        border-radius: 6px;
-        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 10px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.5px;
     }
 
     .bots-card__badge--free {
-        background: color-mix(in srgb, #00c4ff 12%, transparent);
+        background: color-mix(in srgb, #00c4ff 15%, transparent);
         color: #00c4ff;
-        border: 1px solid color-mix(in srgb, #00c4ff 30%, transparent);
+        border: 1px solid color-mix(in srgb, #00c4ff 25%, transparent);
     }
 
     .bots-card__badge--premium {
-        background: color-mix(in srgb, #ffc107 12%, transparent);
+        background: color-mix(in srgb, #ffc107 20%, transparent);
         color: #ffc107;
         border: 1px solid color-mix(in srgb, #ffc107 30%, transparent);
     }
 
     .bots-card__badge--quick {
-        background: color-mix(in srgb, #00c4ff 12%, transparent);
+        background: color-mix(in srgb, #00c4ff 15%, transparent);
         color: #00c4ff;
-        border: 1px solid color-mix(in srgb, #00c4ff 30%, transparent);
+        border: 1px solid color-mix(in srgb, #00c4ff 25%, transparent);
     }
 
     .bots-card__kind {
@@ -134,17 +160,17 @@
 
     .bots-card__name {
         margin: 0;
-        font-size: 1.1rem;
+        font-size: 16px;
         font-weight: 800;
-        color: var(--text-prominent);
+        color: #fff;
         letter-spacing: -0.01em;
     }
 
     .bots-card__desc {
         margin: 0;
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        line-height: 1.5;
+        font-size: 12.5px;
+        color: #9fb6d4;
+        line-height: 1.45;
         flex: 1;
     }
 
@@ -154,12 +180,12 @@
 
     .bots-card__load {
         width: 100%;
-        padding: 0.65rem;
+        padding: 10px;
         background: linear-gradient(135deg, var(--bot-color, #00c4ff), color-mix(in srgb, var(--bot-color, #00c4ff) 75%, #2563eb));
         color: #02121f;
         border: none;
         border-radius: 8px;
-        font-size: 0.85rem;
+        font-size: 12.5px;
         font-weight: 700;
         cursor: pointer;
         transition: transform 0.1s ease, box-shadow 0.15s ease;
@@ -175,19 +201,14 @@
         cursor: not-allowed;
     }
 
-    @media (max-width: 560px) {
-        .bots-grid {
-            grid-template-columns: 1fr;
+    @keyframes bt-rise {
+        0% {
+            transform: translateY(12px) scale(0.98);
+            opacity: 0;
         }
-
-        .bots-card {
-            padding: 1rem;
-        }
-    }
-
-    @media (min-width: 561px) and (max-width: 860px) {
-        .bots-grid {
-            grid-template-columns: repeat(2, minmax(240px, 1fr));
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
         }
     }
 }

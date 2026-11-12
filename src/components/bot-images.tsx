@@ -6,7 +6,11 @@ export type BotImageId =
     | 'vertex' | 'quantum'
     | 'digit-nexus-ai' | 'volt-scalper' | 'apex-ai' | 'neutrade-ai' | 'straddle-edge'
     | 'aurora-parity' | 'obsidian-parity' | 'prism-extremes' | 'pulsetrader-ai'
-    | 'titan-range' | 'zenith-flow';
+    | 'titan-range' | 'zenith-flow'
+    | 'parity-pulse-ai' | 'over-under-edge-ai' | 'trend-match-fusion-ai'
+    | 'bt-frequency-hunter' | 'bt-pattern-matrix' | 'bt-probability-shield'
+    | 'bt-adaptive-market-rotator' | 'bt-dual-momentum-fusion' | 'bt-ultimate-fusion-ai'
+    | 'bt-trend-runner';
 
 const SVG = (id: BotImageId): string => {
     switch (id) {
@@ -205,12 +209,203 @@ const SVG = (id: BotImageId): string => {
                         <stop offset='0%' style='stop-color:#38bdf8;stop-opacity:1' />
                         <stop offset='100%' style='stop-color:#0ea5e9;stop-opacity:1' />
                     </linearGradient>
+                    <filter id='zglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
                 </defs>
                 <rect width='200' height='160' fill='#0b111e' rx='16' />
-                <path d='M40,60 Q80,20 120,60 Q160,20 160,60 Q120,100 80,60 Q40,100 40,60 Z' fill='none' stroke='url(#zgrad)' stroke-width='3' opacity='0.6' />
+                <path d='M40,60 Q80,20 120,60 Q160,20 160,60 Q120,100 80,60 Q40,100 40,60 Z' fill='none' stroke='url(#zgrad)' stroke-width='3' opacity='0.6' filter='url(#zglow)' />
                 <circle cx='100' cy='80' r='12' fill='none' stroke='#38bdf8' stroke-width='3' />
                 <path d='M85,80 Q100,70 115,80' fill='none' stroke='#0ea5e9' stroke-width='3' stroke-linecap='round' />
                 <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#38bdf8' text-anchor='middle'>ZENITH</text>
+            </svg>`;
+        case 'parity-pulse-ai':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='ppgrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:#22e7ff;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#2563eb;stop-opacity:1' />
+                    </linearGradient>
+                    <filter id='ppglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16' />
+                <circle cx='100' cy='80' r='30' fill='none' stroke='url(#ppgrad)' stroke-width='3' filter='url(#ppglow)' />
+                <path d='M60,80 Q100,50 140,80 Q100,110 60,80' fill='none' stroke='#22e7ff' stroke-width='2' opacity='0.5' />
+                <circle cx='70' cy='70' r='5' fill='#22e7ff' opacity='0.7' />
+                <circle cx='130' cy='90' r='5' fill='#2563eb' opacity='0.7' />
+                <circle cx='100' cy='100' r='4' fill='#fff' opacity='0.6' />
+                <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#22e7ff' text-anchor='middle'>PARITY</text>
+            </svg>`;
+        case 'over-under-edge-ai':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='ougrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:#22e7ff;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#2563eb;stop-opacity:1' />
+                    </linearGradient>
+                    <filter id='ouglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16' />
+                <path d='M50,60 L100,30 L150,60 M50,100 L100,130 L150,100' fill='none' stroke='url(#ougrad)' stroke-width='3' filter='url(#ouglow)' stroke-linecap='round' />
+                <circle cx='100' cy='80' r='8' fill='#22e7ff' />
+                <path d='M80,80 Q100,70 120,80 M80,80 Q100,90 120,80' fill='none' stroke='#22e7ff' stroke-width='2' opacity='0.4' />
+                <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#22e7ff' text-anchor='middle'>OVER UNDER</text>
+            </svg>`;
+        case 'trend-match-fusion-ai':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='tmfgrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:#38bdf8;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#0ea5e9;stop-opacity:1' />
+                    </linearGradient>
+                    <filter id='tmfglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16' />
+                <path d='M40,140 L100,20 L160,140' fill='none' stroke='url(#tmfgrad)' stroke-width='4' stroke-linejoin='round' filter='url(#tmfglow)' />
+                <circle cx='100' cy='80' r='10' fill='#38bdf8' />
+                <path d='M85,95 L100,80 L115,95' fill='none' stroke='#0ea5e9' stroke-width='3' stroke-linecap='round' />
+                <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#38bdf8' text-anchor='middle'>TREND</text>
+            </svg>`;
+        case 'bt-frequency-hunter':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='btfgrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:#ffd700;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#f59e0b;stop-opacity:1' />
+                    </linearGradient>
+                    <filter id='btfglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16' />
+                <circle cx='100' cy='80' r='35' fill='none' stroke='url(#btfgrad)' stroke-width='3' filter='url(#btfglow)' />
+                <circle cx='100' cy='80' r='20' fill='none' stroke='#ffd700' stroke-width='2' stroke-dasharray='30,15' />
+                <circle cx='100' cy='80' r='6' fill='#ffd700' />
+                <path d='M65,55 L100,35 L135,55 L100,75 Z' fill='none' stroke='#ffd700' stroke-width='2' opacity='0.5' />
+                <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#ffd700' text-anchor='middle'>BT FREQ</text>
+            </svg>`;
+        case 'bt-pattern-matrix':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='btpgrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:#ffd700;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#f59e0b;stop-opacity:1' />
+                    </linearGradient>
+                    <filter id='btpglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16' />
+                <rect x='60' y='40' width='20' height='20' fill='#ffd700' opacity='0.9' rx='2' />
+                <rect x='120' y='40' width='20' height='20' fill='#f59e0b' opacity='0.7' rx='2' />
+                <rect x='60' y='100' width='20' height='20' fill='#f59e0b' opacity='0.7' rx='2' />
+                <rect x='120' y='100' width='20' height='20' fill='#ffd700' opacity='0.9' rx='2' />
+                <rect x='90' y='70' width='20' height='20' fill='#ffd700' opacity='1' rx='2' filter='url(#btpglow)' />
+                <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#ffd700' text-anchor='middle'>BT PATTERN</text>
+            </svg>`;
+        case 'bt-probability-shield':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='btpsgrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:#ffd700;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#f59e0b;stop-opacity:1' />
+                    </linearGradient>
+                    <filter id='btpsglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16' />
+                <path d='M100,30 Q160,40 160,80 Q160,120 100,130 Q40,120 40,80 Q40,40 100,30 Z' fill='none' stroke='url(#btpsgrad)' stroke-width='3' filter='url(#btpsglow)' />
+                <circle cx='100' cy='80' r='15' fill='none' stroke='#ffd700' stroke-width='2' opacity='0.6' />
+                <circle cx='100' cy='80' r='6' fill='#ffd700' />
+                <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#ffd700' text-anchor='middle'>BT SHIELD</text>
+            </svg>`;
+        case 'bt-adaptive-market-rotator':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='btamrgrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:#ffd700;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#f59e0b;stop-opacity:1' />
+                    </linearGradient>
+                    <filter id='btamrglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16' />
+                <path d='M50,80 Q100,40 150,80 Q100,120 50,80 Z' fill='none' stroke='url(#btamrgrad)' stroke-width='3' filter='url(#btamrglow)' />
+                <path d='M100,40 L100,120' stroke='#ffd700' stroke-width='2' opacity='0.5' />
+                <path d='M50,80 L150,80' stroke='#f59e0b' stroke-width='2' opacity='0.5' />
+                <circle cx='100' cy='80' r='8' fill='#ffd700' />
+                <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#ffd700' text-anchor='middle'>BT ROTATOR</text>
+            </svg>`;
+        case 'bt-dual-momentum-fusion':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='btdmfgrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:#ffd700;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#f59e0b;stop-opacity:1' />
+                    </linearGradient>
+                    <filter id='btdmfglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16' />
+                <path d='M40,140 L60,40 L90,120 L120,30 L150,140' fill='none' stroke='url(#btdmfgrad)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' filter='url(#btdmfglow)' />
+                <circle cx='60' cy='40' r='5' fill='#ffd700' />
+                <circle cx='120' cy='30' r='5' fill='#f59e0b' />
+                <circle cx='100' cy='80' r='25' fill='none' stroke='#ffd700' stroke-width='2' opacity='0.3' />
+                <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#ffd700' text-anchor='middle'>BT MOMENTUM</text>
+            </svg>`;
+        case 'bt-ultimate-fusion-ai':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='btufaigrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:#ffd700;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#f59e0b;stop-opacity:1' />
+                    </linearGradient>
+                    <filter id='btufaiglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16' />
+                <polygon points='100,20 180,80 100,140 20,80' fill='none' stroke='url(#btufaigrad)' stroke-width='3' filter='url(#btufaiglow)' />
+                <path d='M100,20 L100,140 M20,80 L180,80' stroke='#ffd700' stroke-width='2' opacity='0.4' />
+                <circle cx='100' cy='80' r='10' fill='#ffd700' />
+                <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#ffd700' text-anchor='middle'>BT FUSION</text>
+            </svg>`;
+        case 'bt-trend-runner':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='btrgrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:#ffd700;stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#f59e0b;stop-opacity:1' />
+                    </linearGradient>
+                    <filter id='btrglow' x='-20%' y='-20%' width='140%' height='140%'>
+                        <feGaussianBlur stdDeviation='8' result='blur' />
+                        <feComposite in='SourceGraphic' in2='blur' operator='over' />
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16' />
+                <path d='M30,140 L60,40 L90,120 L120,30 L150,140' fill='none' stroke='url(#btrgrad)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' filter='url(#btrglow)' />
+                <circle cx='90' cy='80' r='10' fill='#ffd700' />
+                <path d='M70,70 Q90,60 110,70 Q90,80 70,70 Z' fill='none' stroke='#ffd700' stroke-width='2' opacity='0.6' />
+                <text x='100' y='145' font-family='monospace' font-size='14' font-weight='bold' fill='#ffd700' text-anchor='middle'>BT TREND</text>
             </svg>`;
         default:
             return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>

@@ -59,55 +59,47 @@
     }
 }
 
-@media (min-width: 561px) and (max-width: 860px) {
-    .bots-catalog__grid {
+.bots-catalog__grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.2rem;
+
+    @media (min-width: 561px) and (max-width: 860px) {
         grid-template-columns: repeat(2, minmax(240px, 1fr));
     }
-}
 
-@media (min-width: 861px) {
-    .bots-catalog__grid {
+    @media (min-width: 861px) {
         grid-template-columns: repeat(3, minmax(200px, 1fr));
     }
 }
 
 .bots-card {
-    background: #0b111e;
-    border: 1px solid color-mix(in srgb, #cbd5e1 20%, transparent);
-    border-radius: 14px;
-    padding: 1.25rem;
+    background: linear-gradient(180deg, rgba(34, 10, 10, 0.9), rgba(24, 8, 8, 0.8));
+    border: 1px solid color-mix(in srgb, var(--bot-color, #00c4ff) 16%, transparent);
+    border-radius: 30px;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
     transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-    animation: lp-card-rise 0.5s ease-out forwards both;
     position: relative;
     overflow: hidden;
-}
-
-.bots-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, transparent, rgba(0, 196, 255, 0.04), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-}
-
-.bots-card:hover::before {
-    opacity: 1;
+    box-shadow:
+        0 28px 90px rgba(12, 2, 2, 0.6),
+        0 0 44px color-mix(in srgb, var(--bot-color, #00c4ff) 22%, transparent),
+        inset 0 1px 0 rgba(255, 245, 245, 0.05);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    animation: bt-rise 0.8s ease-out forwards both;
 }
 
 .bots-card:hover {
     transform: translateY(-2px);
-    border-color: #00c4ff;
-    box-shadow: 0 8px 24px color-mix(in srgb, #00c4ff 15%, transparent);
-}
-
-.bots-card.premium:hover {
-    border-color: #ffc107;
-    box-shadow: 0 8px 24px color-mix(in srgb, #ffc107 15%, transparent);
+    border-color: var(--bot-color, #00c4ff);
+    box-shadow:
+        0 28px 90px rgba(12, 2, 2, 0.6),
+        0 0 44px var(--bot-color, #00c4ff),
+        inset 0 1px 0 rgba(255, 245, 245, 0.05);
 }
 
 .bots-card__icon {
@@ -130,6 +122,15 @@
     text-align: center;
 }
 
+.bots-card__header {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2px;
+}
+
 .bots-card__tag {
     display: inline-block;
     font-size: 10px;
@@ -138,24 +139,31 @@
     text-transform: uppercase;
     padding: 2px 8px;
     border-radius: 999px;
-    margin-bottom: 10px;
+    margin-bottom: 0;
     background: color-mix(in srgb, var(--bot-color, #00c4ff) 15%, transparent);
     color: var(--bot-color, #00c4ff);
     border: 1px solid color-mix(in srgb, var(--bot-color, #00c4ff) 25%, transparent);
 }
 
-.bots-card__tag.premium,
 .bots-card__premium {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-bottom: 0;
     background: color-mix(in srgb, #ffc107 20%, transparent);
     color: #ffc107;
-    border-color: color-mix(in srgb, #ffc107 30%, transparent);
+    border: 1px solid color-mix(in srgb, #ffc107 30%, transparent);
 }
 
 .bots-card__name {
     font-size: 16px;
     font-weight: 800;
     color: #fff;
-    margin-bottom: 6px;
+    margin: 0 0 6px 0;
     letter-spacing: -0.01em;
 }
 
@@ -163,7 +171,7 @@
     font-size: 12.5px;
     color: #9fb6d4;
     line-height: 1.45;
-    margin-bottom: 14px;
+    margin: 0 0 14px 0;
 }
 
 .bots-card__footer {
@@ -202,7 +210,13 @@
     background: color-mix(in srgb, var(--bot-color, #00c4ff) 40%, transparent);
 }
 
-@keyframes lp-card-rise {
-    0% { transform: translateY(12px) scale(0.98); opacity: 0; }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes bt-rise {
+    0% {
+        transform: translateY(12px) scale(0.98);
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }

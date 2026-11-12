@@ -53,9 +53,8 @@ const loadBot = async (bot: Bot) => {
             strategy_id: null,
             showIncompatibleStrategyDialog: null,
         });
-        // Surface the Blockly workspace.
-        (window as any).__goToBotBuilder?.();
-        document.dispatchEvent(new CustomEvent('mwx:go-bot-builder'));
+        // Surface the Bot Monitor screen.
+        document.dispatchEvent(new CustomEvent('mwx:go-bot-monitor'));
     } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Failed to load bot', bot.file, e);

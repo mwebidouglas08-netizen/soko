@@ -1,7 +1,7 @@
 /**
  * Bot visual themes — attractive icons + gradient palettes for free-bot
- * cards. Matches the reference app (binarytool.site) design: cyan #00c4ff
- * and amber #ffc107 accent colors on a dark canvas.
+ * cards. Matches the reference app (dollarprinter.com) design: indigo #6366f1
+ * and cyan #22d3ee gradient accents on a dark canvas.
  */
 export type BotTheme = {
     tag: string;
@@ -14,8 +14,8 @@ export type BotTheme = {
 
 const GRAD = (c1: string, c2: string) => `linear-gradient(135deg, ${c1}, ${c2})`;
 
-const CYAN = '#00c4ff';
-const AMBER = '#ffc107';
+const INDIGO = '#6366f1';
+const CYAN = '#22d3ee';
 
 const ICON: Record<BotTheme['kind'], string> = {
     digits: `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><rect x='3' y='3' width='18' height='18' rx='2'/><path d='M12 9l3 3 5-5'/><circle cx='9' cy='9' r='1' fill='currentColor'/></svg>`,
@@ -36,35 +36,35 @@ const ICON: Record<BotTheme['kind'], string> = {
 
 export const BOT_VISUALS: Record<string, BotTheme> = {
     // trading-bots (quick bots)
-    vertex: { tag: 'QUICK', kind: 'vertex', color: CYAN, color2: '#2563eb', glow: CYAN },
-    quantum: { tag: 'QUICK', kind: 'quantum', color: AMBER, color2: '#f59e0b', glow: AMBER },
+    vertex: { tag: 'QUICK', kind: 'vertex', color: INDIGO, color2: CYAN, glow: INDIGO },
+    quantum: { tag: 'QUICK', kind: 'quantum', color: INDIGO, color2: CYAN, glow: INDIGO },
     // bots-catalog
-    'dmo-bot': { tag: 'PREMIUM', kind: 'balanced', color: AMBER, color2: '#d97706', glow: AMBER },
-    'dollar-printer-ai': { tag: 'PREMIUM', kind: 'balanced', color: AMBER, color2: '#d97706', glow: AMBER },
-    'digit-nexus-ai': { tag: 'DIGITS', kind: 'digits', color: CYAN, color2: '#2563eb', glow: CYAN },
-    'volt-scalper': { tag: 'SCALP', kind: 'scalp', color: CYAN, color2: '#2563eb', glow: CYAN },
-    'apex-ai': { tag: 'PREMIUM', kind: 'premium', color: AMBER, color2: '#f59e0b', glow: AMBER, premium: true },
-    'neutrade-ai': { tag: 'BALANCED', kind: 'balanced', color: CYAN, color2: '#2563eb', glow: CYAN },
-    'straddle-edge': { tag: 'RISE/FALL', kind: 'risefall', color: CYAN, color2: '#2563eb', glow: CYAN },
-    'parity-pulse-ai': { tag: 'PARITY', kind: 'parity', color: CYAN, color2: '#2563eb', glow: CYAN, premium: true },
-    'obsidian-parity': { tag: 'PARITY', kind: 'parity', color: CYAN, color2: '#2563eb', glow: CYAN, premium: true },
-    'prism-extremes': { tag: 'EXTREMES', kind: 'extremes', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
-    'pulsetrader-ai': { tag: 'MOMENTUM', kind: 'momentum', color: CYAN, color2: '#2563eb', glow: CYAN },
-    'titan-range': { tag: 'RANGE', kind: 'range', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
-    'zenith-flow': { tag: 'FLOW', kind: 'flow', color: CYAN, color2: '#0ea5e9', glow: CYAN, premium: true },
-    'over-under-edge-ai': { tag: 'OVER/UNDER', kind: 'overunder', color: CYAN, color2: '#2563eb', glow: CYAN },
-    'trend-match-fusion-ai': { tag: 'TREND', kind: 'callput', color: CYAN, color2: '#0ea5e9', glow: CYAN, premium: true },
-    'bt-frequency-hunter': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
-    'bt-pattern-matrix': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
-    'bt-probability-shield': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
-    'bt-adaptive-market-rotator': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
-    'bt-dual-momentum-fusion': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
-    'bt-ultimate-fusion-ai': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
-    'bt-trend-runner': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
+    'dmo-bot': { tag: 'PREMIUM', kind: 'balanced', color: INDIGO, color2: CYAN, glow: INDIGO },
+    'dollar-printer-ai': { tag: 'PREMIUM', kind: 'balanced', color: INDIGO, color2: CYAN, glow: INDIGO },
+    'digit-nexus-ai': { tag: 'DIGITS', kind: 'digits', color: INDIGO, color2: CYAN, glow: INDIGO },
+    'volt-scalper': { tag: 'SCALP', kind: 'scalp', color: INDIGO, color2: CYAN, glow: INDIGO },
+    'apex-ai': { tag: 'PREMIUM', kind: 'premium', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'neutrade-ai': { tag: 'BALANCED', kind: 'balanced', color: INDIGO, color2: CYAN, glow: INDIGO },
+    'straddle-edge': { tag: 'RISE/FALL', kind: 'risefall', color: INDIGO, color2: CYAN, glow: INDIGO },
+    'parity-pulse-ai': { tag: 'PARITY', kind: 'parity', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'obsidian-parity': { tag: 'PARITY', kind: 'parity', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'prism-extremes': { tag: 'EXTREMES', kind: 'extremes', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'pulsetrader-ai': { tag: 'MOMENTUM', kind: 'momentum', color: INDIGO, color2: CYAN, glow: INDIGO },
+    'titan-range': { tag: 'RANGE', kind: 'range', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'zenith-flow': { tag: 'FLOW', kind: 'flow', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'over-under-edge-ai': { tag: 'OVER/UNDER', kind: 'overunder', color: INDIGO, color2: CYAN, glow: INDIGO },
+    'trend-match-fusion-ai': { tag: 'TREND', kind: 'callput', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'bt-frequency-hunter': { tag: 'BT', kind: 'premium', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'bt-pattern-matrix': { tag: 'BT', kind: 'premium', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'bt-probability-shield': { tag: 'BT', kind: 'premium', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'bt-adaptive-market-rotator': { tag: 'BT', kind: 'premium', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'bt-dual-momentum-fusion': { tag: 'BT', kind: 'premium', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'bt-ultimate-fusion-ai': { tag: 'BT', kind: 'premium', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
+    'bt-trend-runner': { tag: 'BT', kind: 'premium', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
 };
 
 export const botVisual = (id: string): BotTheme =>
-    BOT_VISUALS[id] ?? { tag: 'BOT', kind: 'balanced', color: CYAN, color2: '#2563eb', glow: CYAN };
+    BOT_VISUALS[id] ?? { tag: 'BOT', kind: 'balanced', color: INDIGO, color2: CYAN, glow: INDIGO };
 
 export const botIcon = (kind: BotTheme['kind']): string => ICON[kind] ?? ICON.balanced;
 export const botGradient = (theme: BotTheme): string => GRAD(theme.color, theme.color2);

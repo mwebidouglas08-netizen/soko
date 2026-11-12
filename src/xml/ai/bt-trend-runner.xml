@@ -141,11 +141,16 @@
                   <block type="controls_if" id="btr_signal_choice">
                     <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1"></mutation>
                     <value name="IF0">
-                      <block type="tick_trend_condition" id="btr_uptrend">
-                        <field name="CONDITION">UP</field>
+                      <block type="last_digits_condition" id="btr_uptrend">
+                        <field name="CONDITION">GREATER_OR_EQUAL</field>
                         <value name="N">
                           <shadow type="math_number" id="btr_uptrend_n">
                             <field name="NUM">5</field>
+                          </shadow>
+                        </value>
+                        <value name="COMPARE_VALUE">
+                          <shadow type="math_number" id="btr_uptrend_compare">
+                            <field name="NUM">7</field>
                           </shadow>
                         </value>
                       </block>
@@ -171,11 +176,16 @@
                       </block>
                     </statement>
                     <value name="IF1">
-                      <block type="tick_trend_condition" id="btr_downtrend">
-                        <field name="CONDITION">DOWN</field>
+                      <block type="last_digits_condition" id="btr_downtrend">
+                        <field name="CONDITION">LESS_OR_EQUAL</field>
                         <value name="N">
                           <shadow type="math_number" id="btr_downtrend_n">
                             <field name="NUM">5</field>
+                          </shadow>
+                        </value>
+                        <value name="COMPARE_VALUE">
+                          <shadow type="math_number" id="btr_downtrend_compare">
+                            <field name="NUM">2</field>
                           </shadow>
                         </value>
                       </block>

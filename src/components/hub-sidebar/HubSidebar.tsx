@@ -1,6 +1,7 @@
 export type HubViewId =
     | 'dashboard'
     | 'bot-builder'
+    | 'bot-monitor'
     | 'volt-ai'
     | 'free-bots'
     | 'premium-ai'
@@ -33,6 +34,7 @@ export type HubViewId =
 export const HUB_VIEW_LABELS: Record<HubViewId, string> = {
     dashboard: 'Dashboard',
     'bot-builder': 'Bot Builder',
+    'bot-monitor': 'Bot Monitor',
     'volt-ai': 'Smart AI',
     'free-bots': 'Free Bots',
     'premium-ai': 'Premium Bots',
@@ -66,6 +68,7 @@ export const HUB_VIEW_LABELS: Record<HubViewId, string> = {
 export const HUB_TAB_ORDER: HubViewId[] = [
     'dashboard',
     'bot-builder',
+    'bot-monitor',
     'volt-ai',
     'free-bots',
     'bulk-trader',

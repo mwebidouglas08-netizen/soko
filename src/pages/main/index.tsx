@@ -23,6 +23,7 @@ import RiskPill from '@/components/risk-pill';
 import { subscribeHubNavigation } from '@/services/hub-navigation';
 import DashboardLaunchpad from '@/components/dashboard-launchpad';
 import BotsCatalog from '@/pages/bots-catalog';
+import BotMonitor from '@/pages/bot-monitor';
 import Landing from '@/pages/landing';
 import { DBOT_TABS } from '@/constants/bot-contents';
 import './main.scss';
@@ -99,8 +100,13 @@ const Main = observer(() => {
     // becomes visible and the loaded strategy can be executed.
     useEffect(() => {
         const onGoBotBuilder = () => setRequestedView('bot-builder');
+        const onGoBotMonitor = () => setRequestedView('bot-monitor');
         document.addEventListener('mwx:go-bot-builder', onGoBotBuilder);
-        return () => document.removeEventListener('mwx:go-bot-builder', onGoBotBuilder);
+        document.addEventListener('mwx:go-bot-monitor', onGoBotMonitor);
+        return () => {
+            document.removeEventListener('mwx:go-bot-builder', onGoBotBuilder);
+            document.removeEventListener('mwx:go-bot-monitor', onGoBotMonitor);
+        };
     }, []);
 
     const enterAnim = (view: HubViewId): { animation?: string } =>
@@ -162,6 +168,7 @@ const Main = observer(() => {
                             {mount('speedbot', <SpeedbotPage />)}
                             {mount('automated', <AutomatedPage />)}
                             {mount('bots-catalog', <BotsCatalog />)}
+                            {mount('bot-monitor', <BotMonitor />)}
                             {mount(
                                 'chart',
                                 <Suspense fallback={<div className='main-hub__fallback'>Loading chart…</div>}>

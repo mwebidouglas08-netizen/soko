@@ -5,7 +5,7 @@
  */
 export type BotTheme = {
     tag: string;
-    kind: 'digits' | 'scalp' | 'premium' | 'balanced' | 'risefall' | 'parity' | 'extremes' | 'momentum' | 'range' | 'flow' | 'vertex' | 'quantum' | 'overunder';
+    kind: 'digits' | 'scalp' | 'premium' | 'balanced' | 'risefall' | 'parity' | 'extremes' | 'momentum' | 'range' | 'flow' | 'vertex' | 'quantum' | 'overunder' | 'callput';
     color: string;
     color2: string;
     glow: string;
@@ -29,6 +29,7 @@ const ICON: Record<BotTheme['kind'], string> = {
     range: `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><rect x='3' y='3' width='18' height='18' rx='2'/><path d='M3 12h18M12 3v18'/></svg>`,
     flow: `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><path d='M2 12h20'/><path d='M12 2v20'/></svg>`,
     overunder: `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><path d='M5 12h14M12 19l7-7M12 5l7 7'/></svg>`,
+    callput: `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><path d='M12 2l7 7-7 7M12 22l-7-7 7-7'/></svg>`,
     vertex: `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><polygon points='12 2 22 12 12 22 2 12'/><path d='M12 12l5 5M12 12l-5-5'/></svg>`,
     quantum: `<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 2v6M12 16v6M4.93 4.93l4.24 4.24M17.77 17.77l4.24 4.24M2 12h6M16 12h6'/></svg>`,
 };
@@ -45,12 +46,21 @@ export const BOT_VISUALS: Record<string, BotTheme> = {
     'apex-ai': { tag: 'PREMIUM', kind: 'premium', color: AMBER, color2: '#f59e0b', glow: AMBER, premium: true },
     'neutrade-ai': { tag: 'BALANCED', kind: 'balanced', color: CYAN, color2: '#2563eb', glow: CYAN },
     'straddle-edge': { tag: 'RISE/FALL', kind: 'risefall', color: CYAN, color2: '#2563eb', glow: CYAN },
-    'aurora-parity': { tag: 'PARITY', kind: 'parity', color: CYAN, color2: '#2563eb', glow: CYAN, premium: true },
+    'parity-pulse-ai': { tag: 'PARITY', kind: 'parity', color: CYAN, color2: '#2563eb', glow: CYAN, premium: true },
     'obsidian-parity': { tag: 'PARITY', kind: 'parity', color: CYAN, color2: '#2563eb', glow: CYAN, premium: true },
     'prism-extremes': { tag: 'EXTREMES', kind: 'extremes', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
     'pulsetrader-ai': { tag: 'MOMENTUM', kind: 'momentum', color: CYAN, color2: '#2563eb', glow: CYAN },
     'titan-range': { tag: 'RANGE', kind: 'range', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
     'zenith-flow': { tag: 'FLOW', kind: 'flow', color: CYAN, color2: '#0ea5e9', glow: CYAN, premium: true },
+    'over-under-edge-ai': { tag: 'OVER/UNDER', kind: 'overunder', color: CYAN, color2: '#2563eb', glow: CYAN },
+    'trend-match-fusion-ai': { tag: 'TREND', kind: 'callput', color: CYAN, color2: '#0ea5e9', glow: CYAN, premium: true },
+    'bt-frequency-hunter': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
+    'bt-pattern-matrix': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
+    'bt-probability-shield': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
+    'bt-adaptive-market-rotator': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
+    'bt-dual-momentum-fusion': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
+    'bt-ultimate-fusion-ai': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
+    'bt-trend-runner': { tag: 'BT', kind: 'premium', color: AMBER, color2: '#d97706', glow: AMBER, premium: true },
 };
 
 export const botVisual = (id: string): BotTheme =>

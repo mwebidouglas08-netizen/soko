@@ -22,13 +22,21 @@ const BOTS: Bot[] = [
     { file: 'dollar-printer-ai', name: 'Dollar Printer', tag: 'PREMIUM', desc: 'AI-powered volatility analyzer that identifies favorable market opportunities and trades over/under 4/5/6/7/8 signals with intelligent stake management and martingale recovery.', color: '#ffc107', premium: true },
     { file: 'neutrade-ai', name: 'Neutrade', tag: 'BALANCED', desc: 'Balanced risk engine that sizes stakes from live confidence scores.', color: '#00c4ff' },
     { file: 'straddle-edge', name: 'Rise Fall Reversal', tag: 'RISE/FALL', desc: 'Straddles Rise/Fall around a digit bias with dual-direction protection.', color: '#00c4ff' },
-    { file: 'aurora-parity', name: 'Parity Pulse', tag: 'PARITY', desc: 'Even/Odd parity hunter with streak-aware recovery.', color: '#00c4ff', premium: true },
+    { file: 'parity-pulse-ai', name: 'Parity Pulse', tag: 'PARITY', desc: 'Even/Odd parity hunter with streak-aware recovery.', color: '#00c4ff', premium: true },
     { file: 'obsidian-parity', name: 'Even Odd', tag: 'PARITY', desc: 'Deep-sample even/odd engine tuned for sustained sessions.', color: '#00c4ff', premium: true },
     { file: 'prism-extremes', name: 'Extreme Digits', tag: 'EXTREMES', desc: 'Trades extreme digit outliers with hard stop-loss guardrails.', color: '#ffc107', premium: true },
     { file: 'pulsetrader-ai', name: 'PulseTrader', tag: 'MOMENTUM', desc: 'Momentum-driven entries synced to tick velocity.', color: '#00c4ff' },
     { file: 'titan-range', name: 'Titan Range', tag: 'RANGE', desc: 'Range Break strategy with volatility-scaled stake sizing.', color: '#ffc107', premium: true },
     { file: 'zenith-flow', name: 'Zenith Flow', tag: 'FLOW', desc: 'Flow-based direction engine with adaptive barriers.', color: '#00c4ff', premium: true },
-    { file: 'digit-nexus-ai', name: 'Over Under Edge', tag: 'OVER/UNDER', desc: 'Focused Over/Under digit and percentage setup using barrier 4 and a compact three-digit analysis window.', color: '#00c4ff' },
+    { file: 'over-under-edge-ai', name: 'Over Under Edge', tag: 'OVER/UNDER', desc: 'Focused Over/Under digit and percentage setup using barrier 4 and a compact three-digit analysis window.', color: '#00c4ff' },
+    { file: 'trend-match-fusion-ai', name: 'Trend Match Fusion', tag: 'TREND', desc: 'Call-trend rider on R_25 with take-profit and stop-loss guardrails.', color: '#00c4ff', premium: true },
+    { file: 'bt-frequency-hunter', name: 'BT Frequency Hunter', tag: 'BT', desc: 'Digit-frequency edge hunter on R_50 with Over/Under recovery and session guardrails.', color: '#ffc107', premium: true },
+    { file: 'bt-pattern-matrix', name: 'BT Pattern Matrix', tag: 'BT', desc: 'Pattern-matrix scanner on R_75 detecting even/odd streaks and repeat clusters.', color: '#ffc107', premium: true },
+    { file: 'bt-probability-shield', name: 'BT Probability Shield', tag: 'BT', desc: 'Probability-shielded Over/Under system on R_100 with hard TP/SL boundaries.', color: '#ffc107', premium: true },
+    { file: 'bt-adaptive-market-rotator', name: 'BT Adaptive Market Rotator', tag: 'BT', desc: 'Multi-market Call/Put rotator on R_25 with trend-following entries.', color: '#ffc107', premium: true },
+    { file: 'bt-dual-momentum-fusion', name: 'BT Dual Momentum Fusion', tag: 'BT', desc: 'Dual-momentum digit fusion on R_50 with low/high/mid zone logic.', color: '#ffc107', premium: true },
+    { file: 'bt-ultimate-fusion-ai', name: 'BT Ultimate Fusion AI', tag: 'BT', desc: 'AI-fused extreme-digit and parity strategy on R_100 with multi-signal confirmation.', color: '#ffc107', premium: true },
+    { file: 'bt-trend-runner', name: 'BT Trend Runner', tag: 'BT', desc: 'Trend-following Call/Put runner on R_75 with tick-trend gating.', color: '#ffc107', premium: true },
 ];
 
 const loadBot = async (bot: Bot) => {

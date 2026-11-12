@@ -1,0 +1,388 @@
+<xml xmlns="https://developers.google.com/blockly/xml" collection="false" is_dbot="true">
+  <variables>
+    <variable id="btr_stake">Stake</variable>
+    <variable id="btr_martingale">Martingale</variable>
+    <variable id="btr_signal">Entry Signal</variable>
+    <variable id="btr_take_profit">Take Profit</variable>
+    <variable id="btr_base_stake">Stake []</variable>
+    <variable id="btr_runs">Runs</variable>
+    <variable id="btr_direction">Trade Direction</variable>
+    <variable id="btr_stop_loss">Stop Loss</variable>
+  </variables>
+  <block type="trade_definition" id="btr_trade_definition" deletable="false" x="0" y="60">
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="btr_market" deletable="false" movable="false">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">random_index</field>
+        <field name="SYMBOL_LIST">R_75</field>
+        <field name="ALTERNATE_MARKETS">FALSE</field>
+        <field name="ALTERNATE_EVERY">1</field>
+        <field name="MULTI_MARKET">FALSE</field>
+        <field name="VH_ENABLED">FALSE</field>
+        <field name="VH_SETTINGS_BTN">VH Settings</field>
+        <next>
+          <block type="trade_definition_tradetype" id="btr_trade_type" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">callput</field>
+            <field name="TRADETYPE_LIST">callput</field>
+            <next>
+              <block type="trade_definition_contracttype" id="btr_contract_type" deletable="false" movable="false">
+                <field name="TYPE_LIST">both</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="btr_interval" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="btr_restart_buy_sell" deletable="false" movable="false">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="btr_restart_error" deletable="false" movable="false">
+                            <field name="RESTARTONERROR">TRUE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="btr_set_stake">
+        <field name="VAR" id="btr_stake">Stake</field>
+        <value name="VALUE">
+          <block type="math_number" id="btr_stake_value">
+            <field name="NUM">0.5</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="btr_set_martingale">
+            <field name="VAR" id="btr_martingale">Martingale</field>
+            <value name="VALUE">
+              <block type="math_number" id="btr_martingale_value">
+                <field name="NUM">2</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="btr_set_take_profit">
+                <field name="VAR" id="btr_take_profit">Take Profit</field>
+                <value name="VALUE">
+                  <block type="math_number" id="btr_take_profit_value">
+                    <field name="NUM">14</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="btr_set_stop_loss">
+                    <field name="VAR" id="btr_stop_loss">Stop Loss</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="btr_stop_loss_value">
+                        <field name="NUM">48</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="btr_reset_runs_start" collapsed="true">
+                        <field name="VAR" id="btr_runs">Runs</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="btr_zero_start">
+                            <field name="NUM">0</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="btr_reset_signal_start" collapsed="true">
+                            <field name="VAR" id="btr_signal">Entry Signal</field>
+                            <value name="VALUE">
+                              <block type="logic_boolean" id="btr_false_start">
+                                <field name="BOOL">FALSE</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="variables_set" id="btr_init_direction" collapsed="true">
+                                <field name="VAR" id="btr_direction">Trade Direction</field>
+                                <value name="VALUE">
+                                  <block type="math_number" id="btr_direction_start">
+                                    <field name="NUM">1</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="variables_set" id="btr_set_base_stake" collapsed="true">
+        <field name="VAR" id="btr_base_stake">Stake []</field>
+        <value name="VALUE">
+          <block type="variables_get" id="btr_base_stake_read">
+            <field name="VAR" id="btr_stake">Stake</field>
+          </block>
+        </value>
+        <next>
+          <block type="controls_whileUntil" id="btr_scan_loop" collapsed="true">
+            <field name="MODE">UNTIL</field>
+            <value name="BOOL">
+              <block type="variables_get" id="btr_signal_read">
+                <field name="VAR" id="btr_signal">Entry Signal</field>
+              </block>
+            </value>
+            <statement name="DO">
+              <block type="timeout" id="btr_scan_delay">
+                <statement name="TIMEOUTSTACK">
+                  <block type="controls_if" id="btr_signal_choice">
+                    <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1"></mutation>
+                    <value name="IF0">
+                      <block type="tick_trend_condition" id="btr_uptrend">
+                        <field name="CONDITION">UP</field>
+                        <value name="N">
+                          <shadow type="math_number" id="btr_uptrend_n">
+                            <field name="NUM">5</field>
+                          </shadow>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="variables_set" id="btr_direction_call">
+                        <field name="VAR" id="btr_direction">Trade Direction</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="btr_call_value">
+                            <field name="NUM">1</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="btr_signal_call">
+                            <field name="VAR" id="btr_signal">Entry Signal</field>
+                            <value name="VALUE">
+                              <block type="logic_boolean" id="btr_true_call">
+                                <field name="BOOL">TRUE</field>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <value name="IF1">
+                      <block type="tick_trend_condition" id="btr_downtrend">
+                        <field name="CONDITION">DOWN</field>
+                        <value name="N">
+                          <shadow type="math_number" id="btr_downtrend_n">
+                            <field name="NUM">5</field>
+                          </shadow>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO1">
+                      <block type="variables_set" id="btr_direction_put">
+                        <field name="VAR" id="btr_direction">Trade Direction</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="btr_put_value">
+                            <field name="NUM">0</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="btr_signal_put">
+                            <field name="VAR" id="btr_signal">Entry Signal</field>
+                            <value name="VALUE">
+                              <block type="logic_boolean" id="btr_true_put">
+                                <field name="BOOL">TRUE</field>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                  </block>
+                </statement>
+                <value name="SECONDS">
+                  <block type="math_number" id="btr_delay_value">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+              </block>
+            </statement>
+            <next>
+              <block type="trade_definition_tradeoptions" id="btr_trade_options">
+                <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>
+                <field name="DURATIONTYPE_LIST">t</field>
+                <value name="DURATION">
+                  <shadow type="math_number_positive" id="btr_duration">
+                    <field name="NUM">5</field>
+                  </shadow>
+                </value>
+                <value name="AMOUNT">
+                  <shadow type="math_number_positive" id="btr_amount_shadow">
+                    <field name="NUM">1</field>
+                  </shadow>
+                  <block type="variables_get" id="btr_get_stake">
+                    <field name="VAR" id="btr_stake">Stake</field>
+                  </block>
+                </value>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="after_purchase" id="btr_after_purchase" x="714" y="60">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="controls_if" id="btr_result_check" collapsed="true">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+        <value name="IF0">
+          <block type="contract_check_result" id="btr_is_win">
+            <field name="CHECK_RESULT">win</field>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="variables_set" id="btr_reset_stake_on_win">
+            <field name="VAR" id="btr_stake">Stake</field>
+            <value name="VALUE">
+              <block type="variables_get" id="btr_base_stake_on_win">
+                <field name="VAR" id="btr_base_stake">Stake []</field>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <statement name="ELSE">
+          <block type="variables_set" id="btr_martingale_on_loss">
+            <field name="VAR" id="btr_stake">Stake</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="btr_martingale_multiply">
+                <field name="OP">MULTIPLY</field>
+                <value name="A">
+                  <shadow type="math_number" id="btr_stake_shadow_loss">
+                    <field name="NUM">1</field>
+                  </shadow>
+                  <block type="variables_get" id="btr_current_stake_loss">
+                    <field name="VAR" id="btr_stake">Stake</field>
+                  </block>
+                </value>
+                <value name="B">
+                  <shadow type="math_number" id="btr_multiplier_shadow">
+                    <field name="NUM">1</field>
+                  </shadow>
+                  <block type="variables_get" id="btr_multiplier_read">
+                    <field name="VAR" id="btr_martingale">Martingale</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <next>
+          <block type="controls_if" id="btr_tp_sl_gate" collapsed="true">
+            <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1" else="1"></mutation>
+            <value name="IF0">
+              <block type="logic_compare" id="btr_take_profit_check">
+                <field name="OP">GTE</field>
+                <value name="A">
+                  <block type="total_profit" id="btr_total_profit_tp"></block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="btr_read_take_profit">
+                    <field name="VAR" id="btr_take_profit">Take Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO0">
+              <block type="text_print" id="btr_take_profit_message">
+                <value name="TEXT">
+                  <shadow type="text" id="btr_take_profit_text">
+                    <field name="TEXT">Take Profit reached</field>
+                  </shadow>
+                </value>
+              </block>
+            </statement>
+            <value name="IF1">
+              <block type="logic_compare" id="btr_stop_loss_check">
+                <field name="OP">LTE</field>
+                <value name="A">
+                  <block type="total_profit" id="btr_total_profit_sl"></block>
+                </value>
+                <value name="B">
+                  <block type="math_single" id="btr_negative_stop_loss">
+                    <field name="OP">NEG</field>
+                    <value name="NUM">
+                      <block type="variables_get" id="btr_read_stop_loss">
+                        <field name="VAR" id="btr_stop_loss">Stop Loss</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO1">
+              <block type="text_print" id="btr_stop_loss_message">
+                <value name="TEXT">
+                  <shadow type="text" id="btr_stop_loss_text">
+                    <field name="TEXT">Stop Loss reached</field>
+                  </shadow>
+                </value>
+              </block>
+            </statement>
+            <statement name="ELSE">
+              <block type="trade_again" id="btr_continue_trading"></block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="before_purchase" id="btr_purchase" collapsed="true" deletable="false" x="0" y="1150">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="controls_if" id="btr_direction_choice">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1"></mutation>
+        <value name="IF0">
+          <block type="logic_compare" id="btr_direction_is_call">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="variables_get" id="btr_direction_read_call">
+                <field name="VAR" id="btr_direction">Trade Direction</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="btr_call_number">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="apollo_purchase2" id="btr_buy_call">
+            <field name="PURCHASE_LIST">CALL</field>
+          </block>
+        </statement>
+        <value name="IF1">
+          <block type="logic_compare" id="btr_direction_is_put">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="variables_get" id="btr_direction_read_put">
+                <field name="VAR" id="btr_direction">Trade Direction</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="btr_put_number">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO1">
+          <block type="apollo_purchase2" id="btr_buy_put">
+            <field name="PURCHASE_LIST">PUT</field>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+</xml>

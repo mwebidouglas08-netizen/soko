@@ -256,21 +256,37 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                padding: 16px;
+                padding: 24px;
                 box-sizing: border-box;
                 text-align: center;
+                background-image: url('/loader.jpg');
+                background-size: cover;
+                background-position: center center;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                overflow: hidden;
+                font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+            }
+            #boot-splash::before {
+                content: '';
+                position: absolute;
+                inset: 0;
                 background:
                     radial-gradient(circle at 18% 12%, rgba(0, 196, 255, 0.18), transparent 32%),
                     radial-gradient(circle at 86% 18%, rgba(255, 193, 7, 0.15), transparent 28%),
-                    linear-gradient(#020810c7, #020810eb);
-                background-position: 0 0, 0 0, 0 0;
-                background-repeat: repeat, repeat, repeat;
-                background-size: cover;
-                background-attachment: scroll;
-                background-origin: padding-box;
-                background-clip: border-box;
-                overflow: hidden;
-                font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+                    linear-gradient(#020810cc, #020810f2);
+                pointer-events: none;
+            }
+            #boot-splash::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: rgba(2, 8, 16, 0.55);
+                pointer-events: none;
+            }
+            #boot-splash > * {
+                position: relative;
+                z-index: 1;
             }
             #boot-splash.boot-splash--out {
                 opacity: 0;
@@ -279,15 +295,16 @@
             }
             .bt-loader-content {
                 text-align: left;
-                background: linear-gradient(135deg, rgba(7, 15, 29, 0.95), rgba(4, 9, 18, 0.93));
+                background: linear-gradient(135deg, rgba(7, 15, 29, 0.92), rgba(4, 9, 18, 0.9));
                 border: 1px solid rgba(138, 216, 255, 0.2);
-                border-radius: 8px;
+                border-radius: 12px;
                 width: 100%;
                 max-width: 560px;
                 padding: 34px;
                 position: relative;
                 overflow: hidden;
-                box-shadow: 0 26px 90px rgba(0, 0, 0, 0.42);
+                box-shadow: 0 26px 90px rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(4px);
             }
             .bt-loader-content::before {
                 content: '';
@@ -397,10 +414,33 @@
                 50% { opacity: 1; transform: scaleY(1); }
             }
             @media (max-width: 640px) {
-                #boot-splash { padding: 16px; }
-                .bt-loader-content { padding: 26px; }
+                #boot-splash { padding: 12px; }
+                .bt-loader-content { padding: 22px; border-radius: 10px; }
                 .bt-binary-part, .bt-fx-part { font-size: 2.55rem; }
                 .bt-welcome-tagline { font-size: 1.25rem; }
+                .bt-halo { width: 180px; height: 180px; }
+                .bt-logo-mark { width: 48px; height: 48px; }
+                .bt-activity span { height: 36px; }
+                .bt-welcome { margin-bottom: 18px; }
+                .bt-status-row { margin-bottom: 20px; font-size: 11px; }
+                .bt-status-row strong { font-size: 12px; }
+            }
+            @media (max-width: 480px) {
+                #boot-splash { padding: 8px; }
+                .bt-loader-content { padding: 18px; }
+                .bt-binary-part, .bt-fx-part { font-size: 2.1rem; }
+                .bt-welcome-tagline { font-size: 1.1rem; line-height: 1.3; }
+                .bt-welcome-subtext { font-size: 10px; margin-bottom: 6px; }
+                .bt-logo-mark { width: 44px; height: 44px; }
+                .bt-activity span { height: 32px; }
+                .bt-progress-bar { height: 6px; margin-bottom: 6px; }
+                .bt-progress-meta { font-size: 10px; margin-bottom: 12px; }
+                .bt-status-row { margin-bottom: 16px; }
+            }
+            @media (min-width: 641px) and (max-width: 1024px) {
+                #boot-splash { padding: 20px; }
+                .bt-loader-content { padding: 30px; }
+                .bt-binary-part, .bt-fx-part { font-size: 3rem; }
             }
             @media (prefers-reduced-motion: reduce) {
                 #boot-splash, #boot-splash * { animation: none !important; transition-duration: 0.01s !important; }

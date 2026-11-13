@@ -1,42 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
 import './boot-splash.scss';
 
-interface BootSplashProps {
-    onDone?: () => void;
-    minDurationMs?: number;
-}
-
-const STATUS = [
+const STATUS_LINES = [
     'Initializing core…',
-    'Connecting to trading server…',
-    'Streaming live market data…',
-    'Warming up the bot engine…',
-    'Preparing your dashboard…',
+    'Loading trading engines…',
+    'Connecting to markets…',
+    'Preparing your workspace…',
+    'Almost ready…',
 ];
 
 const BRAND_PRIMARY = 'TRADING';
 const BRAND_SECONDARY = 'HUBS';
 const BRAND_TAGLINE = 'Build and run trading bots without code.';
 const BRAND_SUBTEXT = 'Precision Trading Workspace';
-/** Typewriter cadence. */
-const TYPE_MS = 70;
+const TYPE_MS = 55;
 
 /**
- * Dollarprinter-style cinematic boot loader. Indigo #6366f1 to cyan #22d3ee
- * brand mark, glassmorphic floating card, animated logo rings, live status row.
- * Classic, professional, human-designed startup screen.
- *
- * The splash does NOT self-dismiss on a timer. It stays visible until the
- * parent calls onDone() (triggered by app-root once API initialization is
- * complete), so the background image persists for the whole initialization
- * period.
+ * Cinematic initialization splash. Indigo #6366f1 → cyan #22d3ee theme.
+ * Beautiful classic animations: rotating logo rings, pulsing glow, sheen
+ * light sweep, typewriter brand mark, smooth progress bar, cycling status.
+ * Self-dismisses after the animation completes — the app then opens.
  */
-const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
+const BootSplash = ({ onDone }: { onDone?: () => void }) => {
     const [typed, setTyped] = useState('');
     const [progress, setProgress] = useState(0);
+    const [statusIdx, setStatusIdx] = useState(0);
     const [leaving, setLeaving] = useState(false);
+    const doneRef = useRef(false);
 
-    // Typewriter: types the brand letter by letter, then holds.
+    // Typewriter: types TRADING letter by letter.
     useEffect(() => {
         let i = 0;
         const t = setInterval(() => {
@@ -47,21 +39,32 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
         return () => clearInterval(t);
     }, []);
 
-    // Progress bar animates visually but does NOT auto-dismiss. The parent
-    // controls when the splash hides via onDone().
+    // Hand off from the static splash in index.html.
     useEffect(() => {
-        const duration = Math.max(2200, minDurationMs);
-        const tickMs = Math.max(40, Math.floor(duration / 100));
+        if (typeof window.__hideBootSplash === 'function') window.__hideBootSplash();
+    }, []);
+
+    // Progress + status: smooth advance, cycle status lines, then leave.
+    useEffect(() => {
+        const duration = 7000;
+        const tickMs = 40;
         const started = Date.now();
         const p = setInterval(() => {
             const elapsed = Date.now() - started;
-            const pct = Math.min(95, Math.round((elapsed / duration) * 100));
+            const pct = Math.min(100, Math.round((elapsed / duration) * 100));
             setProgress(pct);
+            setStatusIdx(Math.min(STATUS_LINES.length - 1, Math.floor((pct / 100) * (STATUS_LINES.length - 1))));
+            if (pct >= 100) {
+                clearInterval(p);
+                if (!doneRef.current) {
+                    doneRef.current = true;
+                    setLeaving(true);
+                    setTimeout(() => onDone?.(), 600);
+                }
+            }
         }, tickMs);
         return () => clearInterval(p);
-    }, [minDurationMs]);
-
-    const status = STATUS[Math.min(STATUS.length - 1, Math.floor((progress / 100) * (STATUS.length - 1)))];
+    }, []);
 
     return (
         <div className={`bt-splash ${leaving ? 'bt-splash--leave' : ''}`} role='status' aria-label='Loading TradingHubs'>
@@ -87,7 +90,7 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
                     <span>Boot sequence</span>
                     <span>{progress}%</span>
                 </div>
-                <div className='bt-status-row bt-status-row--bottom'><span>Status</span><strong>{status}</strong></div>
+                <div className='bt-status-row bt-status-row--bottom'><span>Status</span><strong>{STATUS_LINES[statusIdx]}</strong></div>
             </div>
         </div>
     );

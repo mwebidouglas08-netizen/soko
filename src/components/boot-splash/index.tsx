@@ -65,9 +65,12 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
 
     const status = STATUS[Math.min(STATUS.length - 1, Math.floor((progress / 100) * (STATUS.length - 1)))];
 
-    // Take over from the static splash in index.html.
+    // Take over from the static splash in index.html when the app is ready.
+    // The static splash stays visible until booted becomes true, at which point
+    // app-root calls window.__hideBootSplash() so the background image persists
+    // for the whole initialization period.
     useEffect(() => {
-        if (typeof window.__hideBootSplash === 'function') window.__hideBootSplash();
+        // Intentionally do NOT hide the static splash on mount.
     }, []);
 
     return (

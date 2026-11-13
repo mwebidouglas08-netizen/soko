@@ -70,14 +70,13 @@ const AppRoot = () => {
 
     if (!store || !is_api_initialized) return (
         <>
-            {!booted && <BootSplash onDone={() => setBooted(true)} />}
             <AppRootLoader />
         </>
     );
 
     return (
         <>
-            {!booted && <BootSplash onDone={() => setBooted(true)} />}
+            {!booted && <BootSplash onDone={handleBootDone} />}
             <AudioBoot />
             <AudioToggle />
             <ErrorBoundary root_store={store}>
@@ -86,6 +85,11 @@ const AppRoot = () => {
             </ErrorBoundary>
         </>
     );
+
+    function handleBootDone() {
+        setBooted(true);
+        if (typeof window.__hideBootSplash === 'function') window.__hideBootSplash();
+    }
 };
 
 export default AppRoot;

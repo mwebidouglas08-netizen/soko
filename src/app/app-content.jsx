@@ -161,7 +161,7 @@ const AppContent = observer(() => {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (is_api_initialized) {
             init();
             setIsLoading(true);
@@ -178,6 +178,37 @@ const AppContent = observer(() => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [is_api_initialized, client.loginid]);
+
+    React.useEffect(() => {
+        let is_mounted = true;
+
+        const initApi = async () => {
+            try {
+                await api_base.init();
+            } catch (error) {
+                console.error('[AppContent] Failed to initialize API:', error);
+                if (is_mounted) {
+                    setIsLoading(false);
+                    common.setError(true, {
+                        header: localize('Connection error'),
+                        message: localize('API connection not available. Please refresh and try again.'),
+                        should_show_refresh: true,
+                        redirect_label: localize('Refresh'),
+                        redirectOnClick: () => window.location.reload(),
+                        should_clear_error_on_click: true,
+                        should_redirect: false,
+                    });
+                }
+            }
+        };
+
+        initApi();
+
+        return () => {
+            is_mounted = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     if (common?.error) return null;
 

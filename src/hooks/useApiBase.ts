@@ -21,7 +21,7 @@ import {
  * and its dropdown could never open — demo/real switching was unreachable.
  */
 export const useApiBase = () => {
-    const [connectionStatus, setConnectionStatus] = useState<CONNECTION_STATUS>(CONNECTION_STATUS.OPENED);
+    const [connectionStatus, setConnectionStatus] = useState<CONNECTION_STATUS>(CONNECTION_STATUS.UNKNOWN);
     const [isAuthorizing, setIsAuthorizing] = useState(false);
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [accountList, setAccountList] = useState<any[]>([]);

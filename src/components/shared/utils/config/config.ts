@@ -31,6 +31,12 @@ export const WS_SERVERS = {
     PRODUCTION: `${brandConfig.platform.derivws.url.production}options/ws/public`,
 } as const;
 
+const toWebSocketURL = (url: string) => {
+    if (url.startsWith('https://')) return `wss://${url.slice('https://'.length)}`;
+    if (url.startsWith('http://')) return `ws://${url.slice('http://'.length)}`;
+    return url;
+};
+
 // =============================================================================
 // Helper Functions
 // =============================================================================
@@ -56,12 +62,12 @@ const getDefaultServerURL = () => {
     const isProductionEnv = isProduction();
 
     try {
-        return isProductionEnv ? WS_SERVERS.PRODUCTION : WS_SERVERS.STAGING;
+        return toWebSocketURL(isProductionEnv ? WS_SERVERS.PRODUCTION : WS_SERVERS.STAGING);
     } catch (error) {
         console.error('Error in getDefaultServerURL:', error);
     }
 
-    return isProductionEnv ? WS_SERVERS.PRODUCTION : WS_SERVERS.STAGING;
+    return toWebSocketURL(isProductionEnv ? WS_SERVERS.PRODUCTION : WS_SERVERS.STAGING);
 };
 
 /**
@@ -79,7 +85,7 @@ export const getSocketURL = async (): Promise<string> => {
         }
 
         const wsUrl = await DerivWSAccountsService.getAuthenticatedWebSocketURL(authInfo.access_token);
-        return wsUrl;
+        return toWebSocketURL(wsUrl);
     } catch (error) {
         console.error('[DerivWS] Error in getSocketURL:', error);
         return getDefaultServerURL();

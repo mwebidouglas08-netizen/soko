@@ -115,8 +115,8 @@ const TradingBotsPage = observer(() => {
             if (workspace.getAllBlocks().length === 0) {
                 throw new Error('Nothing landed in the workspace — check your connection and try again.');
             }
-            navigateToHubView('bot-builder');
-            setNotice(`${card.name} loaded into Bot Builder. Press Run to start — try on demo first.`);
+            document.dispatchEvent(new CustomEvent('mwx:go-bot-monitor'));
+            setNotice(`${card.name} loaded. Adjust settings in Bot Monitor, then press Run.`);
         } catch (e) {
             setError(e instanceof Error ? e.message : 'Could not load this strategy into the builder.');
         } finally {

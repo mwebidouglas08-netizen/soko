@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import AudioBoot from '@/components/audio/AudioBoot';
 import AudioToggle from '@/components/audio/AudioToggle';

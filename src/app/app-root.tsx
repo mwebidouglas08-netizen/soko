@@ -4,17 +4,11 @@ import AudioBoot from '@/components/audio/AudioBoot';
 import AudioToggle from '@/components/audio/AudioToggle';
 import ErrorBoundary from '@/components/error-component/error-boundary';
 import ErrorComponent from '@/components/error-component/error-component';
-import ChunkLoader from '@/components/loader/chunk-loader';
 import BootSplash from '@/components/boot-splash';
 import { api_base } from '@/external/bot-skeleton';
 import { useStore } from '@/hooks/useStore';
-import { localize } from '@deriv-com/translations';
 import AppContent from './app-content';
 import './app-root.scss';
-
-const AppRootLoader = () => {
-    return <ChunkLoader message={localize('Loading...')} />;
-};
 
 const ErrorComponentWrapper = observer(() => {
     const { common } = useStore();
@@ -59,7 +53,7 @@ const AppRoot = () => {
                     api_base_initialized.current = false;
                 } finally {
                     setIsApiInitialized(true);
-                    clearTimeout(timeoutId); // Clear timeout if API init completes
+                    clearTimeout(timeoutId);
                 }
             }
         };
@@ -68,28 +62,32 @@ const AppRoot = () => {
         return () => clearTimeout(timeoutId);
     }, []);
 
-    if (!store || !is_api_initialized) return (
-        <>
-            <AppRootLoader />
-        </>
-    );
+    // When API initialization completes and the store is available, hide the
+    // boot splash so the app becomes visible. The static splash in index.html
+    // persists until this point, so the background image stays on screen for
+    // the whole initialization period.
+    useEffect(() => {
+        if (is_api_initialized && store) {
+            setBooted(true);
+            if (typeof window.__hideBootSplash === 'function') window.__hideBootSplash();
+        }
+    }, [is_api_initialized, store]);
 
     return (
         <>
-            {!booted && <BootSplash onDone={handleBootDone} />}
-            <AudioBoot />
-            <AudioToggle />
-            <ErrorBoundary root_store={store}>
-                <ErrorComponentWrapper />
-                <AppContent />
-            </ErrorBoundary>
+            {!booted && <BootSplash />}
+            {booted && (
+                <>
+                    <AudioBoot />
+                    <AudioToggle />
+                    <ErrorBoundary root_store={store}>
+                        <ErrorComponentWrapper />
+                        <AppContent />
+                    </ErrorBoundary>
+                </>
+            )}
         </>
     );
-
-    function handleBootDone() {
-        setBooted(true);
-        if (typeof window.__hideBootSplash === 'function') window.__hideBootSplash();
-    }
 };
 
 export default AppRoot;

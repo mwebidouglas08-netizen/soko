@@ -25,12 +25,16 @@ const TYPE_MS = 70;
  * Dollarprinter-style cinematic boot loader. Indigo #6366f1 to cyan #22d3ee
  * brand mark, glassmorphic floating card, animated logo rings, live status row.
  * Classic, professional, human-designed startup screen.
+ *
+ * The splash does NOT self-dismiss on a timer. It stays visible until the
+ * parent calls onDone() (triggered by app-root once API initialization is
+ * complete), so the background image persists for the whole initialization
+ * period.
  */
 const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
     const [typed, setTyped] = useState('');
     const [progress, setProgress] = useState(0);
     const [leaving, setLeaving] = useState(false);
-    const doneRef = useRef(false);
 
     // Typewriter: types the brand letter by letter, then holds.
     useEffect(() => {
@@ -43,35 +47,21 @@ const BootSplash = ({ onDone, minDurationMs = 6000 }: BootSplashProps) => {
         return () => clearInterval(t);
     }, []);
 
-    // Progress + status: advance every 1/5th of the duration, then leave.
+    // Progress bar animates visually but does NOT auto-dismiss. The parent
+    // controls when the splash hides via onDone().
     useEffect(() => {
         const duration = Math.max(2200, minDurationMs);
         const tickMs = Math.max(40, Math.floor(duration / 100));
         const started = Date.now();
         const p = setInterval(() => {
-            const pct = Math.min(100, Math.round(((Date.now() - started) / duration) * 100));
+            const elapsed = Date.now() - started;
+            const pct = Math.min(95, Math.round((elapsed / duration) * 100));
             setProgress(pct);
-            if (pct >= 100) {
-                clearInterval(p);
-                if (!doneRef.current) {
-                    doneRef.current = true;
-                    setLeaving(true);
-                    setTimeout(() => onDone?.(), 560);
-                }
-            }
         }, tickMs);
         return () => clearInterval(p);
-    }, [minDurationMs, onDone]);
+    }, [minDurationMs]);
 
     const status = STATUS[Math.min(STATUS.length - 1, Math.floor((progress / 100) * (STATUS.length - 1)))];
-
-    // Take over from the static splash in index.html when the app is ready.
-    // The static splash stays visible until booted becomes true, at which point
-    // app-root calls window.__hideBootSplash() so the background image persists
-    // for the whole initialization period.
-    useEffect(() => {
-        // Intentionally do NOT hide the static splash on mount.
-    }, []);
 
     return (
         <div className={`bt-splash ${leaving ? 'bt-splash--leave' : ''}`} role='status' aria-label='Loading TradingHubs'>

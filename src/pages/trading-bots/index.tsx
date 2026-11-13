@@ -7,7 +7,7 @@ import {
 } from '@/pages/ai-trading-hub/deploy-strategy';
 import { VERTEX_DIGITS, QUANTUM_EDGE } from '@/pages/quick-bot';
 import { navigateToHubView } from '@/services/hub-navigation';
-import { HubNote, HubPage, HubPageHeader } from '@/components/hub-page';
+import { HubPage, HubPageHeader } from '@/components/hub-page';
 import { botVisual, botIcon } from '@/components/bot-visuals';
 import { botImage, type BotImageId } from '@/components/bot-images';
 import './trading-bots.scss';
@@ -127,8 +127,8 @@ const TradingBotsPage = observer(() => {
     return (
         <HubPage className='bots-page'>
             <HubPageHeader
-                title='Free Bots'
-                subtitle='Load a ready-made strategy into the Bot Builder or open a Quick Bot preset. Nothing trades until you press Run.'
+                title='Trading Bots'
+                subtitle='Load a ready-made strategy into the Bot Builder.'
                 actions={
                     <input
                         type='search'
@@ -146,10 +146,6 @@ const TradingBotsPage = observer(() => {
                     {visible.length} of {cards.length} bots
                 </span>
             </div>
-
-            <HubNote tone='info'>
-                These entries are strategies and stake progressions — they change how your stake moves between trades. Nothing here guarantees profit. Loading a bot only fills the workspace: nothing trades until you press Run, and demo orders are the safe first step.
-            </HubNote>
 
             {error && (
                 <div className='bots-error' role='alert'>

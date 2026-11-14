@@ -50,14 +50,14 @@ html, body {
     overflow-x: hidden;
 }
 @media (max-width: 768px) {
-    html { font-size: 15px; }
-    body { font-size: 14px; }
+    html { font-size: 16px; }
+    body { font-size: 16px; }
     .bot {
         --bot-content-width: 100vw;
         --bot-content-height: calc(100dvh - 120px);
     }
 }
 @media (max-width: 480px) {
-    html { font-size: 14px; }
-    body { font-size: 13.5px; }
+    html { font-size: 16px; }
+    body { font-size: 16px; }
 }

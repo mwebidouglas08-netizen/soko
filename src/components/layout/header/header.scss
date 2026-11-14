@@ -315,8 +315,25 @@
     }
 
     .auth-actions {
+        gap: 0.4rem;
         button {
-            margin-inline-end: 0.8rem;
+            margin-inline-end: 0;
+            font-size: 1.2rem;
+            padding-inline: 0.8rem;
+        }
+    }
+
+    .account-switcher {
+        &__item {
+            .deriv-account-switcher-item {
+                padding: 0.4rem 0.8rem;
+                
+                &__detail {
+                    .deriv-account-switcher-item__currency {
+                        font-size: 1.2rem;
+                    }
+                }
+            }
         }
     }
 }

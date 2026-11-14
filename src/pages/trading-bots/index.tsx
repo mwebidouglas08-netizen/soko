@@ -22,7 +22,7 @@ interface BotCard {
 
 /** Free bots grid — clean, human-made card design. */
 const REFERENCE_CARDS: BotCard[] = [
-    { id: 'maziwa', name: 'Maziwa AI', description: 'Premium multi-market scanner. Rotates synthetic markets, detects favourable digit opportunities, and trades with adaptive risk controls.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'maziwa' },
+    { id: 'maziwa', name: 'Maziwa AI', description: 'Premium high-frequency Over/Under scanner. Rotates all synthetic markets, prioritizes Over 2 and Under 8 signals, 1-tick trades with martingale and session risk controls.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'maziwa' },
     { id: 'vertex', name: 'Vertex Digits', description: 'Quick Over/Under + Even/Odd analysis bot. Stake 1.0, recovery ×2, pattern gate after every 3 trades.', kind: 'quick', badge: 'FREE', preset: 'vertex' },
     { id: 'digit_nexus', name: 'Digit Nexus', description: 'Digit-frequency Over/Under strategy on Volatility markets with adaptive recovery.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'digit-nexus-ai' },
     { id: 'volt_scalper', name: 'Volt Scalper', description: 'Fast volatility scalping strategy with momentum-based entries and recovery.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'volt-scalper' },

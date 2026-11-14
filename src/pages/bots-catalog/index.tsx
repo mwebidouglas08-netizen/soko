@@ -12,7 +12,7 @@ type Bot = {
 };
 
 const BOTS: Bot[] = [
-    { file: 'maziwa', name: 'Maziwa AI', tag: 'PREMIUM', desc: 'Premium multi-market scanner: rotates markets, detects digit opportunities, adaptive risk controls.', premium: true },
+    { file: 'maziwa', name: 'Maziwa AI', tag: 'PREMIUM', desc: 'High-frequency Over/Under scanner: Over 2 / Under 8, 1-tick, multi-market, martingale.', premium: true },
     { file: 'digit-nexus-ai', name: 'Digit Nexus', tag: 'DIGITS', desc: 'Digit frequency Over/Under entries.' },
     { file: 'volt-scalper', name: 'Volt Scalper', tag: 'SCALP', desc: 'Fast volatility scalping.' },
     { file: 'apex-ai', name: 'Apex AI', tag: 'PREMIUM', desc: 'Adaptive multi-market AI.', premium: true },

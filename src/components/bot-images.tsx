@@ -3,6 +3,7 @@
  * Each bot gets a distinct, eye-catching visual that reflects its strategy.
  */
 export type BotImageId =
+    | 'maziwa'
     | 'vertex' | 'quantum'
     | 'digit-nexus-ai' | 'volt-scalper' | 'apex-ai' | 'neutrade-ai' | 'straddle-edge'
     | 'aurora-parity' | 'obsidian-parity' | 'prism-extremes' | 'pulsetrader-ai'
@@ -14,6 +15,27 @@ export type BotImageId =
 
 const SVG = (id: BotImageId): string => {
     switch (id) {
+        case 'maziwa':
+            return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
+                <defs>
+                    <linearGradient id='mzgrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' stop-color='#22d3ee'/>
+                        <stop offset='50%' stop-color='#6366f1'/>
+                        <stop offset='100%' stop-color='#a855f7'/>
+                    </linearGradient>
+                    <filter id='mzglow' x='-30%' y='-30%' width='160%' height='160%'>
+                        <feGaussianBlur stdDeviation='6' result='blur'/>
+                        <feMerge><feMergeNode in='blur'/><feMergeNode in='SourceGraphic'/></feMerge>
+                    </filter>
+                </defs>
+                <rect width='200' height='160' fill='#0b111e' rx='16'/>
+                <circle cx='100' cy='78' r='48' fill='url(#mzgrad)' opacity='0.12'/>
+                <path d='M40 118 Q70 30 100 78 Q130 126 160 38' fill='none' stroke='url(#mzgrad)' stroke-width='4' stroke-linecap='round' filter='url(#mzglow)'/>
+                <circle cx='70' cy='58' r='6' fill='#22d3ee'/><circle cx='100' cy='78' r='8' fill='#6366f1'/>
+                <circle cx='130' cy='58' r='6' fill='#a855f7'/><circle cx='160' cy='38' r='5' fill='#22d3ee'/>
+                <path d='M55 28h10M60 23v10M140 28h10M145 23v10' stroke='#fff' stroke-width='2' stroke-linecap='round' opacity='0.7'/>
+                <text x='100' y='146' font-family='monospace' font-size='14' font-weight='bold' fill='#22d3ee' text-anchor='middle'>MAZIWA AI</text>
+            </svg>`;
         case 'vertex':
             return `<svg viewBox='0 0 200 160' xmlns='http://www.w3.org/2000/svg'>
                 <defs>

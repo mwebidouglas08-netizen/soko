@@ -38,6 +38,7 @@ export const BOT_VISUALS: Record<string, BotTheme> = {
     // trading-bots (quick bots)
     vertex: { tag: 'QUICK', kind: 'vertex', color: INDIGO, color2: CYAN, glow: INDIGO },
     quantum: { tag: 'QUICK', kind: 'quantum', color: INDIGO, color2: CYAN, glow: INDIGO },
+    maziwa: { tag: 'PREMIUM', kind: 'premium', color: INDIGO, color2: CYAN, glow: INDIGO, premium: true },
     // bots-catalog
     'dmo-bot': { tag: 'PREMIUM', kind: 'balanced', color: INDIGO, color2: CYAN, glow: INDIGO },
     'dollar-printer-ai': { tag: 'PREMIUM', kind: 'balanced', color: INDIGO, color2: CYAN, glow: INDIGO },

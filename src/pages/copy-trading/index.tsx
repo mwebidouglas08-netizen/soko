@@ -12,12 +12,12 @@ const timeAt = (ms: number) =>
 
 const EVENT_TONE: Record<string, string> = {
     info: 'info',
-    success: 'ok',
+    success: 'success',
     warn: 'warn',
-    error: 'err',
+    error: 'error',
     quote: 'info',
-    purchase: 'buy',
-    settlement: 'settle',
+    purchase: 'success',
+    settlement: 'info',
     risk: 'warn',
 };
 
@@ -40,8 +40,6 @@ const STATUS_TONE: Record<string, string> = {
     error: 'hub-badge--error',
 };
 
-const money = (n: number) => n.toFixed(2);
-
 const CopyTradingPage = observer(() => {
     const state = useCopyTrading();
     const { client, run_panel } = useStore() ?? {};
@@ -61,9 +59,17 @@ const CopyTradingPage = observer(() => {
     const isRunning = state.status === 'connecting' || state.status === 'running' || state.status === 'stopping';
 
     useEffect(() => {
+        setMultiplierDraft(String(state.settings.stakeMultiplier));
+    }, [state.settings.stakeMultiplier]);
+
+    useEffect(() => {
+        setCapDraft(state.settings.stakeCap === null ? '' : String(state.settings.stakeCap));
+    }, [state.settings.stakeCap]);
+
+    useEffect(() => {
         const el = feedRef.current;
-        if (el) el.scrollTop = el.scrollHeight;
-    }, [state.events.length]);
+        if (el) el.scrollTop = 0;
+    }, [state.events[0]?.id]);
 
     const connect = () => {
         const token = masterToken.trim();
@@ -92,13 +98,15 @@ const CopyTradingPage = observer(() => {
         copyTrading.removeCopier(id);
     };
 
-    const commitMultiplier = (raw: string, commitOnType = false): number | null => {
-        const value = Number(raw);
-        if (raw.trim() === '' || !Number.isFinite(value)) return null;
+    const commitMultiplier = () => {
+        const value = Number(multiplierDraft);
+        if (!Number.isFinite(value)) {
+            setMultiplierDraft(String(state.settings.stakeMultiplier));
+            return;
+        }
         const clamped = Math.min(10, Math.max(0.1, value));
-        if (commitOnType && (value < 0.1 || value > 10)) return null;
+        setMultiplierDraft(String(clamped));
         if (clamped !== state.settings.stakeMultiplier) copyTrading.setSettings({ stakeMultiplier: clamped });
-        return clamped;
     };
 
     const commitCap = () => {
@@ -120,8 +128,8 @@ const CopyTradingPage = observer(() => {
     return (
         <HubPage className='copy-page'>
             <HubPageHeader
-                title='Copy Trading'
-                subtitle='Mirror a master account&#39;s trades into copier accounts with a stake multiplier and cap.'
+                title='Copy Trader'
+                subtitle='Mirror a master account’s trades to copier accounts with a multiplier and cap.'
                 badge={
                     <>
                         <span className={`hub-badge ${STATUS_TONE[state.status] ?? 'hub-badge--idle'}`}>
@@ -135,14 +143,14 @@ const CopyTradingPage = observer(() => {
                                 .filter(Boolean)
                                 .join(' ')}
                         >
-                            {!isLoggedIn ? 'Guest · signals only' : `${localIsDemo ? 'Demo' : 'Real'} · ${activeLoginid}`}
+                            {!isLoggedIn ? 'Guest · login required' : `${localIsDemo ? 'Demo' : 'Real'} · ${activeLoginid}`}
                         </span>
                     </>
                 }
             />
 
             <HubNote tone='risk'>
-                Demo copiers only by default. Enable <strong>Allow real copiers</strong> to mirror to real accounts.
+                Demo copiers only by default. Enable <strong>Allow real copiers</strong> only if you accept real-money risk.
                 The stake multiplier scales both wins and losses.
             </HubNote>
 
@@ -171,7 +179,7 @@ const CopyTradingPage = observer(() => {
                     <button
                         type='button'
                         className='hub-btn hub-btn--primary'
-                        disabled={state.status === 'connecting' || state.status === 'stopping'}
+                        disabled={state.status === 'connecting' || state.status === 'stopping' || (isLoggedIn && !masterToken.trim())}
                         onClick={connect}
                     >
                         {state.status === 'connecting' ? 'Connecting…' : state.master.connected ? 'Reconnect' : 'Connect & start'}
@@ -212,7 +220,7 @@ const CopyTradingPage = observer(() => {
                         <input
                             type='password'
                             autoComplete='off'
-                            placeholder='Account API token (demo by default)'
+                            placeholder='Account API token (demo recommended)'
                             value={copierToken}
                             onChange={e => setCopierToken(e.target.value)}
                         />
@@ -266,21 +274,13 @@ const CopyTradingPage = observer(() => {
                                     </button>
                                 </div>
                                 <div className='copy-card__stats'>
-                                    <span>
-                                        <strong>{copier.copied}</strong> copied
-                                    </span>
-                                    <span>
-                                        <strong>{copier.failed}</strong> failed
-                                    </span>
-                                    <span>
-                                        <strong>{copier.skipped}</strong> skipped
-                                    </span>
+                                    <span><strong>{copier.copied}</strong> copied</span>
+                                    <span><strong>{copier.failed}</strong> failed</span>
+                                    <span><strong>{copier.skipped}</strong> skipped</span>
                                 </div>
                                 {copier.lastError && <p className='copy-card__error'>Last error: {copier.lastError}</p>}
                                 <p className='copy-card__seen'>
-                                    {copier.lastSeen
-                                        ? `Last seen ${timeAt(copier.lastSeen)}`
-                                        : 'No proposal seen yet'}
+                                    {copier.lastSeen ? `Last seen ${timeAt(copier.lastSeen)}` : 'No activity yet'}
                                 </p>
                             </article>
                         ))}
@@ -313,7 +313,7 @@ const CopyTradingPage = observer(() => {
                                 copyTrading.setSettings({ allowRealCopiers: e.target.checked });
                             }}
                         />
-                        <span>Allow real copiers (dangerous — real funds)</span>
+                        <span>Allow real copiers (real funds)</span>
                     </label>
                     <label className='hub-field'>
                         Stake multiplier (0.1 – 10)
@@ -323,21 +323,15 @@ const CopyTradingPage = observer(() => {
                             min={0.1}
                             max={10}
                             value={multiplierDraft}
-                            onChange={e => {
-                                setMultiplierDraft(e.target.value);
-                                commitMultiplier(e.target.value, true);
-                            }}
-                            onBlur={() => {
-                                const committed = commitMultiplier(multiplierDraft);
-                                if (committed !== null) setMultiplierDraft(String(committed));
-                            }}
+                            onChange={e => setMultiplierDraft(e.target.value)}
+                            onBlur={commitMultiplier}
                         />
                     </label>
                     <label className='hub-field'>
                         Stake cap (empty = no cap)
                         <input
                             type='number'
-                            step={0.5}
+                            step={0.1}
                             min={0}
                             placeholder='No cap'
                             value={capDraft}
@@ -362,6 +356,18 @@ const CopyTradingPage = observer(() => {
                     <strong>{state.stats.copied}</strong>
                 </div>
                 <div className='hub-stat'>
+                    <span>Settled</span>
+                    <strong>{state.stats.settled}</strong>
+                </div>
+                <div className='hub-stat'>
+                    <span>Won / Lost</span>
+                    <strong>{state.stats.won} / {state.stats.lost}</strong>
+                </div>
+                <div className='hub-stat'>
+                    <span>Profit</span>
+                    <strong className={state.stats.profit < 0 ? 'hub-neg' : ''}>{money(state.stats.profit)}</strong>
+                </div>
+                <div className='hub-stat'>
                     <span>Failed</span>
                     <strong className='hub-neg'>{state.stats.failed}</strong>
                 </div>
@@ -375,7 +381,7 @@ const CopyTradingPage = observer(() => {
                 <h3>Events ({state.events.length})</h3>
                 {state.events.length === 0 ? (
                     <p className='hub-empty'>
-                        No events yet — connect a master account to watch proposals stream in.
+                        No events yet — connect a master account to start observing trades.
                     </p>
                 ) : (
                     <div className='hub-log' ref={feedRef}>
@@ -395,8 +401,8 @@ const CopyTradingPage = observer(() => {
             </section>
 
             <HubNote tone='risk'>
-                Honest note: copying replicates the master&#39;s decisions, not their results. Start with a multiplier
-                of 1 and a tight stake cap.
+                Copy trading replicates the master’s decisions, not guaranteed results. Start with a multiplier
+                of 1, a tight stake cap, and demo accounts.
             </HubNote>
         </HubPage>
     );

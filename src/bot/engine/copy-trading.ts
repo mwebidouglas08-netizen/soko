@@ -636,6 +636,14 @@ export class CopyTradingEngine {
     private scheduleReconnect() {
         if (!this.running) return;
         if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+        if (this.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+            this.running = false;
+            this.masterAuthorized = false;
+            this.update({ master: { connected: false, loginid: null, balance: null, isVirtual: null } });
+            this.setStatus('error', 'Master connection lost. Reconnect attempts exhausted — start again when ready.');
+            this.logEvent('error', 'Master connection lost. Reconnect attempts exhausted.');
+            return;
+        }
         const delay = Math.min(RECONNECT_BASE_MS * 2 ** this.reconnectAttempts, RECONNECT_MAX_MS);
         this.reconnectAttempts = Math.min(this.reconnectAttempts + 1, MAX_RECONNECT_ATTEMPTS);
         this.logEvent('info', `Reconnecting to master in ${Math.round(delay / 1000)}s…`);
@@ -653,14 +661,10 @@ export class CopyTradingEngine {
               : [];
         for (const entry of open) {
             const id = Number(entry?.contract_id);
-            if (!Number.isFinite(id) || this.seenContracts.has(id)) continue;
-            this.seenContracts.add(id);
-            this.bumpStat('observed');
-            this.logEvent(
-                'info',
-                `Master opened contract #${id}${entry?.contract_type ? ` — ${entry.contract_type}${entry.barrier ? `(${entry.barrier})` : ''} on ${entry.symbol || ''}` : ''}.`
-            );
-            this.masterSend({ proposal_open_contract: 1, contract_id: id, subscribe: 1 });
+        if (!Number.isFinite(id) || this.seenContracts.has(id)) continue;
+        this.seenContracts.add(id);
+        // details and observed accounting are handled in handleMasterContract to avoid duplicates
+        this.masterSend({ proposal_open_contract: 1, contract_id: id, subscribe: 1 });
         }
     }
 
@@ -671,6 +675,7 @@ export class CopyTradingEngine {
         if (!this.seenContracts.has(id)) {
             this.seenContracts.add(id);
             this.bumpStat('observed');
+            this.logEvent('info', `Master opened contract #${id}${poc?.contract_type ? ` — ${poc.contract_type} on ${poc.symbol || poc.underlying_symbol || ''}` : ''}.`);
         }
         if (!this.running || this.replicatedContracts.has(id)) return;
         this.replicatedContracts.add(id);
@@ -722,10 +727,11 @@ export class CopyTradingEngine {
                 continue;
             }
             const { settings } = this.state;
-            let stake = Math.round(masterStake * settings.stakeMultiplier);
+            let stake = Math.round(masterStake * settings.stakeMultiplier * 100) / 100;
             if (settings.stakeCap !== null && Number.isFinite(settings.stakeCap)) {
                 stake = Math.min(stake, settings.stakeCap);
             }
+            stake = Math.round(stake * 100) / 100;
             if (!(stake >= MIN_STAKE)) {
                 this.skipCopier(copier, `stake ${stake} below the ${MIN_STAKE} minimum after multiplier/cap`);
                 continue;

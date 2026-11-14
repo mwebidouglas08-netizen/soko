@@ -6,35 +6,45 @@ import { doUntilDone, getUUID } from '../tradeEngine/utils/helpers';
 import { api_base } from './api-base';
 
 const parseTick = tick => ({
-    epoch: +tick.epoch,
-    quote: +tick.quote,
+    epoch: Number(tick?.epoch),
+    quote: Number(tick?.quote),
 });
 
 const parseOhlc = ohlc => ({
-    open: +ohlc.open,
-    high: +ohlc.high,
-    low: +ohlc.low,
-    close: +ohlc.close,
-    epoch: +(ohlc.open_time || ohlc.epoch),
+    open: Number(ohlc?.open),
+    high: Number(ohlc?.high),
+    low: Number(ohlc?.low),
+    close: Number(ohlc?.close),
+    epoch: Number(ohlc?.open_time || ohlc?.epoch),
 });
 
-const parseCandles = candles => candles.map(t => parseOhlc(t));
+const parseCandles = candles => (Array.isArray(candles) ? candles.map(t => parseOhlc(t)) : []);
 
-const updateTicks = (ticks, newTick) => (getLast(ticks).epoch >= newTick.epoch ? ticks : [...ticks.slice(1), newTick]);
+const updateTicks = (ticks, newTick) => {
+    const list = Array.isArray(ticks) ? ticks : [];
+    if (!newTick || !Number.isFinite(newTick.epoch)) return list;
+    const last = getLast(list);
+    if (last && Number.isFinite(last.epoch) && last.epoch >= newTick.epoch) return list;
+    if (list.length === 0) return [newTick];
+    return [...list.slice(1), newTick];
+};
 
 const updateCandles = (candles, ohlc) => {
-    const lastCandle = getLast(candles);
+    const list = Array.isArray(candles) ? candles : [];
+    if (!ohlc || !Number.isFinite(ohlc.epoch)) return list;
+    const lastCandle = getLast(list);
+    if (!lastCandle) return [ohlc];
     if (
         (lastCandle.open === ohlc.open &&
             lastCandle.high === ohlc.high &&
             lastCandle.low === ohlc.low &&
             lastCandle.close === ohlc.close &&
             lastCandle.epoch === ohlc.epoch) ||
-        lastCandle.epoch > ohlc.epoch
+        (Number.isFinite(lastCandle.epoch) && lastCandle.epoch > ohlc.epoch)
     ) {
-        return candles;
+        return list;
     }
-    const prevCandles = lastCandle.epoch === ohlc.epoch ? candles.slice(0, -1) : candles.slice(1);
+    const prevCandles = lastCandle.epoch === ohlc.epoch ? list.slice(0, -1) : list.slice(1);
     return [...prevCandles, ohlc];
 };
 
@@ -70,20 +80,21 @@ export default class TicksService {
 
     async request(options) {
         return new Promise((resolve, reject) => {
-            const { symbol, granularity } = options;
-
+            const { symbol, granularity } = options || {};
             const style = getType(granularity);
 
             if (style === 'ticks' && this.ticks.has(symbol)) {
-                resolve(this.ticks.get(symbol));
+                resolve(this.ticks.get(symbol) || []);
+                return;
             }
 
             if (style === 'candles' && this.candles.hasIn([symbol, Number(granularity)])) {
-                resolve(this.candles.getIn([symbol, Number(granularity)]));
+                resolve(this.candles.getIn([symbol, Number(granularity)]) || []);
+                return;
             }
-            this.requestStream({ ...options, style })
+            this.requestStream({ ...(options || {}), style })
                 .then(res => {
-                    resolve(res);
+                    resolve(Array.isArray(res) ? res : []);
                 })
                 .catch(e => {
                     reject(e);
@@ -256,7 +267,7 @@ export default class TicksService {
     }
 
     requestTicks(options) {
-        const { symbol, granularity, style } = options;
+        const { symbol, granularity, style } = options || {};
         const request_object = {
             ticks_history: symbol === 'na' ? 'R_100' : symbol,
             subscribe: 1,
@@ -265,39 +276,45 @@ export default class TicksService {
             granularity: granularity ? Number(granularity) : undefined,
             style,
         };
-        return new Promise((resolve, reject) => {
-            if (!api_base.api) resolve([]);
+        return new Promise(resolve => {
+            if (!api_base.api) {
+                resolve([]);
+                return;
+            }
             doUntilDone(() => api_base.api.send(request_object), ['AlreadySubscribed'], api_base)
                 .then(r => {
-                    if (style === 'ticks') {
-                        const ticks = historyToTicks(r.history);
-
-                        this.updateTicksAndCallListeners(symbol, ticks);
-                        resolve(ticks);
-                    } else {
-                        const candles = parseCandles(r.candles);
-
-                        this.updateCandlesAndCallListeners([symbol, Number(granularity)], candles);
-
-                        resolve(candles);
+                    try {
+                        if (style === 'ticks') {
+                            const ticks = historyToTicks(r?.history);
+                            this.updateTicksAndCallListeners(symbol, ticks);
+                            resolve(ticks);
+                        } else {
+                            const candles = parseCandles(r?.candles);
+                            this.updateCandlesAndCallListeners([symbol, Number(granularity)], candles);
+                            resolve(candles);
+                        }
+                    } catch (e) {
+                        resolve([]);
                     }
                 })
                 .catch(error => {
-                    // Handle AlreadySubscribed errors gracefully - they're not fatal
                     if (error?.error?.code === 'AlreadySubscribed') {
-                        // For AlreadySubscribed errors, we can still resolve with existing data
                         if (style === 'ticks' && this.ticks.has(symbol)) {
-                            resolve(this.ticks.get(symbol));
+                            resolve(this.ticks.get(symbol) || []);
                         } else if (style === 'candles' && this.candles.hasIn([symbol, Number(granularity)])) {
-                            resolve(this.candles.getIn([symbol, Number(granularity)]));
+                            resolve(this.candles.getIn([symbol, Number(granularity)]) || []);
                         } else {
                             resolve([]);
                         }
                         return;
                     }
-                    // Don't clear auth data for InvalidSymbol errors as it causes unwanted logouts
-                    // InvalidSymbol errors can occur for various reasons and don't necessarily mean the user is unauthorized
-                    reject(error);
+                    if (style === 'ticks' && this.ticks.has(symbol)) {
+                        resolve(this.ticks.get(symbol) || []);
+                    } else if (style === 'candles' && this.candles.hasIn([symbol, Number(granularity)])) {
+                        resolve(this.candles.getIn([symbol, Number(granularity)]) || []);
+                    } else {
+                        resolve([]);
+                    }
                 });
         });
     }

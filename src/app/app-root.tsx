@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import AudioBoot from '@/components/audio/AudioBoot';
 import AudioToggle from '@/components/audio/AudioToggle';
 import ErrorBoundary from '@/components/error-component/error-boundary';
 import ErrorComponent from '@/components/error-component/error-component';
-import BootSplash from '@/components/boot-splash';
 import { useStore } from '@/hooks/useStore';
 import AppContent from './app-content';
 import './app-root.scss';
@@ -32,9 +31,24 @@ const AppRoot = () => {
     const store = useStore();
     const [booted, setBooted] = useState(false);
 
+    useEffect(() => {
+        const ready = () => {
+            if (typeof window.__hideBootSplash === 'function') {
+                window.__hideBootSplash();
+            }
+            setBooted(true);
+        };
+        if (document.readyState === 'complete') {
+            const t = window.setTimeout(ready, 1200);
+            return () => window.clearTimeout(t);
+        }
+        const onLoad = () => window.setTimeout(ready, 1200);
+        window.addEventListener('load', onLoad);
+        return () => window.removeEventListener('load', onLoad);
+    }, []);
+
     return (
         <>
-            {!booted && <BootSplash onDone={() => setBooted(true)} />}
             {booted && store && (
                 <>
                     <AudioBoot />

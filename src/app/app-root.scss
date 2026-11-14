@@ -1,12 +1,14 @@
-.app-root {
-    height: 100vh;
-    width: 100vw;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-
-    .load-message {
-        margin-top: 6rem;
+﻿.app-root {
+    height: 100dvh;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+@media (max-width: 768px) {
+    .app-root {
+        font-size: 1.4rem;
+        align-items: stretch;
+        justify-content: flex-start;
     }
 }

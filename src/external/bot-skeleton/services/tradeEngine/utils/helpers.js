@@ -108,23 +108,20 @@ export const tradeOptionToBuy = (contract_type, trade_option) => {
 };
 
 export const getDirection = ticks => {
-    const { length } = ticks;
-    const [tickOld, tickNew] = ticks.slice(-2);
-
-    let direction = '';
-    if (length >= 2) {
-        direction = tickOld.quote < tickNew.quote ? 'rise' : direction;
-        direction = tickOld.quote > tickNew.quote ? 'fall' : direction;
-    }
-
-    return direction;
+    const list = Array.isArray(ticks) ? ticks : [];
+    if (list.length < 2) return '';
+    const tickOld = list[list.length - 2];
+    const tickNew = list[list.length - 1];
+    if (!tickOld || !tickNew || !Number.isFinite(tickOld.quote) || !Number.isFinite(tickNew.quote)) return '';
+    if (tickOld.quote < tickNew.quote) return 'rise';
+    if (tickOld.quote > tickNew.quote) return 'fall';
+    return '';
 };
 
 export const getLastDigit = tick => {
-    let number_string = tick;
-    if (typeof number_string === 'number') {
-        number_string = String(number_string);
-    }
+    if (tick === undefined || tick === null) return NaN;
+    const number_string = typeof tick === 'number' ? String(tick) : String(tick);
+    if (!number_string.length) return NaN;
     return Number(number_string[number_string.length - 1]);
 };
 

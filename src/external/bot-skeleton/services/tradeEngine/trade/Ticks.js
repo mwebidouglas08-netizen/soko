@@ -1,4 +1,4 @@
-/* eslint-disable no-promise-executor-return */
+﻿/* eslint-disable no-promise-executor-return */
 import debounce from 'lodash.debounce';
 import { getLocalizedErrorMessage } from '@/constants/backend-error-messages';
 import { localize } from '@deriv-com/translations';
@@ -26,9 +26,11 @@ export default Engine =>
                     if (this.is_proposal_subscription_required) {
                         this.checkProposalReady();
                     }
-                    const lastTick = ticks.slice(-1)[0];
-                    const { epoch } = lastTick;
-                    this.store.dispatch({ type: constants.NEW_TICK, payload: epoch });
+                    const list = Array.isArray(ticks) ? ticks : [];
+                    const lastTick = list.length ? list[list.length - 1] : null;
+                    if (lastTick && Number.isFinite(lastTick.epoch)) {
+                        this.store.dispatch({ type: constants.NEW_TICK, payload: lastTick.epoch });
+                    }
                 };
 
                 const key = await ticksService.monitor({ symbol, callback });
@@ -42,16 +44,25 @@ export default Engine =>
 
         getTicks(toString = false) {
             return new Promise(resolve => {
-                this.$scope.ticksService.request({ symbol: this.symbol }).then(ticks => {
-                    const ticks_list = ticks.map(tick => {
-                        if (toString) {
-                            return tick.quote.toFixed(this.getPipSize());
-                        }
-                        return tick.quote;
-                    });
+                this.$scope.ticksService
+                    .request({ symbol: this.symbol })
+                    .then(ticks => {
+                        const source = Array.isArray(ticks) ? ticks : [];
+                        const pip_size = this.getPipSize();
+                        const ticks_list = source
+                            .map(tick => {
+                                const q = tick && tick.quote;
+                                if (!Number.isFinite(q)) return null;
+                                if (toString) {
+                                    return Number(q).toFixed(pip_size);
+                                }
+                                return q;
+                            })
+                            .filter(v => v !== null);
 
-                    resolve(ticks_list);
-                });
+                        resolve(ticks_list);
+                    })
+                    .catch(() => resolve([]));
             });
         }
 
@@ -61,9 +72,15 @@ export default Engine =>
                     .request({ symbol: this.symbol })
                     .then(ticks => {
                         try {
-                            let last_tick = raw ? getLast(ticks) : getLast(ticks).quote;
+                            const list = Array.isArray(ticks) ? ticks : [];
+                            const last = getLast(list);
+                            if (!last || !Number.isFinite(last.quote)) {
+                                resolve(raw ? last : undefined);
+                                return;
+                            }
+                            let last_tick = raw ? last : last.quote;
                             if (!raw && toString) {
-                                last_tick = last_tick.toFixed(this.getPipSize());
+                                last_tick = Number(last_tick).toFixed(this.getPipSize());
                             }
                             resolve(last_tick);
                         } catch (error) {
@@ -71,7 +88,7 @@ export default Engine =>
                         }
                     })
                     .catch(e => {
-                        if (e.code === 'MarketIsClosed') {
+                        if (e && e.code === 'MarketIsClosed') {
                             const localizedError = {
                                 ...e,
                                 message: getLocalizedErrorMessage(e.code, e.details),
@@ -79,35 +96,58 @@ export default Engine =>
                             globalObserver.emit('Error', localizedError);
                             resolve(e.code);
                         }
+                        reject(e);
                     })
             );
         }
 
         getLastDigit() {
-            return new Promise(resolve => this.getLastTick(false, true).then(tick => resolve(getLastDigit(tick))));
+            return new Promise(resolve =>
+                this.getLastTick(false, true)
+                    .then(tick => {
+                        if (tick === undefined || tick === null || tick === '') {
+                            resolve(NaN);
+                            return;
+                        }
+                        resolve(getLastDigit(tick));
+                    })
+                    .catch(() => resolve(NaN))
+            );
         }
 
         getLastDigitList() {
-            return new Promise(resolve => this.getTicks().then(ticks => resolve(this.getLastDigitsFromList(ticks))));
+            return new Promise(resolve =>
+                this.getTicks(true)
+                    .then(ticks => resolve(this.getLastDigitsFromList(ticks)))
+                    .catch(() => resolve([]))
+            );
         }
         getLastDigitsFromList(ticks) {
-            const digits = ticks.map(tick => {
-                return getLastDigit(tick.toFixed(this.getPipSize()));
-            });
-            return digits;
+            const source = Array.isArray(ticks) ? ticks : [];
+            const pip_size = this.getPipSize();
+            return source
+                .map(tick => {
+                    if (tick === undefined || tick === null) return NaN;
+                    const value = typeof tick === 'number' ? Number(tick).toFixed(pip_size) : String(tick);
+                    return getLastDigit(value);
+                })
+                .filter(d => Number.isFinite(d));
         }
 
         getNthLastDigit(n = 1) {
             const index = Number.parseInt(n, 10);
             return new Promise(resolve =>
-                this.getTicks().then(ticks => {
-                    if (!Number.isFinite(index) || index < 1 || ticks.length < index) {
-                        resolve(undefined);
-                        return;
-                    }
-                    const tick = ticks[ticks.length - index];
-                    resolve(getLastDigit(tick.toFixed(this.getPipSize())));
-                })
+                this.getTicks(true)
+                    .then(ticks => {
+                        const list = Array.isArray(ticks) ? ticks : [];
+                        if (!Number.isFinite(index) || index < 1 || list.length < index) {
+                            resolve(undefined);
+                            return;
+                        }
+                        const tick = list[list.length - index];
+                        resolve(getLastDigit(tick));
+                    })
+                    .catch(() => resolve(undefined))
             );
         }
 
@@ -163,6 +203,7 @@ export default Engine =>
                 this.$scope.ticksService
                     .request({ symbol: this.symbol })
                     .then(ticks => resolve(getDirection(ticks) === dir))
+                    .catch(() => resolve(false))
             );
         }
 
@@ -172,7 +213,11 @@ export default Engine =>
             return new Promise(resolve =>
                 this.$scope.ticksService
                     .request({ symbol: this.symbol, granularity })
-                    .then(ohlc => resolve(field ? ohlc.map(o => o[field]) : ohlc))
+                    .then(ohlc => {
+                        const list = Array.isArray(ohlc) ? ohlc : [];
+                        resolve(field ? list.map(o => (o ? o[field] : undefined)) : list);
+                    })
+                    .catch(() => resolve([]))
             );
         }
 
@@ -181,7 +226,12 @@ export default Engine =>
 
             const index = expectPositiveInteger(Number(i), localize('Index must be a positive integer'));
 
-            return new Promise(resolve => this.getOhlc(args).then(ohlc => resolve(ohlc.slice(-index)[0])));
+            return new Promise(resolve =>
+                this.getOhlc(args).then(ohlc => {
+                    const list = Array.isArray(ohlc) ? ohlc : [];
+                    resolve(list.length >= index ? list[list.length - index] : undefined);
+                })
+            );
         }
 
         getPipSize() {
@@ -217,7 +267,6 @@ export default Engine =>
                     if (data.msg_type === 'proposal') {
                         try {
                             this.subscription_id_for_accumulators = data.subscription.id;
-                            // this was done because we can multile arrays in the respone and the list comes in reverse order
                             const stat_list = (data.proposal.contract_details.ticks_stayed_in || []).flat().reverse();
                             ticks_stayed_in_list = [...stat_list, ...ticks_stayed_in_list];
                             if (ticks_stayed_in_list.length > 0) resolve(ticks_stayed_in_list);
@@ -232,17 +281,14 @@ export default Engine =>
 
         async fetchStatsForAccumulators() {
             try {
-                // request stats for accumulators
                 const debouncedAccumulatorsRequest = debounce(() => this.requestAccumulatorStats(), 300);
                 debouncedAccumulatorsRequest();
-                // wait for proposal response
                 const ticks_stayed_in_list = await this.handleOnMessageForAccumulators();
                 return ticks_stayed_in_list;
             } catch (error) {
                 globalObserver.emit('Error in subscription promise:', error);
                 throw error;
             } finally {
-                // forget all proposal subscriptions so we can fetch new stats data on new call
                 await api_base?.api?.send({ forget_all: 'proposal' });
                 this.is_proposal_requested_for_accumulators = false;
                 this.subscription_id_for_accumulators = null;

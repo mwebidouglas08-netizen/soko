@@ -35,3 +35,29 @@ body {
         }
     }
 }
+html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+#root, .app-root {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100dvh;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+@media (max-width: 768px) {
+    html { font-size: 15px; }
+    body { font-size: 14px; }
+    .bot {
+        --bot-content-width: 100vw;
+        --bot-content-height: calc(100dvh - 120px);
+    }
+}
+@media (max-width: 480px) {
+    html { font-size: 14px; }
+    body { font-size: 13.5px; }
+}

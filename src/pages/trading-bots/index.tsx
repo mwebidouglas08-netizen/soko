@@ -1,14 +1,10 @@
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import {
-    HUB_STRATEGIES,
-    deployHubStrategy,
-    type HubStrategy,
-} from '@/pages/ai-trading-hub/deploy-strategy';
+import { loadStrategyXml } from '@/pages/ai-trading-hub/deploy-strategy';
 import { VERTEX_DIGITS, QUANTUM_EDGE } from '@/pages/quick-bot';
 import { navigateToHubView } from '@/services/hub-navigation';
 import { HubPage, HubPageHeader } from '@/components/hub-page';
-import { botVisual, botIcon } from '@/components/bot-visuals';
+import { botVisual } from '@/components/bot-visuals';
 import { botImage, type BotImageId } from '@/components/bot-images';
 import './trading-bots.scss';
 
@@ -18,27 +14,27 @@ interface BotCard {
     id: string;
     name: string;
     description: string;
-    kind: 'quick' | 'hub';
+    kind: 'quick' | 'xml';
     badge: CardBadge;
-    hubId?: string;
+    xmlFile?: string;
     preset?: 'vertex' | 'quantum';
 }
 
 /** Free bots grid — clean, human-made card design. */
 const REFERENCE_CARDS: BotCard[] = [
     { id: 'vertex', name: 'Vertex Digits', description: 'Quick Over/Under + Even/Odd analysis bot. Stake 1.0, recovery ×2, pattern gate after every 3 trades.', kind: 'quick', badge: 'FREE', preset: 'vertex' },
-    { id: 'digit_nexus', name: 'Digit Nexus', description: 'Digit-trend rider on Volatility 75. Three-tick Rise contracts with stake recovery.', kind: 'hub', badge: 'PREMIUM', hubId: 'digit_nexus' },
-    { id: 'volt_scalper', name: 'Volt Scalper', description: 'Ultra-fast scalper. One-tick Rise contracts on Volatility 100 with aggressive recovery.', kind: 'hub', badge: 'PREMIUM', hubId: 'volt_scalper' },
-    { id: 'apex_ai', name: 'Apex AI', description: 'Trend-following apex bot. Two-tick Rise contracts on Volatility 25.', kind: 'hub', badge: 'PREMIUM', hubId: 'apex_ai' },
-    { id: 'neutrade', name: 'Neutrade', description: 'Neutral mean-reversion bot. One-minute Fall contracts on Volatility 50.', kind: 'hub', badge: 'PREMIUM', hubId: 'neutrade' },
-    { id: 'straddle', name: 'Rise Fall Reversal', description: 'Breakout straddle. Two-tick Fall contracts on Boom 1000 Index.', kind: 'hub', badge: 'PREMIUM', hubId: 'straddle_edge' },
-    { id: 'aurora', name: 'Parity Pulse', description: 'Parity momentum rider. One-tick Rise contracts on Volatility 100 (1s) Index.', kind: 'hub', badge: 'PREMIUM', hubId: 'aurora' },
-    { id: 'obsidian', name: 'Even Odd', description: 'Dark-parity streak hunter. One-tick Fall contracts on Volatility 75 (1s) Index.', kind: 'hub', badge: 'PREMIUM', hubId: 'obsidian' },
-    { id: 'prism', name: 'Extreme Digits', description: 'Extreme-digit prism. One-tick Rise contracts on Volatility 100 Index.', kind: 'hub', badge: 'PREMIUM', hubId: 'prism' },
-    { id: 'pulsetrader', name: 'PulseTrader', description: 'Pulse-riding momentum bot. Five-tick Rise contracts on Jump 100 Index.', kind: 'hub', badge: 'PREMIUM', hubId: 'pulsetrader' },
-    { id: 'titan', name: 'Titan Range', description: 'Range-capping titan. One-tick Fall contracts on Volatility 50 Index.', kind: 'hub', badge: 'PREMIUM', hubId: 'titan' },
-    { id: 'zenith', name: 'Zenith Flow', description: 'Zenith flow rider. Two-tick Rise contracts on Volatility 25 (1s) Index.', kind: 'hub', badge: 'PREMIUM', hubId: 'zenith' },
-    { id: 'quantum', name: 'Quantum Edge', description: 'Extreme-digit bot. Stake 0.8, recovery ×2, Over/Under on every trade.', kind: 'quick', badge: 'FREE', preset: 'quantum' },
+    { id: 'digit_nexus', name: 'Digit Nexus', description: 'Digit-frequency Over/Under strategy on Volatility markets with adaptive recovery.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'digit-nexus-ai' },
+    { id: 'volt_scalper', name: 'Volt Scalper', description: 'Fast volatility scalping strategy with momentum-based entries and recovery.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'volt-scalper' },
+    { id: 'apex_ai', name: 'Apex AI', description: 'Adaptive Rise/Fall AI strategy with trend-following logic and risk controls.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'apex-ai' },
+    { id: 'neutrade', name: 'Neutrade', description: 'Balanced Rise/Fall engine with controlled stake recovery and session targets.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'neutrade-ai' },
+    { id: 'straddle', name: 'Rise Fall Reversal', description: 'Breakout straddle strategy for reversal opportunities on volatile markets.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'straddle-edge' },
+    { id: 'aurora', name: 'Aurora Parity', description: 'Parity momentum strategy with digit analysis, stake control and session limits.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'aurora-parity' },
+    { id: 'obsidian', name: 'Even Odd', description: 'Even/Odd parity engine with streak-aware entries and risk management.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'obsidian-parity' },
+    { id: 'prism', name: 'Extreme Digits', description: 'Extreme-digit strategy targeting outlier outcomes with recovery controls.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'prism-extremes' },
+    { id: 'pulsetrader', name: 'PulseTrader', description: 'Momentum pulse strategy with tick-driven entries and profit/loss management.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'pulsetrader-ai' },
+    { id: 'titan', name: 'Titan Range', description: 'Range-based strategy with disciplined stake sizing and session protection.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'titan-range' },
+    { id: 'zenith', name: 'Zenith Flow', description: 'Flow-based strategy designed for consistent entries with adaptive recovery.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'zenith-flow' },
+    { id: 'quantum', name: 'Quantum Edge', description: 'Extreme-digit quick bot. Stake 0.8, recovery ×2, Over/Under on every trade.', kind: 'quick', badge: 'FREE', preset: 'quantum' },
 ];
 
 const IMAGE_MAP: Record<string, BotImageId> = {
@@ -49,7 +45,7 @@ const IMAGE_MAP: Record<string, BotImageId> = {
     apex_ai: 'apex-ai',
     neutrade: 'neutrade-ai',
     straddle: 'straddle-edge',
-    aurora: 'parity-pulse-ai',
+    aurora: 'aurora-parity',
     obsidian: 'obsidian-parity',
     prism: 'prism-extremes',
     pulsetrader: 'pulsetrader-ai',
@@ -65,7 +61,7 @@ const THEME_MAP: Record<string, string> = {
     apex_ai: 'apex-ai',
     neutrade: 'neutrade-ai',
     straddle: 'straddle-edge',
-    aurora: 'parity-pulse-ai',
+    aurora: 'aurora-parity',
     obsidian: 'obsidian-parity',
     prism: 'prism-extremes',
     pulsetrader: 'pulsetrader-ai',
@@ -97,22 +93,23 @@ const TradingBotsPage = observer(() => {
         if (card.kind === 'quick') {
             const preset = card.preset === 'quantum' ? QUANTUM_EDGE : VERTEX_DIGITS;
             window.sessionStorage.setItem('quick-bot-preset', JSON.stringify(preset));
+            document.dispatchEvent(new CustomEvent('mwx:quick-bot-preset', { detail: preset }));
             navigateToHubView('quick-bot');
             setNotice(`${card.name} loaded into Quick Bot.`);
             return;
         }
 
-        const strategy: HubStrategy | undefined = HUB_STRATEGIES.find(s => s.id === card.hubId);
         const workspace = window.Blockly?.derivWorkspace;
-        if (!strategy || !workspace) {
+        if (!workspace || !card.xmlFile) {
             setError('Bot Builder workspace is still loading — try again in a moment.');
             return;
         }
 
         setBusyId(card.id);
         try {
-            await deployHubStrategy(strategy, workspace);
-            if (workspace.getAllBlocks().length === 0) {
+            const mod = await import(/* webpackChunkName: `[request]` */ `../../xml/ai/${card.xmlFile}.xml`);
+            const loaded = await loadStrategyXml(mod.default, card.name, workspace);
+            if (!loaded) {
                 throw new Error('Nothing landed in the workspace — check your connection and try again.');
             }
             document.dispatchEvent(new CustomEvent('mwx:go-bot-monitor'));
@@ -179,7 +176,7 @@ const TradingBotsPage = observer(() => {
                                 <div className='bots-card__content'>
                                     <div className='bots-card__header'>
                                         <span className={`bots-card__badge bots-card__badge--${card.badge.toLowerCase()}`}>{card.badge}</span>
-                                        <span className='bots-card__kind'>{card.kind === 'quick' ? 'Quick' : 'Hub'}</span>
+                                        <span className='bots-card__kind'>{card.kind === 'quick' ? 'Quick' : 'Strategy'}</span>
                                     </div>
                                     <h3 className='bots-card__name'>{card.name}</h3>
                                     <p className='bots-card__desc'>{card.description}</p>

@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
-import { load } from '@/external/bot-skeleton';
-import { save_types } from '@/external/bot-skeleton/constants/save-type';
+import { loadStrategyXml } from '@/pages/ai-trading-hub/deploy-strategy';
 import { botVisual, botIcon } from '@/components/bot-visuals';
 import './bots-catalog.scss';
 
@@ -20,7 +19,7 @@ const BOTS: Bot[] = [
     { file: 'dollar-printer-ai', name: 'Dollar Printer', tag: 'PREMIUM', desc: 'Volatility analyzer with stake management.', premium: true },
     { file: 'neutrade-ai', name: 'Neutrade', tag: 'BALANCED', desc: 'Balanced risk engine.' },
     { file: 'straddle-edge', name: 'Rise Fall Reversal', tag: 'RISE/FALL', desc: 'Straddle Rise/Fall around digit bias.' },
-    { file: 'parity-pulse-ai', name: 'Parity Pulse', tag: 'PARITY', desc: 'Even/Odd parity hunter.', premium: true },
+    { file: 'aurora-parity', name: 'Aurora Parity', tag: 'PARITY', desc: 'Parity momentum digit strategy.', premium: true },
     { file: 'obsidian-parity', name: 'Even Odd', tag: 'PARITY', desc: 'Deep-sample even/odd engine.', premium: true },
     { file: 'prism-extremes', name: 'Extreme Digits', tag: 'EXTREMES', desc: 'Extreme digit outlier trades.', premium: true },
     { file: 'pulsetrader-ai', name: 'PulseTrader', tag: 'MOMENTUM', desc: 'Momentum-driven tick velocity entries.' },
@@ -37,45 +36,44 @@ const BOTS: Bot[] = [
     { file: 'bt-trend-runner', name: 'BT Trend Runner', tag: 'BT', desc: 'Trend-following Call/Put runner.', premium: true },
 ];
 
-const loadBot = async (bot: Bot) => {
-    try {
-        const mod = await import(/* webpackChunkName: `[request]` */ `../../xml/ai/${bot.file}.xml`);
-        const dom = window.Blockly.utils.xml.textToDom(mod.default);
-        const workspace = window.Blockly.derivWorkspace;
-        await load({
-            block_string: window.Blockly.Xml.domToText(dom),
-            file_name: bot.name,
-            workspace,
-            from: save_types.UNSAVED,
-            drop_event: null,
-            strategy_id: null,
-            showIncompatibleStrategyDialog: null,
-        });
-        // Surface the Bot Monitor screen.
-        document.dispatchEvent(new CustomEvent('mwx:go-bot-monitor'));
-    } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to load bot', bot.file, e);
-    }
-};
-
 const BotsCatalog = () => {
     const [filter, setFilter] = useState<'all' | 'free' | 'premium'>('all');
     const [loading, setLoading] = useState<string | null>(null);
+    const [notice, setNotice] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const bots = useMemo(() => BOTS.filter(b => (filter === 'all' ? true : filter === 'premium' ? b.premium : !b.premium)), [filter]);
 
     const onLoad = async (bot: Bot) => {
         setLoading(bot.file);
-        await loadBot(bot);
-        setLoading(null);
+        setNotice(null);
+        setError(null);
+        try {
+            const workspace = window.Blockly?.derivWorkspace;
+            if (!workspace) {
+                throw new Error('Bot Builder workspace is still loading — try again in a moment.');
+            }
+            const mod = await import(/* webpackChunkName: `[request]` */ `../../xml/ai/${bot.file}.xml`);
+            const loaded = await loadStrategyXml(mod.default, bot.name, workspace);
+            if (!loaded) {
+                throw new Error('Nothing landed in the workspace — check your connection and try again.');
+            }
+            document.dispatchEvent(new CustomEvent('mwx:go-bot-monitor'));
+            setNotice(`${bot.name} loaded. Adjust settings in Bot Monitor, then press Run.`);
+        } catch (e) {
+            setError(e instanceof Error ? e.message : 'Could not load this bot into the builder.');
+            // eslint-disable-next-line no-console
+            console.error('Failed to load bot', bot.file, e);
+        } finally {
+            setLoading(null);
+        }
     };
 
     return (
         <div className='bots-catalog'>
             <header className='bots-catalog__head'>
                 <span className='bots-catalog__eyebrow'>Free Workspace</span>
-                <h2 className='bots-catalog__title'>Trading Bots</h2>
+                <h2 className='bots-catalog__title'>Bots Catalog</h2>
                 <div className='bots-catalog__filters'>
                     {(['all', 'free', 'premium'] as const).map(f => (
                         <button key={f} type='button' className={`bots-catalog__filter ${filter === f ? 'is-active' : ''}`} onClick={() => setFilter(f)}>
@@ -84,6 +82,17 @@ const BotsCatalog = () => {
                     ))}
                 </div>
             </header>
+
+            {error && (
+                <div className='bots-catalog__error' role='alert'>
+                    {error}
+                </div>
+            )}
+            {notice && (
+                <div className='bots-catalog__notice' role='status'>
+                    {notice}
+                </div>
+            )}
 
             <div className='bots-catalog__grid'>
                 {bots.map((bot, i) => {
@@ -106,18 +115,13 @@ const BotsCatalog = () => {
                                 <p className='bots-card__desc'>{bot.desc}</p>
                             </div>
                             <div className='bots-card__footer'>
-                                <button type='button' className='bots-card__load' onClick={() => onLoad(bot)} disabled={loading === bot.file}>
+                                <button type='button' className='bots-card__load' onClick={() => onLoad(bot)} disabled={loading !== null}>
                                     {loading === bot.file ? 'Loading…' : 'Load Bot'}
                                 </button>
                             </div>
                         </article>
                     );
                 })}
-                {loading && (
-                    <div className='bots-card__load lp-loading' style={{ textAlign: 'center', marginTop: '1rem', fontSize: '12px', color: '#9fb6d4' }}>
-                        Loading bot…
-                    </div>
-                )}
             </div>
         </div>
     );

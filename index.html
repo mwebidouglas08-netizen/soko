@@ -1,547 +1,291 @@
 <!doctype html>
-<html lang="en" dir="auto">
+<html lang="en" dir="auto" class="light">
     <head>
-        <!-- build marker: 2026-10-25T12:00Z (redeploy trigger) -->
-        <script>
-            (function () {
-                // Light is the brand default (SmartFlip-class look); an explicit
-                // stored choice always wins.
-                var mode = 'light';
-                try { mode = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'; } catch (_) {}
-                var root = document.documentElement;
-                root.dataset.theme = mode;
-                root.classList.add(mode);
-                root.style.colorScheme = mode;
-                // Sync the body class before first paint so the theme tokens apply
-                // immediately (body ships as theme--light in the markup below).
-                var applyBody = function () {
-                    var b = document.body;
-                    if (!b) return;
-                    b.classList.remove('theme--light', 'theme--dark');
-                    b.classList.add('theme--' + mode);
-                    var mc = document.querySelector('meta[name="theme-color"]');
-                    if (mc) mc.setAttribute('content', mode === 'dark' ? '#050a14' : '#f2f3f4');
-                };
-                if (document.body) applyBody();
-                else document.addEventListener('DOMContentLoaded', applyBody);
-            })();
-        </script>
-        <script>
-            // Pre-bundle error catcher: catches crashes that happen while the
-            // JS bundle is being parsed/evaluated, before main.tsx can register
-            // its own handlers. Renders directly into #root (no React needed).
-            window.__fatalErrorShown = false;
-            // Set by main.tsx once React has committed its first render. Before
-            // that a crash really is fatal (nothing is on screen); afterwards the
-            // app is alive and must NEVER be replaced by a full-screen error page.
-            window.__appMounted = false;
-            // Errors raised by browser extensions (MetaMask and other wallet
-            // add-ons, ad blockers, password managers) surface on `window` exactly
-            // like our own, but say nothing about this app's health. Identify them
-            // so they can be logged instead of being mistaken for an app crash.
-            window.__isExtensionError = function (err) {
-                if (!err) return false;
-                var text = '';
-                try {
-                    text = String((err && (err.stack || err.message)) || err);
-                } catch (_) {
-                    return false;
-                }
-                return (
-                    /(chrome|moz|safari|safari-web|ms-browser)-extension:\/\//i.test(text) ||
-                    /metamask|ethereum|evmask|eth_requestAccounts|wallet_?connect|coinbase|trust ?wallet|phantom/i.test(
-                        text
-                    )
-                );
-            };
-            window.__showFatalError = function (message) {
-                if (window.__fatalErrorShown) return;
-                window.__fatalErrorShown = true;
-                console.error('[FATAL]', message);
-                var splash = document.getElementById('boot-splash');
-                if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
-                var el = document.getElementById('root');
-                if (!el) return;
-                el.innerHTML =
-                    '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#050a14;color:#fff;font-family:sans-serif;flex-direction:column;gap:16px;padding:24px;text-align:center">' +
-                    '<p style="font-size:18px;font-weight:600">Something went wrong</p>' +
-                    '<p style="font-size:14px;color:#aaa;max-width:600px;word-break:break-word">' +
-                    String(message).replace(/</g, '&lt;') +
-                    '</p>' +
-                    '<button onclick="location.reload()" style="padding:8px 24px;border-radius:4px;border:none;background:#0e9aa7;color:#fff;cursor:pointer;font-size:14px">Refresh</button>' +
-                    '</div>';
-            };
-            // Non-blocking, dismissible notice for recoverable runtime problems.
-            // A wallet-extension rejection gets a small dismissible card in the
-            // corner - never a full-screen "Something went wrong" page.
-            window.__showNonFatalNotice = function (message) {
-                try {
-                    var text = String(message == null ? 'Something went wrong' : message).slice(0, 240);
-                    var stack = document.getElementById('app-notice-stack');
-                    if (!stack) {
-                        stack = document.createElement('div');
-                        stack.id = 'app-notice-stack';
-                        stack.setAttribute('role', 'status');
-                        stack.setAttribute('aria-live', 'polite');
-                        stack.style.cssText =
-                            'position:fixed;right:14px;bottom:14px;z-index:2147482000;display:flex;' +
-                            'flex-direction:column;gap:8px;max-width:min(360px,calc(100vw - 28px));pointer-events:none;';
-                        (document.body || document.documentElement).appendChild(stack);
-                    }
-                    // Collapse repeats so a retrying extension cannot spam the page.
-                    var key = text.replace(/[\\"']/g, '');
-                    if (stack.querySelector('[data-notice="' + key + '"]')) return;
-                    var card = document.createElement('div');
-                    card.setAttribute('data-notice', key);
-                    card.style.cssText =
-                        'pointer-events:auto;display:flex;gap:10px;align-items:flex-start;padding:10px 12px;' +
-                        'border-radius:10px;font:13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;' +
-                        'color:#0b1220;background:#fff;border:1px solid rgba(15,23,42,.12);' +
-                        'box-shadow:0 10px 30px rgba(15,23,42,.16);';
-                    var body = document.createElement('span');
-                    body.style.cssText = 'flex:1;word-break:break-word;';
-                    body.textContent = text;
-                    var close = document.createElement('button');
-                    close.type = 'button';
-                    close.textContent = '\u00d7';
-                    close.setAttribute('aria-label', 'Dismiss');
-                    close.style.cssText =
-                        'border:0;background:transparent;color:#5b6472;font-size:16px;line-height:1;' +
-                        'cursor:pointer;padding:0 2px;';
-                    close.onclick = function () {
-                        if (card.parentNode) card.parentNode.removeChild(card);
-                    };
-                    card.appendChild(body);
-                    card.appendChild(close);
-                    stack.appendChild(card);
-                    setTimeout(function () {
-                        if (card.parentNode) card.parentNode.removeChild(card);
-                    }, 9000);
-                } catch (_) {}
-            };
-            // Central policy: a runtime error only kills the app while nothing has
-            // rendered yet. Once mounted, report non-fatally and keep going.
-            window.__reportError = function (err, label) {
-                if (window.__isExtensionError(err)) {
-                    console.warn('[ignored extension error]', label, err);
-                    return;
-                }
-                var message = (err && err.message) || (err == null ? '' : String(err)) || label;
-                if (window.__appMounted) {
-                    console.warn('[non-fatal]', label, err);
-                    window.__showNonFatalNotice(message);
-                    return;
-                }
-                window.__showFatalError(message);
-            };
-
-            window.addEventListener(
-                'error',
-                function (e) {
-                    // Resource load failures (img / audio / chunk 404s) must never
-                    // be fatal - only a missing entry bundle leaves nothing to draw.
-                    var target = e.target;
-                    if (target && target !== window && target.tagName) {
-                        if (target.tagName === 'SCRIPT' && !window.__appMounted) {
-                            window.__showFatalError('Failed to load ' + (target.src || 'the application bundle'));
-                        }
-                        return;
-                    }
-                    window.__reportError(e.error || e.message, 'error');
-                },
-                true
-            );
-            window.addEventListener('unhandledrejection', function (e) {
-                window.__reportError(e.reason, 'unhandledrejection');
-            });
-            // If the bundle silently fails (e.g. a deferred script 404s or a
-            // module throws before any handler fires), detect the blank state.
-            setTimeout(function () {
-                if (window.__fatalErrorShown || window.__appMounted) return;
-                var el = document.getElementById('root');
-                if (el && el.childElementCount === 0) {
-                    var scripts = Array.prototype.map.call(
-                        document.querySelectorAll('script[src]'),
-                        function (s) { return s.src; }
-                    );
-                    window.__showFatalError(
-                        'Application bundle failed to load or crashed during startup. ' +
-                        'Scripts loaded: ' + scripts.join(', ')
-                    );
-                }
-            }, 8000);
-        </script>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Orbitron:wght@400;700;900&display=swap"
-            rel="stylesheet"
-        />
-        <link rel="manifest" href="/manifest.webmanifest" />
-        <link rel="apple-touch-icon" href="/icon-180.png" />
-        <meta name="msapplication-TileColor" content="#001840" />
-        <meta name="msapplication-TileImage" content="/icon-180.png" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="TradingHubs.site" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-        <meta name="theme-color" content="#001840" />
-        <meta name="title" content="TradingHubs.site — Free Deriv Bots & Smart Trading Automation" />
-        <meta name="description" content="TradingHubs.site — Free Deriv bots, AI market scanner, automated and manual trading tools. Trade smarter on Volatility, Boom/Crash, Step and more synthetic markets." />
-        <meta property="og:title" content="TradingHubs.site — Free Deriv Bots & Smart Trading Automation" />
-        <meta property="og:description" content="TradingHubs.site — Free Deriv bots, AI market scanner, automated and manual trading tools. Trade smarter on Volatility, Boom/Crash, Step and more synthetic markets." />
+        <meta name="title" content="Build a trading bot without coding | TradingHubs." />
+        <meta
+            name="description"
+            content="Import your current bot or learn how to create a trading bot from scratch with our detailed guides, FAQs, and tutorials. Start with a quick strategy!"
+        />
+        <meta property="og:title" content="TradingHubs" />
+        <meta
+            property="og:description"
+            content="Import your current bot or learn how to create a trading bot from scratch with our detailed guides, FAQs, and tutorials. Start with a quick strategy!"
+        />
         <meta property="og:type" content="website" />
-        <title id="page-title">TradingHubs.site — Free Deriv Bots & Smart Trading Automation</title>
+        <meta
+            property="og:image"
+            content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTR3qsyDtQ_1mlX1AoeV963gFP0UZBTcJOcdK0G802Vfg&s"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@tradinghubs" />
+        <meta name="twitter:title" content="TradingHubs" />
+        <meta
+            name="twitter:description"
+            content="Import your current bot or learn how to create a trading bot from scratch with our detailed guides, FAQs, and tutorials. Start with a quick strategy!"
+        />
+        <meta
+            name="twitter:image"
+            content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTR3qsyDtQ_1mlX1AoeV963gFP0UZBTcJOcdK0G802Vfg&s"
+        />
+        <title>TradingHubs</title>
         <script>
-            // Animated page title — eye-catching single-line text that cycles
-            // through compelling variants. Pauses when the tab is hidden.
             (function () {
-                var titleEl = document.getElementById('page-title');
-                if (!titleEl) return;
-
-                var variants = [
-                    'TradingHubs.site — Free Deriv Bots & Smart Trading Automation',
-                    '🤖 Load Free Bots • Trade Smarter • TradingHubs.site',
-                    '📈 AI Market Scanner • Deriv Trading Workspace',
-                    '⚡ Speedbot & Bot Builder • No Code Required'
-                ];
-                var idx = 0;
-                var paused = false;
-
-                document.addEventListener('visibilitychange', function () {
-                    paused = document.hidden;
-                    if (!paused) cycle();
-                });
-
-                function cycle() {
-                    if (paused) return;
-                    idx = (idx + 1) % variants.length;
-                    titleEl.textContent = variants[idx];
-                    setTimeout(cycle, 3500);
+                function showFatal(message) {
+                    try {
+                        var root = document.getElementById('root');
+                        if (root) root.style.display = 'none';
+                        var existing = document.getElementById('fatal-boot-error');
+                        if (existing) existing.remove();
+                        var el = document.createElement('div');
+                        el.id = 'fatal-boot-error';
+                        el.style.position = 'fixed';
+                        el.style.inset = '0';
+                        el.style.zIndex = '2147483647';
+                        el.style.background = '#0b0f1a';
+                        el.style.color = '#fff';
+                        el.style.padding = '24px';
+                        el.style.fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+                        el.style.overflow = 'auto';
+                        el.innerHTML =
+                            '<div style="max-width:900px;margin:0 auto">' +
+                            '<h2 style="margin:0 0 12px;font-size:18px;line-height:1.2">App failed to start</h2>' +
+                            '<div style="opacity:.85;margin:0 0 12px">A runtime error prevented the app from loading. Copy the error and share it.</div>' +
+                            '<pre style="white-space:pre-wrap;word-break:break-word;background:#111827;border:1px solid rgba(255,255,255,.12);padding:12px;border-radius:12px;margin:0 0 16px">' +
+                            String(message || 'Unknown error') +
+                            '</pre>' +
+                            '<button id="fatal-boot-reload" style="appearance:none;border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer">Reload</button>' +
+                            '</div>';
+                        document.body.appendChild(el);
+                        var btn = document.getElementById('fatal-boot-reload');
+                        if (btn) btn.onclick = function () { location.reload(); };
+                    } catch (e) {}
                 }
-
-                setTimeout(cycle, 3000);
+                window.__showFatalError = function (err) {
+                    var splash = document.getElementById('boot-splash');
+                    if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+                    var msg = err && (err.stack || err.message) ? (err.stack || err.message) : String(err);
+                    showFatal(msg);
+                };
+                window.addEventListener('error', function (e) {
+                    try {
+                        var target = e && e.target;
+                        if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) return;
+                    } catch (_) {}
+                    var msg = e && e.error ? e.error : e && e.message ? e.message : 'Unknown error';
+                    window.__showFatalError(msg);
+                });
+                window.addEventListener('unhandledrejection', function (e) {
+                    var msg = e && e.reason ? e.reason : 'Unhandled promise rejection';
+                    window.__showFatalError(msg);
+                });
             })();
         </script>
         <style>
-            :root {
-                font-size: 62.5%;
-                background: #020810;
-            }
-            html, body, #root {
-                width: 100%;
-                min-width: 100%;
-                min-height: 100%;
+            html, body {
                 margin: 0;
-                background: #020810;
+                min-height: 100%;
+                background: #030712;
             }
-            body {
-                min-height: 100vh;
-            }
-            #root {
-                min-height: 100vh;
-            }
+            body { min-height: 100vh; }
+            #root { min-height: 100vh; }
 
-            /* Dollarprinter-style startup loader — dark bg, indigo/cyan gradient, visible background image */
             #boot-splash {
                 position: fixed;
                 inset: 0;
                 z-index: 2147483000;
                 display: flex;
-                flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                padding: 24px;
+                padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
                 box-sizing: border-box;
-                text-align: center;
-                background-image: url('/loader.jpg');
-                background-size: cover;
-                background-position: center center;
-                background-repeat: no-repeat;
-                background-attachment: fixed;
                 overflow: hidden;
-                font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
-                animation: btFadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+                font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+                color: #f8fafc;
+                background:
+                    radial-gradient(1200px 600px at 10% -10%, rgba(99,102,241,0.35), transparent 60%),
+                    radial-gradient(900px 500px at 110% 110%, rgba(34,211,238,0.22), transparent 55%),
+                    linear-gradient(180deg, rgba(2,6,23,0.55), rgba(2,6,23,0.82)),
+                    url('/loader.jpg') center/cover no-repeat fixed;
+                isolation: isolate;
             }
             #boot-splash::before {
                 content: '';
                 position: absolute;
-                inset: 0;
+                inset: -20%;
                 background:
-                    radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.14), transparent 42%),
-                    radial-gradient(circle at 80% 70%, rgba(34, 211, 238, 0.12), transparent 42%),
-                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04), transparent 55%);
-                pointer-events: none;
-                animation: btGlowShift 12s ease-in-out infinite alternate;
+                    conic-gradient(from 180deg at 50% 50%, rgba(99,102,241,0.18), rgba(34,211,238,0.12), rgba(99,102,241,0.18));
+                filter: blur(60px);
+                opacity: 0.55;
+                animation: bootAurora 14s ease-in-out infinite alternate;
+                z-index: 0;
             }
             #boot-splash::after {
                 content: '';
                 position: absolute;
                 inset: 0;
-                background: linear-gradient(180deg, rgba(2, 6, 23, 0.12) 0%, rgba(2, 6, 23, 0.22) 100%);
+                background:
+                    linear-gradient(to bottom, rgba(3,7,18,0.15) 0%, rgba(3,7,18,0.35) 45%, rgba(3,7,18,0.75) 100%),
+                    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.06), transparent 45%);
                 pointer-events: none;
+                z-index: 0;
             }
-            #boot-splash > * {
+            .boot-grain {
+                position: absolute;
+                inset: 0;
+                opacity: 0.05;
+                background-image: radial-gradient(rgba(255,255,255,0.7) 0.5px, transparent 0.5px);
+                background-size: 3px 3px;
+                mix-blend-mode: soft-light;
+                pointer-events: none;
+                z-index: 0;
+            }
+            .boot-shell {
                 position: relative;
                 z-index: 1;
+                width: min(92vw, 640px);
+                text-align: center;
+                padding: clamp(20px, 4vw, 36px) clamp(16px, 3vw, 28px);
+                border-radius: 28px;
+                background: linear-gradient(180deg, rgba(15,23,42,0.28), rgba(15,23,42,0.12));
+                border: 1px solid rgba(255,255,255,0.12);
+                box-shadow: 0 30px 80px rgba(2,6,23,0.45), inset 0 1px 0 rgba(255,255,255,0.12);
+                backdrop-filter: blur(18px) saturate(140%);
+                -webkit-backdrop-filter: blur(18px) saturate(140%);
+                animation: bootRise 0.9s cubic-bezier(0.22,1,0.36,1) both;
+            }
+            .boot-logo-wrap {
+                position: relative;
+                width: clamp(64px, 16vw, 88px);
+                height: clamp(64px, 16vw, 88px);
+                margin: 0 auto 18px;
+            }
+            .boot-ring, .boot-ring-inner {
+                position: absolute;
+                inset: 0;
+                border-radius: 50%;
+                border: 1px solid rgba(99,102,241,0.55);
+                box-shadow: 0 0 24px rgba(99,102,241,0.25);
+                animation: bootSpin 18s linear infinite;
+            }
+            .boot-ring-inner {
+                inset: 7px;
+                border-color: rgba(34,211,238,0.45);
+                box-shadow: 0 0 20px rgba(34,211,238,0.2);
+                animation-direction: reverse;
+                animation-duration: 14s;
+            }
+            .boot-logo {
+                position: absolute;
+                inset: 12px;
+                width: calc(100% - 24px);
+                height: calc(100% - 24px);
+                border-radius: 50%;
+                object-fit: cover;
+                border: 1px solid rgba(255,255,255,0.18);
+                box-shadow: 0 10px 30px rgba(2,6,23,0.45);
+                animation: bootPulse 4.5s ease-in-out infinite;
+            }
+            .boot-brand {
+                display: flex;
+                justify-content: center;
+                align-items: baseline;
+                gap: 0.35em;
+                flex-wrap: wrap;
+                margin-bottom: 10px;
+                letter-spacing: -0.03em;
+                line-height: 0.95;
+            }
+            .boot-brand-main {
+                font-size: clamp(2.2rem, 8vw, 4.6rem);
+                font-weight: 900;
+                background: linear-gradient(135deg, #818cf8 0%, #6366f1 45%, #22d3ee 100%);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                filter: drop-shadow(0 0 18px rgba(99,102,241,0.25));
+            }
+            .boot-brand-accent {
+                font-size: clamp(2.2rem, 8vw, 4.6rem);
+                font-weight: 900;
+                color: #e0f2fe;
+                text-shadow: 0 0 22px rgba(34,211,238,0.25);
+            }
+            .boot-kicker {
+                font-size: 0.72rem;
+                letter-spacing: 0.28em;
+                text-transform: uppercase;
+                color: #c7d2fe;
+                font-weight: 700;
+                margin-bottom: 8px;
+            }
+            .boot-tagline {
+                font-size: clamp(1.05rem, 2.8vw, 1.55rem);
+                line-height: 1.35;
+                color: #f8fafc;
+                font-weight: 600;
+                max-width: 28ch;
+                margin: 0 auto 22px;
+                text-wrap: balance;
+            }
+            .boot-progress {
+                width: min(100%, 420px);
+                height: 6px;
+                margin: 0 auto 10px;
+                border-radius: 999px;
+                background: rgba(255,255,255,0.08);
+                overflow: hidden;
+                border: 1px solid rgba(255,255,255,0.08);
+            }
+            .boot-progress-fill {
+                height: 100%;
+                width: 35%;
+                border-radius: inherit;
+                background: linear-gradient(90deg, #6366f1, #22d3ee, #818cf8);
+                background-size: 200% 100%;
+                box-shadow: 0 0 18px rgba(99,102,241,0.45);
+                animation: bootLoad 2.2s ease-in-out infinite, bootShimmer 3s linear infinite;
+            }
+            .boot-status {
+                font-size: 0.78rem;
+                color: #94a3b8;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                font-weight: 700;
+            }
+            .boot-status strong {
+                color: #67e8f9;
+                text-transform: none;
+                letter-spacing: 0.02em;
+                font-weight: 700;
             }
             #boot-splash.boot-splash--out {
                 opacity: 0;
                 visibility: hidden;
-                pointer-events: none;
-                transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.7s ease;
+                transition: opacity 0.5s ease, visibility 0.5s ease;
             }
-            .bt-loader-content {
-                text-align: left;
-                background: linear-gradient(135deg, rgba(15, 23, 42, 0.22), rgba(30, 41, 59, 0.14) 45%, rgba(15, 23, 42, 0.18));
-                border: 1px solid rgba(255, 255, 255, 0.22);
-                border-radius: 26px;
-                width: 100%;
-                max-width: 560px;
-                padding: 56px 48px 48px;
-                position: relative;
-                overflow: hidden;
-                box-shadow:
-                    0 24px 80px rgba(2, 6, 23, 0.28),
-                    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
-                    0 1px 0 rgba(255, 255, 255, 0.35) inset,
-                    0 0 48px rgba(99, 102, 241, 0.12);
-                backdrop-filter: blur(22px) saturate(160%);
-                -webkit-backdrop-filter: blur(22px) saturate(160%);
-                animation: btCardRise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both, btGlassFloat 8s ease-in-out 1s infinite;
+
+            @keyframes bootRise { from { opacity: 0; transform: translateY(18px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+            @keyframes bootAurora { from { transform: translate3d(-2%, -1%, 0) scale(1); } to { transform: translate3d(2%, 2%, 0) scale(1.08); } }
+            @keyframes bootSpin { to { transform: rotate(360deg); } }
+            @keyframes bootPulse { 0%,100% { transform: scale(1); box-shadow: 0 10px 30px rgba(2,6,23,0.45); } 50% { transform: scale(1.03); box-shadow: 0 14px 36px rgba(99,102,241,0.25); } }
+            @keyframes bootLoad { 0% { transform: translateX(-120%); } 50% { transform: translateX(10%); } 100% { transform: translateX(220%); } }
+            @keyframes bootShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
+            @media (max-height: 700px) {
+                .boot-shell { padding: 18px 16px; border-radius: 22px; }
+                .boot-tagline { margin-bottom: 16px; }
+                .boot-logo-wrap { margin-bottom: 12px; }
             }
-            .bt-loader-content::before {
-                content: '';
-                pointer-events: none;
-                background: linear-gradient(160deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 35%, transparent 55%, rgba(34, 211, 238, 0.08) 100%);
-                position: absolute;
-                inset: 0;
-            }
-            .bt-loader-content::after {
-                content: '';
-                position: absolute;
-                top: -70%;
-                left: -120%;
-                width: 80%;
-                height: 240%;
-                background: linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0.22) 50%, rgba(255, 255, 255, 0) 65%, transparent 100%);
-                transform: rotate(8deg);
-                pointer-events: none;
-                animation: btGlassShimmer 7.5s ease-in-out 1.2s infinite;
-                z-index: 0;
-            }
-            .bt-loader-content > * {
-                z-index: 1;
-                position: relative;
-            }
-            .bt-status-row {
-                color: #94a3b8;
-                text-transform: uppercase;
-                letter-spacing: 1.5px;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 30px;
-                font-size: 11px;
-                font-weight: 800;
-                display: flex;
-            }
-            .bt-status-row strong {
-                color: #22d3ee;
-                text-transform: none;
-                font-size: 12px;
-                font-weight: 700;
-            }
-            .bt-logo-container {
-                flex-wrap: wrap;
-                justify-content: flex-start;
-                align-items: center;
-                gap: 14px;
-                margin-bottom: 28px;
-                display: flex;
-            }
-            .bt-logo-mark {
-                position: relative;
-                width: 64px;
-                height: 64px;
-                flex-shrink: 0;
-                animation: btLogoPulse 4s ease-in-out infinite;
-            }
-            .bt-logo-ring {
-                position: absolute;
-                inset: 0;
-                border: 2px solid rgba(99, 102, 241, 0.35);
-                border-radius: 50%;
-                animation: btRingRotate 10s linear infinite;
-            }
-            .bt-logo-ring-inner {
-                position: absolute;
-                inset: 4px;
-                border: 1px solid rgba(34, 211, 238, 0.25);
-                border-radius: 50%;
-                animation: btRingRotate 14s linear infinite reverse;
-            }
-            .bt-logo-image {
-                position: absolute;
-                inset: 8px;
-                width: 100%;
-                height: 100%;
-                border-radius: 50%;
-                object-fit: cover;
-                border: 1px solid rgba(255, 255, 255, 0.12);
-                box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
-                background: #030712;
-            }
-            .bt-binary-part {
-                color: #6366f1;
-                text-transform: uppercase;
-                letter-spacing: -1px;
-                font-size: 3.8rem;
-                font-weight: 900;
-                line-height: 0.92;
-                background: linear-gradient(135deg, #6366f1, #22d3ee);
-                -webkit-background-clip: text;
-                background-clip: text;
-                color: transparent;
-                filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.35));
-            }
-            .bt-fx-part {
-                color: #22d3ee;
-                text-transform: uppercase;
-                letter-spacing: -1px;
-                font-size: 3.8rem;
-                font-weight: 900;
-                line-height: 0.92;
-                filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.3));
-            }
-            .bt-welcome {
-                margin-bottom: 30px;
-            }
-            .bt-welcome-subtext {
-                color: #c7d2fe;
-                text-transform: uppercase;
-                letter-spacing: 1.5px;
-                margin-bottom: 10px;
-                font-size: 11px;
-                font-weight: 800;
-            }
-            .bt-welcome-tagline {
-                color: #f8fafc;
-                max-width: 460px;
-                font-size: 1.75rem;
-                font-weight: 800;
-                line-height: 1.3;
-                letter-spacing: -0.02em;
-            }
-            .bt-progress-bar {
-                background-color: rgba(255, 255, 255, 0.06);
-                border-radius: 999px;
-                width: 100%;
-                height: 7px;
-                margin-bottom: 14px;
-                overflow: hidden;
-                border: 1px solid rgba(255, 255, 255, 0.04);
-            }
-            .bt-progress-fill {
-                border-radius: inherit;
-                background: linear-gradient(90deg, #6366f1, #22d3ee);
-                height: 100%;
-                transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-                box-shadow: 0 0 16px rgba(99, 102, 241, 0.5);
-            }
-            .bt-progress-meta {
-                display: flex;
-                justify-content: space-between;
-                font-size: 10px;
-                color: #94a3b8;
-                text-transform: uppercase;
-                font-weight: 800;
-                margin-bottom: 24px;
-                letter-spacing: 0.5px;
-            }
-            .bt-status-row--bottom {
-                color: #94a3b8;
-                text-transform: uppercase;
-                letter-spacing: 1.5px;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 11px;
-                font-weight: 800;
-                display: flex;
-            }
-            .bt-status-row--bottom strong {
-                color: #22d3ee;
-                text-transform: none;
-                font-size: 12px;
-                font-weight: 700;
-            }
-            @keyframes btFadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            @keyframes btCardRise {
-                from { opacity: 0; transform: translateY(20px) scale(0.96); }
-                to { opacity: 1; transform: translateY(0) scale(1); }
-            }
-            @keyframes btGlowShift {
-                from { opacity: 0.7; transform: scale(1); }
-                to { opacity: 1; transform: scale(1.04); }
-            }
-            @keyframes btSheen {
-                0% { transform: translateX(-100%) rotate(45deg); }
-                40% { transform: translateX(100%) rotate(45deg); }
-                100% { transform: translateX(100%) rotate(45deg); }
-            }
-            @keyframes btGlassFloat {
-                0%, 100% { transform: translateY(0px); box-shadow: 0 24px 80px rgba(2, 6, 23, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.06) inset, 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 0 48px rgba(99, 102, 241, 0.12); }
-                50% { transform: translateY(-6px); box-shadow: 0 32px 90px rgba(2, 6, 23, 0.24), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 0 56px rgba(34, 211, 238, 0.14); }
-            }
-            @keyframes btGlassShimmer {
-                0% { left: -120%; opacity: 0; }
-                10% { opacity: 1; }
-                45% { left: 140%; opacity: 1; }
-                55%, 100% { left: 140%; opacity: 0; }
-            }
-            @keyframes btLogoPulse {
-                0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.35); transform: scale(1); }
-                50% { box-shadow: 0 0 32px rgba(34, 211, 238, 0.5); transform: scale(1.04); }
-            }
-            @keyframes btRingRotate {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-            @media (max-width: 640px) {
-                #boot-splash { padding: 16px; }
-                .bt-loader-content { padding: 36px 28px 28px; border-radius: 22px; }
-                .bt-binary-part, .bt-fx-part { font-size: 2.9rem; }
-                .bt-welcome-tagline { font-size: 1.4rem; }
-                .bt-logo-mark { width: 56px; height: 56px; }
-                .bt-status-row { margin-bottom: 26px; font-size: 10px; }
-                .bt-status-row strong { font-size: 11px; }
-            }
-            @media (max-width: 480px) {
-                #boot-splash { padding: 12px; }
-                .bt-loader-content { padding: 30px 22px 22px; }
-                .bt-binary-part, .bt-fx-part { font-size: 2.4rem; }
-                .bt-welcome-tagline { font-size: 1.25rem; line-height: 1.3; }
-                .bt-welcome-subtext { font-size: 10px; margin-bottom: 8px; }
-                .bt-logo-mark { width: 50px; height: 50px; }
-                .bt-progress-bar { height: 6px; margin-bottom: 12px; }
-                .bt-progress-meta { font-size: 9px; margin-bottom: 20px; }
-                .bt-status-row--bottom { margin-bottom: 0; font-size: 10px; }
-                .bt-status-row--bottom strong { font-size: 11px; }
-            }
-            @media (min-width: 641px) and (max-width: 1024px) {
-                #boot-splash { padding: 20px; }
-                .bt-loader-content { padding: 48px; }
-                .bt-binary-part, .bt-fx-part { font-size: 3.4rem; }
+            @media (max-width: 420px) {
+                .boot-shell { width: 100%; border-radius: 22px; }
+                .boot-kicker { letter-spacing: 0.2em; }
             }
             @media (prefers-reduced-motion: reduce) {
-                #boot-splash, #boot-splash * { animation: none !important; transition-duration: 0.01s !important; }
+                #boot-splash *, #boot-splash::before { animation: none !important; transition: none !important; }
+                .boot-progress-fill { transform: none; width: 45%; }
             }
         </style>
     </head>
@@ -550,28 +294,24 @@
         <div id="popup_root" class="popup-root"></div>
         <div id="root"></div>
         <div id="boot-splash" role="status" aria-label="Loading TradingHubs">
-            <div class="bt-boot-brand">
-                <div class="bt-logo-container">
-                    <div class="bt-logo-mark">
-                        <div class="bt-logo-ring"></div>
-                        <div class="bt-logo-ring-inner"></div>
-                        <img class="bt-logo-image" src="/loader.jpg" alt="" />
-                    </div>
-                    <span class="bt-binary-part">TRADING</span>
-                    <span class="bt-fx-part">HUBS</span>
+            <div class="boot-grain" aria-hidden="true"></div>
+            <div class="boot-shell">
+                <div class="boot-logo-wrap">
+                    <div class="boot-ring"></div>
+                    <div class="boot-ring-inner"></div>
+                    <img class="boot-logo" src="/loader.jpg" alt="" />
                 </div>
-                <div class="bt-welcome">
-                    <div class="bt-welcome-subtext">Precision Trading Workspace</div>
-                    <div class="bt-welcome-tagline">Build and run trading bots without code.</div>
+                <div class="boot-kicker">Precision Trading Workspace</div>
+                <div class="boot-brand" aria-label="TradingHubs">
+                    <span class="boot-brand-main">TRADING</span>
+                    <span class="boot-brand-accent">HUBS</span>
                 </div>
-                <div class="bt-boot-status">Initializing <strong id="bt-boot-status-text">Core</strong></div>
+                <p class="boot-tagline">Build, automate, and run trading strategies with clarity and confidence.</p>
+                <div class="boot-progress" aria-hidden="true"><div class="boot-progress-fill"></div></div>
+                <div class="boot-status">Initializing <strong id="bt-boot-status-text">Core</strong></div>
             </div>
         </div>
         <script>
-            // The pre-hydration splash is removed the instant the React
-            // cinematic splash mounts (see BootSplash), so the two full-screen
-            // layers never overlap. The 6s failsafe guarantees the app is never
-            // trapped behind it, and __showFatalError removes it on a boot crash.
             (function () {
                 var splash = document.getElementById('boot-splash');
                 if (!splash) return;
@@ -582,20 +322,15 @@
                     if (splash.parentNode) splash.parentNode.removeChild(splash);
                 };
                 window.__hideBootSplash = hide;
-                var lines = [
-                    'Warming up the bot engine…',
-                    'Preparing your dashboard…',
-                    'Loading AI engines…',
-                    'Connecting markets…'
-                ];
+                var lines = ['Core', 'Trading engines', 'Market data', 'AI workspace', 'Final checks'];
                 var idx = 0;
-                var el = document.getElementById('bt-boot-status-text') || document.querySelector('.bt-status-row strong');
+                var el = document.getElementById('bt-boot-status-text');
                 if (el) {
-                    var timer = setInterval(function () {
+                    setInterval(function () {
                         if (hidden) return;
                         idx = (idx + 1) % lines.length;
                         el.textContent = lines[idx];
-                    }, 1600);
+                    }, 1400);
                 }
                 setTimeout(hide, 60000);
             })();

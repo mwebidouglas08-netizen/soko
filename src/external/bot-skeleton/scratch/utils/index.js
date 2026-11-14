@@ -405,33 +405,48 @@ export const addDomAsBlock = (el_block, parent_block = null) => {
     return block;
 };
 
+const hasPurchaseBlock = workspace =>
+    workspace.getAllBlocks().some(block =>
+        ['purchase', 'apollo_purchase', 'apollo_purchase2'].includes(block.type)
+    );
+
 const getAllRequiredBlocks = (workspace, required_block_types) => {
     return workspace.getAllBlocks().filter(block => {
-        if (required_block_types.includes(block.type)) {
+        const block_type = block.type === 'apollo_purchase' || block.type === 'apollo_purchase2' ? 'purchase' : block.type;
+        if (required_block_types.includes(block_type)) {
             return (
                 (block.childBlocks_.length === 0 && required_block_types.includes(block.category_)) ||
-                block.parentBlock_ === null
+                block.parentBlock_ === null ||
+                required_block_types.includes(block_type)
             );
         }
+        return false;
     });
 };
 
 const getMissingBlocks = (workspace, required_block_types) => {
     return required_block_types.filter(blockType => {
+        if (blockType === 'purchase') {
+            return !hasPurchaseBlock(workspace);
+        }
         return !workspace.getAllBlocks().some(block => block.type === blockType);
     });
 };
 
 const getDisabledBlocks = required_blocks_check => {
     const workspace = window.Blockly.derivWorkspace;
-    const required_block_types = [getSelectedTradeType(workspace), ...config().mandatoryMainBlocks];
+    const mandatory_trade_option_block = getSelectedTradeType(workspace);
+    const required_block_types = [mandatory_trade_option_block, ...config().mandatoryMainBlocks];
+    const isRequiredType = type =>
+        required_block_types.includes(type) ||
+        (type === 'apollo_purchase' || type === 'apollo_purchase2' ? required_block_types.includes('purchase') : false);
     const disabled_blocks = Object.fromEntries(
         workspace
             .getAllBlocks()
-            .filter(block => required_block_types.includes(block.type))
-            .map(block => [block.type, block.disabled])
+            .filter(block => isRequiredType(block.type))
+            .map(block => [block.type === 'apollo_purchase' || block.type === 'apollo_purchase2' ? 'purchase' : block.type, block.disabled])
     );
-    const mandatory_blocks = ['before_purchase', 'purchase', 'trade_definition', 'trade_definition_tradeoptions'];
+    const mandatory_blocks = ['before_purchase', 'purchase', 'trade_definition', mandatory_trade_option_block];
     const has_disabled_blocks = mandatory_blocks.some(type => disabled_blocks[type]);
 
     return has_disabled_blocks
@@ -465,20 +480,18 @@ export const isAllRequiredBlocksEnabled = workspace => {
 
     const mandatory_trade_option_block = getSelectedTradeType(workspace);
     const { mandatoryMainBlocks } = config();
-    const required_block_types = [mandatory_trade_option_block, ...mandatoryMainBlocks];
+    const required_block_types = [mandatory_trade_option_block, ...mandatoryMainBlocks].filter(Boolean);
 
     const required_blocks_check = getAllRequiredBlocks(workspace, required_block_types);
 
     const missing_blocks = getMissingBlocks(workspace, required_block_types);
     const disabled_blocks = getDisabledBlocks(required_blocks_check);
 
-    if (missing_blocks) throwNewErrorMessage(missing_blocks, 'missing');
-    if (disabled_blocks) throwNewErrorMessage(disabled_blocks, 'disabled');
+    if (missing_blocks && missing_blocks.length) throwNewErrorMessage(missing_blocks, 'missing');
+    if (disabled_blocks && disabled_blocks.length) throwNewErrorMessage(disabled_blocks, 'disabled');
 
-    const error_blocks = [...missing_blocks, ...disabled_blocks];
-    const blocks_required = error_blocks.length === 0;
-
-    return blocks_required;
+    const error_blocks = [...(missing_blocks || []), ...(disabled_blocks || [])];
+    return error_blocks.length === 0;
 };
 
 export const scrollWorkspace = (workspace, scroll_amount, is_horizontal, is_chronological) => {

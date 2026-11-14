@@ -550,8 +550,7 @@
         <div id="popup_root" class="popup-root"></div>
         <div id="root"></div>
         <div id="boot-splash" role="status" aria-label="Loading TradingHubs">
-            <div class="bt-loader-content">
-                <div class="bt-status-row"><span>Initializing</span><strong>Core</strong></div>
+            <div class="bt-boot-brand">
                 <div class="bt-logo-container">
                     <div class="bt-logo-mark">
                         <div class="bt-logo-ring"></div>
@@ -565,9 +564,7 @@
                     <div class="bt-welcome-subtext">Precision Trading Workspace</div>
                     <div class="bt-welcome-tagline">Build and run trading bots without code.</div>
                 </div>
-                <div class="bt-progress-bar"><div class="bt-progress-fill" style="width: 60%" /></div>
-                <div class="bt-progress-meta"><span>Boot sequence</span><span>60%</span></div>
-                <div class="bt-status-row bt-status-row--bottom"><span>Status</span><strong>Standing by</strong></div>
+                <div class="bt-boot-status">Initializing <strong id="bt-boot-status-text">Core</strong></div>
             </div>
         </div>
         <script>
@@ -592,7 +589,7 @@
                     'Connecting markets…'
                 ];
                 var idx = 0;
-                var el = document.querySelector('.bt-status-row strong');
+                var el = document.getElementById('bt-boot-status-text') || document.querySelector('.bt-status-row strong');
                 if (el) {
                     var timer = setInterval(function () {
                         if (hidden) return;

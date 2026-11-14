@@ -342,29 +342,7 @@
                   </block>
                 </value>
                 <value name="B">
-                  <block type="logic_compare" id="!tuhxnKM7EjpkgLI$?)k">
-                    <field name="OP">GTE</field>
-                    <value name="A">
-                      <block type="over_under_analysis" id="CJWv=-+h}59oCnO[4BEQ">
-                        <field name="CONDITION_TYPE">OVER</field>
-                        <value name="DIGIT">
-                          <shadow type="math_number" id="9?gESA+{RQ^j5L+eZXnl">
-                            <field name="NUM">2</field>
-                          </shadow>
-                        </value>
-                        <value name="N">
-                          <shadow type="math_number" id="gfJ-Y;uV!X!XaA(6MdP2">
-                            <field name="NUM">60</field>
-                          </shadow>
-                        </value>
-                      </block>
-                    </value>
-                    <value name="B">
-                      <block type="math_number" id="V)`{Wd+5p03v)ldTEqn-">
-                        <field name="NUM">75</field>
-                      </block>
-                    </value>
-                  </block>
+                  <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">2</field></shadow></value></block>
                 </value>
               </block>
             </value>
@@ -447,29 +425,7 @@
                   </block>
                 </value>
                 <value name="B">
-                  <block type="logic_compare" id="W4#[~BTecn[yYYFZ*5HD">
-                    <field name="OP">GTE</field>
-                    <value name="A">
-                      <block type="over_under_analysis" id="4dRlbBN.GlGdX4N[g*,R">
-                        <field name="CONDITION_TYPE">UNDER</field>
-                        <value name="DIGIT">
-                          <shadow type="math_number" id="_B!C^#Hsc]tRG,T/46@!">
-                            <field name="NUM">7</field>
-                          </shadow>
-                        </value>
-                        <value name="N">
-                          <shadow type="math_number" id="GO|QO[jaXnu6,^xC[oLK">
-                            <field name="NUM">60</field>
-                          </shadow>
-                        </value>
-                      </block>
-                    </value>
-                    <value name="B">
-                      <block type="math_number" id="Zv.(Rx.$.d3uMFgPY9ft">
-                        <field name="NUM">75</field>
-                      </block>
-                    </value>
-                  </block>
+                  <block type="last_digits_condition"><field name="CONDITION">GREATER_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">7</field></shadow></value></block>
                 </value>
               </block>
             </value>
@@ -797,29 +753,7 @@
                   </block>
                 </value>
                 <value name="B">
-                  <block type="logic_compare" id="k#e#X@XA0O6|]s`@[PZ4">
-                    <field name="OP">GTE</field>
-                    <value name="A">
-                      <block type="over_under_analysis" id="6F}rh,a%]e@YRD*j8rnH">
-                        <field name="CONDITION_TYPE">OVER</field>
-                        <value name="DIGIT">
-                          <shadow type="math_number" id="h!X{@~)k3-?m|7l!=3X6">
-                            <field name="NUM">4</field>
-                          </shadow>
-                        </value>
-                        <value name="N">
-                          <shadow type="math_number" id="Rk!,5xEsRk#J]:x-nvQg">
-                            <field name="NUM">60</field>
-                          </shadow>
-                        </value>
-                      </block>
-                    </value>
-                    <value name="B">
-                      <block type="math_number" id="QF|HKl-~0m*VX-0r.7`j">
-                        <field name="NUM">55</field>
-                      </block>
-                    </value>
-                  </block>
+                  <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                 </value>
               </block>
             </value>
@@ -852,29 +786,7 @@
                   </block>
                 </value>
                 <value name="B">
-                  <block type="logic_compare" id="He|{WUMRX`_ug:F%mJFy">
-                    <field name="OP">GTE</field>
-                    <value name="A">
-                      <block type="over_under_analysis" id="XeCe:Yxn/bI$5T!l0F5E">
-                        <field name="CONDITION_TYPE">UNDER</field>
-                        <value name="DIGIT">
-                          <shadow type="math_number" id="~_]y)qn66TgHYH_5Ep|)">
-                            <field name="NUM">5</field>
-                          </shadow>
-                        </value>
-                        <value name="N">
-                          <shadow type="math_number" id="{W_.Q4$krEH}g;~psLdE">
-                            <field name="NUM">60</field>
-                          </shadow>
-                        </value>
-                      </block>
-                    </value>
-                    <value name="B">
-                      <block type="math_number" id="CLO1y%D$qI{[br|7Q7eB">
-                        <field name="NUM">55</field>
-                      </block>
-                    </value>
-                  </block>
+                  <block type="last_digits_condition"><field name="CONDITION">GREATER_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">6</field></shadow></value></block>
                 </value>
               </block>
             </value>

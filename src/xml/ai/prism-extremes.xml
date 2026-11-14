@@ -1029,15 +1029,7 @@
                               <block type="logic_compare" id="prism_426">
                                 <field name="OP">GTE</field>
                                 <value name="A">
-                                  <block type="over_under_analysis" id="prism_429">
-                                    <field name="CONDITION_TYPE">OVER</field>
-                                    <value name="DIGIT">
-                                      <shadow type="math_number" id="KwNf]K/kaW8TV/Et9VFM">
-                                        <field name="NUM">4</field>
-                                      </shadow>
-                                      <block type="math_number" id="prism_432">
-                                        <field name="NUM">1</field>
-                                      </block>
+                                  <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                     </value>
                                     <value name="N">
                                       <shadow type="math_number" id="=_SKK8JiB6{HEG^*!e`}">
@@ -1070,15 +1062,7 @@
                               <block type="logic_compare" id="prism_447">
                                 <field name="OP">GTE</field>
                                 <value name="A">
-                                  <block type="over_under_analysis" id="prism_450">
-                                    <field name="CONDITION_TYPE">OVER</field>
-                                    <value name="DIGIT">
-                                      <shadow type="math_number" id="m=)VZ3f[R=9|`%0wo*(B">
-                                        <field name="NUM">4</field>
-                                      </shadow>
-                                      <block type="math_number" id="prism_453">
-                                        <field name="NUM">1</field>
-                                      </block>
+                                  <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                     </value>
                                     <value name="N">
                                       <shadow type="math_number" id="}?/QDhK#75b{[XX+Y1nj">
@@ -1160,15 +1144,7 @@
                                       </block>
                                     </value>
                                     <value name="B">
-                                      <block type="over_under_analysis" id="prism_498">
-                                        <field name="CONDITION_TYPE">OVER</field>
-                                        <value name="DIGIT">
-                                          <shadow type="math_number" id="QS56Xh[fpE+f[91IqwlE">
-                                            <field name="NUM">4</field>
-                                          </shadow>
-                                          <block type="math_number" id="prism_501">
-                                            <field name="NUM">7</field>
-                                          </block>
+                                      <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                         </value>
                                         <value name="N">
                                           <shadow type="math_number" id="y!)YnQ67_2tdJckb]qdh">
@@ -1211,15 +1187,7 @@
                                       </block>
                                     </value>
                                     <value name="B">
-                                      <block type="over_under_analysis" id="prism_525">
-                                        <field name="CONDITION_TYPE">OVER</field>
-                                        <value name="DIGIT">
-                                          <shadow type="math_number" id=":R)A+SzdaJ^E#ybu/R$z">
-                                            <field name="NUM">4</field>
-                                          </shadow>
-                                          <block type="math_number" id="prism_528">
-                                            <field name="NUM">7</field>
-                                          </block>
+                                      <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                         </value>
                                         <value name="N">
                                           <shadow type="math_number" id="wQl!n7-^+3Kk;C*9Tm,(">

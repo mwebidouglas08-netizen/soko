@@ -1029,15 +1029,7 @@
                               <block type="logic_compare" id="titan_426">
                                 <field name="OP">GTE</field>
                                 <value name="A">
-                                  <block type="over_under_analysis" id="titan_429">
-                                    <field name="CONDITION_TYPE">OVER</field>
-                                    <value name="DIGIT">
-                                      <shadow type="math_number" id="C;?vxPA6q8RN5$ib8Psx">
-                                        <field name="NUM">4</field>
-                                      </shadow>
-                                      <block type="math_number" id="titan_432">
-                                        <field name="NUM">2</field>
-                                      </block>
+                                  <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                     </value>
                                     <value name="N">
                                       <shadow type="math_number" id="3Y-)7dX7TRR/2f5L%=/g">
@@ -1070,15 +1062,7 @@
                               <block type="logic_compare" id="titan_447">
                                 <field name="OP">GTE</field>
                                 <value name="A">
-                                  <block type="over_under_analysis" id="titan_450">
-                                    <field name="CONDITION_TYPE">OVER</field>
-                                    <value name="DIGIT">
-                                      <shadow type="math_number" id="J*1@n[8g58LsF,4.UsuS">
-                                        <field name="NUM">4</field>
-                                      </shadow>
-                                      <block type="math_number" id="titan_453">
-                                        <field name="NUM">2</field>
-                                      </block>
+                                  <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                     </value>
                                     <value name="N">
                                       <shadow type="math_number" id="8hfQy/hNA22J,aS5yZ,e">
@@ -1160,15 +1144,7 @@
                                       </block>
                                     </value>
                                     <value name="B">
-                                      <block type="over_under_analysis" id="titan_498">
-                                        <field name="CONDITION_TYPE">OVER</field>
-                                        <value name="DIGIT">
-                                          <shadow type="math_number" id="#e{CBv7YlbUQ*d2I~wS{">
-                                            <field name="NUM">4</field>
-                                          </shadow>
-                                          <block type="math_number" id="titan_501">
-                                            <field name="NUM">6</field>
-                                          </block>
+                                      <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                         </value>
                                         <value name="N">
                                           <shadow type="math_number" id=":NQOs~e`DV(E+S|hI%6b">
@@ -1211,15 +1187,7 @@
                                       </block>
                                     </value>
                                     <value name="B">
-                                      <block type="over_under_analysis" id="titan_525">
-                                        <field name="CONDITION_TYPE">OVER</field>
-                                        <value name="DIGIT">
-                                          <shadow type="math_number" id="fZiHsMXb}d}#BEx(CKQn">
-                                            <field name="NUM">4</field>
-                                          </shadow>
-                                          <block type="math_number" id="titan_528">
-                                            <field name="NUM">6</field>
-                                          </block>
+                                      <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                         </value>
                                         <value name="N">
                                           <shadow type="math_number" id="3SGF{rQX%F(ujBX*LzZ}">

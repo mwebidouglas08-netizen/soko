@@ -1029,15 +1029,7 @@
                               <block type="logic_compare" id="zenith_426">
                                 <field name="OP">GTE</field>
                                 <value name="A">
-                                  <block type="over_under_analysis" id="zenith_429">
-                                    <field name="CONDITION_TYPE">OVER</field>
-                                    <value name="DIGIT">
-                                      <shadow type="math_number" id="F!3a1#L@prrh;SP==_v[">
-                                        <field name="NUM">4</field>
-                                      </shadow>
-                                      <block type="math_number" id="zenith_432">
-                                        <field name="NUM">4</field>
-                                      </block>
+                                  <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                     </value>
                                     <value name="N">
                                       <shadow type="math_number" id="IV9U,s+6`=0c1XCy)NW;">
@@ -1070,15 +1062,7 @@
                               <block type="logic_compare" id="zenith_447">
                                 <field name="OP">GTE</field>
                                 <value name="A">
-                                  <block type="over_under_analysis" id="zenith_450">
-                                    <field name="CONDITION_TYPE">OVER</field>
-                                    <value name="DIGIT">
-                                      <shadow type="math_number" id="-tTs[~I$+I}eL2Xk@woC">
-                                        <field name="NUM">4</field>
-                                      </shadow>
-                                      <block type="math_number" id="zenith_453">
-                                        <field name="NUM">4</field>
-                                      </block>
+                                  <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                     </value>
                                     <value name="N">
                                       <shadow type="math_number" id="kyU@_24p;~9Ch5_kZ*9M">
@@ -1160,15 +1144,7 @@
                                       </block>
                                     </value>
                                     <value name="B">
-                                      <block type="over_under_analysis" id="zenith_498">
-                                        <field name="CONDITION_TYPE">OVER</field>
-                                        <value name="DIGIT">
-                                          <shadow type="math_number" id="YENO7o=eb)gorg2EKGY/">
-                                            <field name="NUM">4</field>
-                                          </shadow>
-                                          <block type="math_number" id="zenith_501">
-                                            <field name="NUM">4</field>
-                                          </block>
+                                      <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                         </value>
                                         <value name="N">
                                           <shadow type="math_number" id="tA6d#5q2cYt5U*vO?`l|">
@@ -1211,15 +1187,7 @@
                                       </block>
                                     </value>
                                     <value name="B">
-                                      <block type="over_under_analysis" id="zenith_525">
-                                        <field name="CONDITION_TYPE">OVER</field>
-                                        <value name="DIGIT">
-                                          <shadow type="math_number" id="9OG5Ny$2GY6.^MR9i!{z">
-                                            <field name="NUM">4</field>
-                                          </shadow>
-                                          <block type="math_number" id="zenith_528">
-                                            <field name="NUM">4</field>
-                                          </block>
+                                      <block type="last_digits_condition"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value></block>
                                         </value>
                                         <value name="N">
                                           <shadow type="math_number" id="e7j0VUeV[F9YD:QUvZs*">

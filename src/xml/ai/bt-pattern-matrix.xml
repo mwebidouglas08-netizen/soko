@@ -16,9 +16,9 @@
         <field name="MARKET_LIST">synthetic_index</field>
         <field name="SUBMARKET_LIST">random_index</field>
         <field name="SYMBOL_LIST">R_75</field>
-        <field name="ALTERNATE_MARKETS">FALSE</field>
+        <field name="ALTERNATE_MARKETS">TRUE</field>
         <field name="ALTERNATE_EVERY">1</field>
-        <field name="MULTI_MARKET">FALSE</field>
+        <field name="MULTI_MARKET">TRUE</field>
         <field name="VH_ENABLED">FALSE</field>
         <field name="VH_SETTINGS_BTN">VH Settings</field>
         <next>
@@ -234,7 +234,7 @@
                 </statement>
                 <value name="SECONDS">
                   <block type="math_number" id="btpm_delay_value">
-                    <field name="NUM">1</field>
+                    <field name="NUM">0.2</field>
                   </block>
                 </value>
               </block>

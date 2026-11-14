@@ -16,9 +16,9 @@
         <field name="MARKET_LIST">synthetic_index</field>
         <field name="SUBMARKET_LIST">random_index</field>
         <field name="SYMBOL_LIST">R_25</field>
-        <field name="ALTERNATE_MARKETS">FALSE</field>
+        <field name="ALTERNATE_MARKETS">TRUE</field>
         <field name="ALTERNATE_EVERY">1</field>
-        <field name="MULTI_MARKET">FALSE</field>
+        <field name="MULTI_MARKET">TRUE</field>
         <field name="VH_ENABLED">FALSE</field>
         <field name="VH_SETTINGS_BTN">VH Settings</field>
         <next>

@@ -17,7 +17,7 @@
         <field name="SUBMARKET_LIST">random_index</field>
         <field name="SYMBOL_LIST">R_25</field>
         <field name="ALTERNATE_MARKETS">TRUE</field>
-        <field name="ALTERNATE_EVERY">3</field>
+        <field name="ALTERNATE_EVERY">1</field>
         <field name="MULTI_MARKET">TRUE</field>
         <field name="VH_ENABLED">FALSE</field>
         <field name="VH_SETTINGS_BTN">VH Settings</field>
@@ -214,7 +214,7 @@
                 </statement>
                 <value name="SECONDS">
                   <block type="math_number" id="btamr_delay_value">
-                    <field name="NUM">1</field>
+                    <field name="NUM">0.2</field>
                   </block>
                 </value>
               </block>

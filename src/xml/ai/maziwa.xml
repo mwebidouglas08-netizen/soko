@@ -10,13 +10,14 @@
     <variable id="mz_signal">Entry Signal</variable>
     <variable id="mz_direction">Trade Direction</variable>
     <variable id="mz_prediction">Prediction</variable>
-    <variable id="mz_recovery_mode">Recovery Mode</variable>
     <variable id="mz_loss_streak">Loss Streak</variable>
     <variable id="mz_max_loss_streak">Max Loss Streak</variable>
     <variable id="mz_duration">Duration</variable>
+    <variable id="mz_recover_amount">Recover Amount</variable>
+    <variable id="mz_max_stake">Max Stake</variable>
   </variables>
   <block type="trade_definition" id="mz_trade_definition" deletable="false" x="0" y="60">
-    <comment pinned="false" h="200" w="480">Maziwa AI — continuous multi-market Over/Under bot. Rotates all synthetic volatility markets every contract, scans digit conditions quickly and places 1-tick trades continuously. Prioritizes Over 2 on low-digit pressure and Under 8 on high-digit pressure with intelligent fallback so it keeps executing. Includes martingale recovery (capped), take profit, stop loss, max trades, and restart-on-error. Test on demo first; trading carries risk and outcomes are not guaranteed.</comment>
+    <comment pinned="false" h="220" w="520">Maziwa AI v2: continuous Over/Under across all synthetic volatility markets. Rotates every contract, scans ticks fast (0.2s), enters Over 2 after low ticks or Under 8 after high ticks with 1-tick duration. Uses over/under analysis to prefer stronger sides and capped recovery stake to recoup recent loss. Includes TP/SL, max trades, restart-on-error. Trading is risky; no outcome guaranteed. Test on demo first.</comment>
     <statement name="TRADE_OPTIONS">
       <block type="trade_definition_market" id="mz_market" deletable="false" movable="false">
         <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
@@ -57,229 +58,104 @@
       </block>
     </statement>
     <statement name="INITIALIZATION">
-      <block type="variables_set" id="mz_set_stake">
-        <field name="VAR" id="mz_stake">Stake</field>
-        <value name="VALUE"><block type="math_number" id="mz_stake_value"><field name="NUM">0.35</field></block></value>
-        <next><block type="variables_set" id="mz_set_base_stake">
-          <field name="VAR" id="mz_base_stake">Base Stake</field>
-          <value name="VALUE"><block type="math_number" id="mz_base_stake_value"><field name="NUM">0.35</field></block></value>
-          <next><block type="variables_set" id="mz_set_martingale">
-            <field name="VAR" id="mz_martingale">Martingale</field>
-            <value name="VALUE"><block type="math_number" id="mz_martingale_value"><field name="NUM">2.1</field></block></value>
-            <next><block type="variables_set" id="mz_set_tp">
-              <field name="VAR" id="mz_take_profit">Take Profit</field>
-              <value name="VALUE"><block type="math_number" id="mz_tp_value"><field name="NUM">15</field></block></value>
-              <next><block type="variables_set" id="mz_set_sl">
-                <field name="VAR" id="mz_stop_loss">Stop Loss</field>
-                <value name="VALUE"><block type="math_number" id="mz_sl_value"><field name="NUM">50</field></block></value>
-                <next><block type="variables_set" id="mz_set_max_trades">
-                  <field name="VAR" id="mz_max_trades">Max Trades</field>
-                  <value name="VALUE"><block type="math_number" id="mz_max_trades_value"><field name="NUM">200</field></block></value>
-                  <next><block type="variables_set" id="mz_set_trades">
-                    <field name="VAR" id="mz_trades">Trades</field>
-                    <value name="VALUE"><block type="math_number" id="mz_trades_value"><field name="NUM">0</field></block></value>
-                    <next><block type="variables_set" id="mz_set_signal">
-                      <field name="VAR" id="mz_signal">Entry Signal</field>
-                      <value name="VALUE"><block type="logic_boolean" id="mz_signal_value"><field name="BOOL">FALSE</field></block></value>
-                      <next><block type="variables_set" id="mz_set_direction">
-                        <field name="VAR" id="mz_direction">Trade Direction</field>
-                        <value name="VALUE"><block type="math_number" id="mz_direction_value"><field name="NUM">4</field></block></value>
-                        <next><block type="variables_set" id="mz_set_prediction">
-                          <field name="VAR" id="mz_prediction">Prediction</field>
-                          <value name="VALUE"><block type="math_number" id="mz_prediction_value"><field name="NUM">2</field></block></value>
-                          <next><block type="variables_set" id="mz_set_recovery">
-                            <field name="VAR" id="mz_recovery_mode">Recovery Mode</field>
-                            <value name="VALUE"><block type="logic_boolean" id="mz_recovery_value"><field name="BOOL">FALSE</field></block></value>
-                            <next><block type="variables_set" id="mz_set_loss_streak">
-                              <field name="VAR" id="mz_loss_streak">Loss Streak</field>
-                              <value name="VALUE"><block type="math_number" id="mz_loss_streak_value"><field name="NUM">0</field></block></value>
-                              <next><block type="variables_set" id="mz_set_max_loss_streak">
-                                <field name="VAR" id="mz_max_loss_streak">Max Loss Streak</field>
-                                <value name="VALUE"><block type="math_number" id="mz_max_loss_streak_value"><field name="NUM">5</field></block></value>
-                                <next><block type="variables_set" id="mz_set_duration">
-                                  <field name="VAR" id="mz_duration">Duration</field>
-                                  <value name="VALUE"><block type="math_number" id="mz_duration_value"><field name="NUM">1</field></block></value>
-                                </block></next>
-                              </block></next>
-                            </block></next>
-                          </block></next>
-                        </block></next>
-                      </block></next>
-                    </block></next>
-                  </block></next>
-                </block></next>
-              </block></next>
-            </block></next>
-          </block></next>
-        </block></next>
-      </block>
+      <block type="variables_set" id="mz_set_stake"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_number" id="mz_stake_v"><field name="NUM">0.35</field></block></value>
+        <next><block type="variables_set" id="mz_set_base"><field name="VAR" id="mz_base_stake">Base Stake</field><value name="VALUE"><block type="math_number" id="mz_base_v"><field name="NUM">0.35</field></block></value>
+          <next><block type="variables_set" id="mz_set_mg"><field name="VAR" id="mz_martingale">Martingale</field><value name="VALUE"><block type="math_number" id="mz_mg_v"><field name="NUM">2.2</field></block></value>
+            <next><block type="variables_set" id="mz_set_tp"><field name="VAR" id="mz_take_profit">Take Profit</field><value name="VALUE"><block type="math_number" id="mz_tp_v"><field name="NUM">10</field></block></value>
+              <next><block type="variables_set" id="mz_set_sl"><field name="VAR" id="mz_stop_loss">Stop Loss</field><value name="VALUE"><block type="math_number" id="mz_sl_v"><field name="NUM">50</field></block></value>
+                <next><block type="variables_set" id="mz_set_mt"><field name="VAR" id="mz_max_trades">Max Trades</field><value name="VALUE"><block type="math_number" id="mz_mt_v"><field name="NUM">500</field></block></value>
+                  <next><block type="variables_set" id="mz_set_tr"><field name="VAR" id="mz_trades">Trades</field><value name="VALUE"><block type="math_number" id="mz_tr_v"><field name="NUM">0</field></block></value>
+                    <next><block type="variables_set" id="mz_set_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_sig_v"><field name="BOOL">FALSE</field></block></value>
+                      <next><block type="variables_set" id="mz_set_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_dir_v"><field name="NUM">4</field></block></value>
+                        <next><block type="variables_set" id="mz_set_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_pred_v"><field name="NUM">2</field></block></value>
+                          <next><block type="variables_set" id="mz_set_ls"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="VALUE"><block type="math_number" id="mz_ls_v"><field name="NUM">0</field></block></value>
+                            <next><block type="variables_set" id="mz_set_mls"><field name="VAR" id="mz_max_loss_streak">Max Loss Streak</field><value name="VALUE"><block type="math_number" id="mz_mls_v"><field name="NUM">6</field></block></value>
+                              <next><block type="variables_set" id="mz_set_dur"><field name="VAR" id="mz_duration">Duration</field><value name="VALUE"><block type="math_number" id="mz_dur_v"><field name="NUM">1</field></block></value>
+                                <next><block type="variables_set" id="mz_set_rec"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_number" id="mz_rec_v"><field name="NUM">0</field></block></value>
+                                  <next><block type="variables_set" id="mz_set_ms"><field name="VAR" id="mz_max_stake">Max Stake</field><value name="VALUE"><block type="math_number" id="mz_ms_v"><field name="NUM">25</field></block></value></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block>
     </statement>
     <statement name="SUBMARKET">
-      <block type="variables_set" id="mz_reset_signal_each_cycle">
-        <field name="VAR" id="mz_signal">Entry Signal</field>
-        <value name="VALUE"><block type="logic_boolean" id="mz_reset_signal_false"><field name="BOOL">FALSE</field></block></value>
-        <next>
-          <block type="controls_whileUntil" id="mz_scan_loop" collapsed="true">
-            <field name="MODE">UNTIL</field>
-            <value name="BOOL"><block type="variables_get" id="mz_signal_read_loop"><field name="VAR" id="mz_signal">Entry Signal</field></block></value>
-            <statement name="DO">
-              <block type="timeout" id="mz_scan_delay">
-                <statement name="TIMEOUTSTACK">
-                  <block type="controls_if" id="mz_scan_logic">
-                    <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="4" else="1"></mutation>
-                    <value name="IF0">
-                      <block type="last_digits_condition" id="mz_strong_low_3">
-                        <field name="CONDITION">LESS_OR_EQUAL</field>
-                        <value name="N"><shadow type="math_number" id="mz_strong_low_n3"><field name="NUM">3</field></shadow></value>
-                        <value name="COMPARE_VALUE"><shadow type="math_number" id="mz_strong_low_cmp3"><field name="NUM">2</field></shadow></value>
-                      </block>
-                    </value>
-                    <statement name="DO0">
-                      <block type="variables_set" id="mz_set_over_s3_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_dir_over_s3"><field name="NUM">4</field></block></value>
-                        <next><block type="variables_set" id="mz_set_over_s3_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_pred_over_s3"><field name="NUM">2</field></block></value>
-                          <next><block type="variables_set" id="mz_signal_over_s3"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_signal_true_over_s3"><field name="BOOL">TRUE</field></block></value></block></next>
-                        </block></next>
-                      </block>
-                    </statement>
-                    <value name="IF1">
-                      <block type="last_digits_condition" id="mz_strong_high_3">
-                        <field name="CONDITION">GREATER_OR_EQUAL</field>
-                        <value name="N"><shadow type="math_number" id="mz_strong_high_n3"><field name="NUM">3</field></shadow></value>
-                        <value name="COMPARE_VALUE"><shadow type="math_number" id="mz_strong_high_cmp3"><field name="NUM">7</field></shadow></value>
-                      </block>
-                    </value>
-                    <statement name="DO1">
-                      <block type="variables_set" id="mz_set_under_s3_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_dir_under_s3"><field name="NUM">5</field></block></value>
-                        <next><block type="variables_set" id="mz_set_under_s3_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_pred_under_s3"><field name="NUM">8</field></block></value>
-                          <next><block type="variables_set" id="mz_signal_under_s3"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_signal_true_under_s3"><field name="BOOL">TRUE</field></block></value></block></next>
-                        </block></next>
-                      </block>
-                    </statement>
-                    <value name="IF2">
-                      <block type="last_digits_condition" id="mz_low_2">
-                        <field name="CONDITION">LESS_OR_EQUAL</field>
-                        <value name="N"><shadow type="math_number" id="mz_low_n2"><field name="NUM">2</field></shadow></value>
-                        <value name="COMPARE_VALUE"><shadow type="math_number" id="mz_low_cmp2"><field name="NUM">3</field></shadow></value>
-                      </block>
-                    </value>
-                    <statement name="DO2">
-                      <block type="variables_set" id="mz_set_over_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_dir_over"><field name="NUM">4</field></block></value>
-                        <next><block type="variables_set" id="mz_set_over_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_pred_over"><field name="NUM">2</field></block></value>
-                          <next><block type="variables_set" id="mz_signal_over"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_signal_true_over"><field name="BOOL">TRUE</field></block></value></block></next>
-                        </block></next>
-                      </block>
-                    </statement>
-                    <value name="IF3">
-                      <block type="last_digits_condition" id="mz_high_2">
-                        <field name="CONDITION">GREATER_OR_EQUAL</field>
-                        <value name="N"><shadow type="math_number" id="mz_high_n2"><field name="NUM">2</field></shadow></value>
-                        <value name="COMPARE_VALUE"><shadow type="math_number" id="mz_high_cmp2"><field name="NUM">6</field></shadow></value>
-                      </block>
-                    </value>
-                    <statement name="DO3">
-                      <block type="variables_set" id="mz_set_under_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_dir_under"><field name="NUM">5</field></block></value>
-                        <next><block type="variables_set" id="mz_set_under_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_pred_under"><field name="NUM">8</field></block></value>
-                          <next><block type="variables_set" id="mz_signal_under"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_signal_true_under"><field name="BOOL">TRUE</field></block></value></block></next>
-                        </block></next>
-                      </block>
-                    </statement>
-                    <value name="IF4">
-                      <block type="last_digits_condition" id="mz_last_low">
-                        <field name="CONDITION">LESS_OR_EQUAL</field>
-                        <value name="N"><shadow type="math_number" id="mz_last_n1"><field name="NUM">1</field></shadow></value>
-                        <value name="COMPARE_VALUE"><shadow type="math_number" id="mz_last_cmp4"><field name="NUM">4</field></shadow></value>
-                      </block>
-                    </value>
-                    <statement name="DO4">
-                      <block type="variables_set" id="mz_set_over_last_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_dir_over_last"><field name="NUM">4</field></block></value>
-                        <next><block type="variables_set" id="mz_set_over_last_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_pred_over_last"><field name="NUM">2</field></block></value>
-                          <next><block type="variables_set" id="mz_signal_over_last"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_signal_true_over_last"><field name="BOOL">TRUE</field></block></value></block></next>
-                        </block></next>
-                      </block>
-                    </statement>
-                    <statement name="ELSE">
-                      <block type="variables_set" id="mz_set_under_default_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_dir_under_default"><field name="NUM">5</field></block></value>
-                        <next><block type="variables_set" id="mz_set_under_default_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_pred_under_default"><field name="NUM">8</field></block></value>
-                          <next><block type="variables_set" id="mz_signal_under_default"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_signal_true_under_default"><field name="BOOL">TRUE</field></block></value></block></next>
-                        </block></next>
-                      </block>
-                    </statement>
-                  </block>
-                </statement>
-                <value name="SECONDS"><block type="math_number" id="mz_delay_value"><field name="NUM">0.3</field></block></value>
-              </block>
-            </statement>
-            <next>
-              <block type="trade_definition_tradeoptions" id="mz_trade_options">
-                <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation>
-                <field name="DURATIONTYPE_LIST">t</field>
-                <value name="DURATION"><block type="variables_get" id="mz_duration_value_ref"><field name="VAR" id="mz_duration">Duration</field></block></value>
-                <value name="AMOUNT"><shadow type="math_number_positive" id="mz_amount_shadow"><field name="NUM">0.35</field></shadow><block type="variables_get" id="mz_get_stake_amt"><field name="VAR" id="mz_stake">Stake</field></block></value>
-                <value name="PREDICTION"><shadow type="math_number_positive" id="mz_prediction_shadow"><field name="NUM">2</field></shadow><block type="variables_get" id="mz_get_prediction_amt"><field name="VAR" id="mz_prediction">Prediction</field></block></value>
-              </block>
-            </next>
-          </block>
-        </next>
-      </block>
+      <block type="variables_set" id="mz_reset_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_reset_sig_f"><field name="BOOL">FALSE</field></block></value>
+        <next><block type="controls_whileUntil" id="mz_scan_loop" collapsed="true"><field name="MODE">UNTIL</field><value name="BOOL"><block type="variables_get" id="mz_sig_read"><field name="VAR" id="mz_signal">Entry Signal</field></block></value>
+            <statement name="DO"><block type="timeout" id="mz_delay"><statement name="TIMEOUTSTACK"><block type="controls_if" id="mz_logic"><mutation xmlns="http://www.w3.org/1999/xhtml" elseif="5" else="1"></mutation>
+                    <value name="IF0"><block type="logic_operation" id="mz_o_strong"><field name="OP">OR</field>
+                      <value name="A"><block type="last_digits_condition" id="mz_o_last1"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number" id="mz_o_n1"><field name="NUM">1</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number" id="mz_o_c1"><field name="NUM">2</field></shadow></value></block></value>
+                      <value name="B"><block type="logic_operation" id="mz_o_pair"><field name="OP">AND</field>
+                        <value name="A"><block type="last_digits_condition" id="mz_o_last2"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number" id="mz_o_n2"><field name="NUM">2</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number" id="mz_o_c2"><field name="NUM">3</field></shadow></value></block></value>
+                        <value name="B"><block type="logic_compare" id="mz_o_pct"><field name="OP">GTE</field><value name="A"><block type="over_under_analysis" id="mz_o_analysis"><field name="CONDITION_TYPE">OVER</field><value name="DIGIT"><shadow type="math_number" id="mz_o_ad"><field name="NUM">2</field></shadow></value><value name="N"><shadow type="math_number" id="mz_o_an"><field name="NUM">60</field></shadow></value></block></value><value name="B"><block type="math_number" id="mz_o_thr"><field name="NUM">65</field></block></value></block></value>
+                      </block></value></block></value>
+                    <statement name="DO0"><block type="variables_set" id="mz_do0_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_do0_dv"><field name="NUM">4</field></block></value><next><block type="variables_set" id="mz_do0_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_do0_pv"><field name="NUM">2</field></block></value><next><block type="variables_set" id="mz_do0_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_do0_sv"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></statement>
+                    <value name="IF1"><block type="logic_operation" id="mz_u_strong"><field name="OP">OR</field>
+                      <value name="A"><block type="last_digits_condition" id="mz_u_last1"><field name="CONDITION">GREATER_OR_EQUAL</field><value name="N"><shadow type="math_number" id="mz_u_n1"><field name="NUM">1</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number" id="mz_u_c1"><field name="NUM">7</field></shadow></value></block></value>
+                      <value name="B"><block type="logic_operation" id="mz_u_pair"><field name="OP">AND</field>
+                        <value name="A"><block type="last_digits_condition" id="mz_u_last2"><field name="CONDITION">GREATER_OR_EQUAL</field><value name="N"><shadow type="math_number" id="mz_u_n2"><field name="NUM">2</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number" id="mz_u_c2"><field name="NUM">6</field></shadow></value></block></value>
+                        <value name="B"><block type="logic_compare" id="mz_u_pct"><field name="OP">GTE</field><value name="A"><block type="over_under_analysis" id="mz_u_analysis"><field name="CONDITION_TYPE">UNDER</field><value name="DIGIT"><shadow type="math_number" id="mz_u_ad"><field name="NUM">8</field></shadow></value><value name="N"><shadow type="math_number" id="mz_u_an"><field name="NUM">60</field></shadow></value></block></value><value name="B"><block type="math_number" id="mz_u_thr"><field name="NUM">65</field></block></value></block></value>
+                      </block></value></block></value>
+                    <statement name="DO1"><block type="variables_set" id="mz_do1_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_do1_dv"><field name="NUM">5</field></block></value><next><block type="variables_set" id="mz_do1_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_do1_pv"><field name="NUM">8</field></block></value><next><block type="variables_set" id="mz_do1_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_do1_sv"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></statement>
+                    <value name="IF2"><block type="last_digits_condition" id="mz_o3"><field name="CONDITION">LESS_OR_EQUAL</field><value name="N"><shadow type="math_number" id="mz_o3n"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number" id="mz_o3c"><field name="NUM">2</field></shadow></value></block></value>
+                    <statement name="DO2"><block type="variables_set" id="mz_do2_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_do2_dv"><field name="NUM">4</field></block></value><next><block type="variables_set" id="mz_do2_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_do2_pv"><field name="NUM">2</field></block></value><next><block type="variables_set" id="mz_do2_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_do2_sv"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></statement>
+                    <value name="IF3"><block type="last_digits_condition" id="mz_u3"><field name="CONDITION">GREATER_OR_EQUAL</field><value name="N"><shadow type="math_number" id="mz_u3n"><field name="NUM">3</field></shadow></value><value name="COMPARE_VALUE"><shadow type="math_number" id="mz_u3c"><field name="NUM">7</field></shadow></value></block></value>
+                    <statement name="DO3"><block type="variables_set" id="mz_do3_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_do3_dv"><field name="NUM">5</field></block></value><next><block type="variables_set" id="mz_do3_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_do3_pv"><field name="NUM">8</field></block></value><next><block type="variables_set" id="mz_do3_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_do3_sv"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></statement>
+                    <value name="IF4"><block type="logic_compare" id="mz_o_bias"><field name="OP">GTE</field><value name="A"><block type="over_under_analysis" id="mz_o_bias_a"><field name="CONDITION_TYPE">OVER</field><value name="DIGIT"><shadow type="math_number" id="mz_o_bd"><field name="NUM">2</field></shadow></value><value name="N"><shadow type="math_number" id="mz_o_bn"><field name="NUM">50</field></shadow></value></block></value><value name="B"><block type="math_number" id="mz_o_bthr"><field name="NUM">72</field></block></value></block></value>
+                    <statement name="DO4"><block type="variables_set" id="mz_do4_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_do4_dv"><field name="NUM">4</field></block></value><next><block type="variables_set" id="mz_do4_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_do4_pv"><field name="NUM">2</field></block></value><next><block type="variables_set" id="mz_do4_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_do4_sv"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></statement>
+                    <value name="IF5"><block type="logic_compare" id="mz_u_bias"><field name="OP">GTE</field><value name="A"><block type="over_under_analysis" id="mz_u_bias_a"><field name="CONDITION_TYPE">UNDER</field><value name="DIGIT"><shadow type="math_number" id="mz_u_bd"><field name="NUM">8</field></shadow></value><value name="N"><shadow type="math_number" id="mz_u_bn"><field name="NUM">50</field></shadow></value></block></value><value name="B"><block type="math_number" id="mz_u_bthr"><field name="NUM">72</field></block></value></block></value>
+                    <statement name="DO5"><block type="variables_set" id="mz_do5_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_do5_dv"><field name="NUM">5</field></block></value><next><block type="variables_set" id="mz_do5_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_do5_pv"><field name="NUM">8</field></block></value><next><block type="variables_set" id="mz_do5_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_do5_sv"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></statement>
+                    <statement name="ELSE"><block type="variables_set" id="mz_def_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number" id="mz_def_dv"><field name="NUM">4</field></block></value><next><block type="variables_set" id="mz_def_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number" id="mz_def_pv"><field name="NUM">2</field></block></value><next><block type="variables_set" id="mz_def_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_def_sv"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></statement>
+                  </block></statement><value name="SECONDS"><block type="math_number" id="mz_delay_v"><field name="NUM">0.2</field></block></value></block></statement>
+            <next><block type="trade_definition_tradeoptions" id="mz_opts"><mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation><field name="DURATIONTYPE_LIST">t</field><value name="DURATION"><block type="variables_get" id="mz_dur_g"><field name="VAR" id="mz_duration">Duration</field></block></value><value name="AMOUNT"><shadow type="math_number_positive" id="mz_amt_s"><field name="NUM">0.35</field></shadow><block type="variables_get" id="mz_amt_g"><field name="VAR" id="mz_stake">Stake</field></block></value><value name="PREDICTION"><shadow type="math_number_positive" id="mz_pred_s"><field name="NUM">2</field></shadow><block type="variables_get" id="mz_pred_g"><field name="VAR" id="mz_prediction">Prediction</field></block></value></block></next></block></next></block>
     </statement>
   </block>
-  <block type="after_purchase" id="mz_after_purchase" x="760" y="60">
+  <block type="after_purchase" id="mz_after" x="760" y="60">
     <statement name="AFTERPURCHASE_STACK">
-      <block type="math_change" id="mz_inc_trades"><field name="VAR" id="mz_trades">Trades</field><value name="DELTA"><shadow type="math_number" id="mz_inc_trades_one"><field name="NUM">1</field></shadow></value>
-        <next>
-          <block type="variables_set" id="mz_reset_signal_post"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_signal_false_post"><field name="BOOL">FALSE</field></block></value>
-            <next>
-              <block type="controls_if" id="mz_result_check">
-                <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
-                <value name="IF0"><block type="contract_check_result" id="mz_is_win"><field name="CHECK_RESULT">win</field></block></value>
-                <statement name="DO0">
-                  <block type="variables_set" id="mz_reset_stake_win"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="variables_get" id="mz_base_on_win"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value>
-                    <next><block type="variables_set" id="mz_reset_loss_streak_win"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="VALUE"><block type="math_number" id="mz_loss_streak_zero"><field name="NUM">0</field></block></value>
-                      <next><block type="variables_set" id="mz_recovery_off_win"><field name="VAR" id="mz_recovery_mode">Recovery Mode</field><value name="VALUE"><block type="logic_boolean" id="mz_recovery_false_win"><field name="BOOL">FALSE</field></block></value></block></next>
-                    </block></next>
-                  </block>
-                </statement>
-                <statement name="ELSE">
-                  <block type="math_change" id="mz_inc_loss_streak"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="DELTA"><shadow type="math_number" id="mz_loss_streak_one"><field name="NUM">1</field></shadow></value>
-                    <next><block type="variables_set" id="mz_recovery_on_loss"><field name="VAR" id="mz_recovery_mode">Recovery Mode</field><value name="VALUE"><block type="logic_boolean" id="mz_recovery_true_loss"><field name="BOOL">TRUE</field></block></value>
-                      <next><block type="controls_if" id="mz_cap_loss_streak"><mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
-                        <value name="IF0"><block type="logic_compare" id="mz_loss_streak_check"><field name="OP">LT</field><value name="A"><block type="variables_get" id="mz_loss_streak_read"><field name="VAR" id="mz_loss_streak">Loss Streak</field></block></value><value name="B"><block type="variables_get" id="mz_max_loss_streak_read"><field name="VAR" id="mz_max_loss_streak">Max Loss Streak</field></block></value></block></value>
-                        <statement name="DO0"><block type="variables_set" id="mz_martingale_stake"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_arithmetic" id="mz_multiply_stake"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get" id="mz_stake_read_loss"><field name="VAR" id="mz_stake">Stake</field></block></value><value name="B"><block type="variables_get" id="mz_martingale_read"><field name="VAR" id="mz_martingale">Martingale</field></block></value></block></value></block></statement>
-                        <statement name="ELSE"><block type="variables_set" id="mz_reset_stake_cap"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="variables_get" id="mz_base_on_cap"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value>
-                          <next><block type="variables_set" id="mz_reset_loss_streak_cap"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="VALUE"><block type="math_number" id="mz_loss_streak_cap_zero"><field name="NUM">0</field></block></value></block></next>
-                        </block></statement>
-                      </block></next>
-                    </block></next>
-                  </block>
-                </statement>
-                <next>
-                  <block type="controls_if" id="mz_session_gate">
-                    <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="2" else="1"></mutation>
-                    <value name="IF0"><block type="logic_compare" id="mz_tp_check"><field name="OP">GTE</field><value name="A"><block type="total_profit" id="mz_total_profit_tp"></block></value><value name="B"><block type="variables_get" id="mz_tp_read"><field name="VAR" id="mz_take_profit">Take Profit</field></block></value></block></value>
-                    <statement name="DO0"><block type="text_print" id="mz_tp_print"><value name="TEXT"><shadow type="text" id="mz_tp_text"><field name="TEXT">Maziwa AI: Take Profit reached. Session stopped.</field></shadow></value></block></statement>
-                    <value name="IF1"><block type="logic_compare" id="mz_sl_check"><field name="OP">LTE</field><value name="A"><block type="total_profit" id="mz_total_profit_sl"></block></value><value name="B"><block type="math_single" id="mz_neg_sl"><field name="OP">NEG</field><value name="NUM"><block type="variables_get" id="mz_sl_read"><field name="VAR" id="mz_stop_loss">Stop Loss</field></block></value></block></value></block></value>
-                    <statement name="DO1"><block type="text_print" id="mz_sl_print"><value name="TEXT"><shadow type="text" id="mz_sl_text"><field name="TEXT">Maziwa AI: Stop Loss reached. Session stopped.</field></shadow></value></block></statement>
-                    <value name="IF2"><block type="logic_compare" id="mz_max_trades_check"><field name="OP">GTE</field><value name="A"><block type="variables_get" id="mz_trades_read"><field name="VAR" id="mz_trades">Trades</field></block></value><value name="B"><block type="variables_get" id="mz_max_trades_read_gate"><field name="VAR" id="mz_max_trades">Max Trades</field></block></value></block></value>
-                    <statement name="DO2"><block type="text_print" id="mz_max_trades_print"><value name="TEXT"><shadow type="text" id="mz_max_trades_text"><field name="TEXT">Maziwa AI: Max trades reached. Session stopped.</field></shadow></value></block></statement>
-                    <statement name="ELSE"><block type="trade_again" id="mz_trade_again"></block></statement>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </next>
-      </block>
+      <block type="math_change" id="mz_inc_tr"><field name="VAR" id="mz_trades">Trades</field><value name="DELTA"><shadow type="math_number" id="mz_inc_tr1"><field name="NUM">1</field></shadow></value>
+        <next><block type="variables_set" id="mz_post_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean" id="mz_post_sig_f"><field name="BOOL">FALSE</field></block></value>
+          <next><block type="controls_if" id="mz_res"><mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+            <value name="IF0"><block type="contract_check_result" id="mz_win"><field name="CHECK_RESULT">win</field></block></value>
+            <statement name="DO0">
+              <block type="controls_if" id="mz_recover_check"><mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                <value name="IF0"><block type="logic_compare" id="mz_rec_gt"><field name="OP">GT</field><value name="A"><block type="variables_get" id="mz_rec_gw"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="read_details" id="mz_profit_w"><field name="DETAIL_INDEX">4</field></block></value></block></value>
+                <statement name="DO0"><block type="variables_set" id="mz_rec_sub"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_arithmetic" id="mz_rec_sub_a"><field name="OP">MINUS</field><value name="A"><block type="variables_get" id="mz_rec_gw2"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="read_details" id="mz_profit_w2"><field name="DETAIL_INDEX">4</field></block></value></block></value></block></statement>
+                <statement name="ELSE"><block type="variables_set" id="mz_rec_zero"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_number" id="mz_rec_zero_v"><field name="NUM">0</field></block></value></block></statement>
+                <next><block type="variables_set" id="mz_ls_zero"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="VALUE"><block type="math_number" id="mz_ls_zero_v"><field name="NUM">0</field></block></value>
+                  <next><block type="controls_if" id="mz_postwin_stake"><mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                    <value name="IF0"><block type="logic_compare" id="mz_need_rec"><field name="OP">GT</field><value name="A"><block type="variables_get" id="mz_rec_gw3"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="math_number" id="mz_need_rec0"><field name="NUM">0</field></block></value></block></value>
+                    <statement name="DO0"><block type="variables_set" id="mz_set_rec_stake"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_arithmetic" id="mz_rec_stake_min"><field name="OP">MIN</field>
+                      <value name="A"><block type="math_arithmetic" id="mz_rec_stake_calc"><field name="OP">ADD</field><value name="A"><block type="variables_get" id="mz_base_gr"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value><value name="B"><block type="math_arithmetic" id="mz_rec_mul"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get" id="mz_rec_gr2"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="math_number" id="mz_rec_factor"><field name="NUM">1.25</field></block></value></block></value></block></value>
+                      <value name="B"><block type="variables_get" id="mz_max_g"><field name="VAR" id="mz_max_stake">Max Stake</field></block></value></block></value></block></statement>
+                    <statement name="ELSE"><block type="variables_set" id="mz_reset_base"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="variables_get" id="mz_base_gw"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value></block></statement>
+                  </block></next></block></next></block>
+            </statement>
+            <statement name="ELSE">
+              <block type="math_change" id="mz_inc_ls"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="DELTA"><shadow type="math_number" id="mz_inc_ls1"><field name="NUM">1</field></shadow></value>
+                <next><block type="variables_set" id="mz_add_rec"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_arithmetic" id="mz_add_rec_a"><field name="OP">ADD</field><value name="A"><block type="variables_get" id="mz_rec_gl"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="math_single" id="mz_abs_loss"><field name="OP">ABS</field><value name="NUM"><block type="read_details" id="mz_profit_l"><field name="DETAIL_INDEX">4</field></block></value></block></value></block></value>
+                  <next><block type="controls_if" id="mz_loss_cap"><mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+                    <value name="IF0"><block type="logic_compare" id="mz_ls_lt"><field name="OP">LT</field><value name="A"><block type="variables_get" id="mz_ls_gl"><field name="VAR" id="mz_loss_streak">Loss Streak</field></block></value><value name="B"><block type="variables_get" id="mz_mls_gl"><field name="VAR" id="mz_max_loss_streak">Max Loss Streak</field></block></value></block></value>
+                    <statement name="DO0"><block type="variables_set" id="mz_mg_stake"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_arithmetic" id="mz_mg_min"><field name="OP">MIN</field>
+                      <value name="A"><block type="math_arithmetic" id="mz_mg_mul"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get" id="mz_stk_gl"><field name="VAR" id="mz_stake">Stake</field></block></value><value name="B"><block type="variables_get" id="mz_mg_gl"><field name="VAR" id="mz_martingale">Martingale</field></block></value></block></value>
+                      <value name="B"><block type="variables_get" id="mz_max_gl"><field name="VAR" id="mz_max_stake">Max Stake</field></block></value></block></value></block></statement>
+                    <statement name="ELSE"><block type="variables_set" id="mz_soft_reset"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_arithmetic" id="mz_soft_min"><field name="OP">MIN</field><value name="A"><block type="math_arithmetic" id="mz_soft_calc"><field name="OP">ADD</field><value name="A"><block type="variables_get" id="mz_base_gl"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value><value name="B"><block type="math_arithmetic" id="mz_soft_mul"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get" id="mz_rec_gl2"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="math_number" id="mz_soft_f"><field name="NUM">1.1</field></block></value></block></value></block></value><value name="B"><block type="variables_get" id="mz_max_gl2"><field name="VAR" id="mz_max_stake">Max Stake</field></block></value></block></value>
+                      <next><block type="variables_set" id="mz_ls_reset"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="VALUE"><block type="math_number" id="mz_ls_reset_v"><field name="NUM">0</field></block></value></block></next></block></statement>
+                  </block></next></block></next></block>
+            </statement>
+            <next><block type="controls_if" id="mz_gate"><mutation xmlns="http://www.w3.org/1999/xhtml" elseif="2" else="1"></mutation>
+              <value name="IF0"><block type="logic_compare" id="mz_tp_c"><field name="OP">GTE</field><value name="A"><block type="total_profit" id="mz_tp_p"></block></value><value name="B"><block type="variables_get" id="mz_tp_g"><field name="VAR" id="mz_take_profit">Take Profit</field></block></value></block></value>
+              <statement name="DO0"><block type="text_print" id="mz_tp_msg"><value name="TEXT"><shadow type="text" id="mz_tp_t"><field name="TEXT">Maziwa AI: Take Profit reached. Session stopped.</field></shadow></value></block></statement>
+              <value name="IF1"><block type="logic_compare" id="mz_sl_c"><field name="OP">LTE</field><value name="A"><block type="total_profit" id="mz_sl_p"></block></value><value name="B"><block type="math_single" id="mz_sl_neg"><field name="OP">NEG</field><value name="NUM"><block type="variables_get" id="mz_sl_g"><field name="VAR" id="mz_stop_loss">Stop Loss</field></block></value></block></value></block></value>
+              <statement name="DO1"><block type="text_print" id="mz_sl_msg"><value name="TEXT"><shadow type="text" id="mz_sl_t"><field name="TEXT">Maziwa AI: Stop Loss reached. Session stopped.</field></shadow></value></block></statement>
+              <value name="IF2"><block type="logic_compare" id="mz_mt_c"><field name="OP">GTE</field><value name="A"><block type="variables_get" id="mz_tr_g"><field name="VAR" id="mz_trades">Trades</field></block></value><value name="B"><block type="variables_get" id="mz_mt_g"><field name="VAR" id="mz_max_trades">Max Trades</field></block></value></block></value>
+              <statement name="DO2"><block type="text_print" id="mz_mt_msg"><value name="TEXT"><shadow type="text" id="mz_mt_t"><field name="TEXT">Maziwa AI: Max trades reached. Session stopped.</field></shadow></value></block></statement>
+              <statement name="ELSE"><block type="trade_again" id="mz_again"></block></statement>
+            </block></next></block></next></block></next></block>
     </statement>
   </block>
-  <block type="before_purchase" id="mz_before_purchase" collapsed="true" deletable="false" x="0" y="1200">
+  <block type="before_purchase" id="mz_before" collapsed="true" deletable="false" x="0" y="1200">
     <statement name="BEFOREPURCHASE_STACK">
-      <block type="controls_if" id="mz_purchase_choice">
-        <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1" else="1"></mutation>
-        <value name="IF0"><block type="logic_compare" id="mz_is_over"><field name="OP">EQ</field><value name="A"><block type="variables_get" id="mz_dir_read_over"><field name="VAR" id="mz_direction">Trade Direction</field></block></value><value name="B"><block type="math_number" id="mz_over_code"><field name="NUM">4</field></block></value></block></value>
-        <statement name="DO0"><block type="apollo_purchase2" id="mz_buy_over"><field name="PURCHASE_LIST">DIGITOVER</field><value name="PREDICTION"><shadow type="math_number_positive" id="mz_buy_over_pred_shadow"><field name="NUM">2</field></shadow><block type="variables_get" id="mz_buy_over_pred"><field name="VAR" id="mz_prediction">Prediction</field></block></value></block></statement>
-        <value name="IF1"><block type="logic_compare" id="mz_is_under"><field name="OP">EQ</field><value name="A"><block type="variables_get" id="mz_dir_read_under"><field name="VAR" id="mz_direction">Trade Direction</field></block></value><value name="B"><block type="math_number" id="mz_under_code"><field name="NUM">5</field></block></value></block></value>
-        <statement name="DO1"><block type="apollo_purchase2" id="mz_buy_under"><field name="PURCHASE_LIST">DIGITUNDER</field><value name="PREDICTION"><shadow type="math_number_positive" id="mz_buy_under_pred_shadow"><field name="NUM">8</field></shadow><block type="variables_get" id="mz_buy_under_pred"><field name="VAR" id="mz_prediction">Prediction</field></block></value></block></statement>
-        <statement name="ELSE"><block type="apollo_purchase2" id="mz_buy_over_fallback"><field name="PURCHASE_LIST">DIGITOVER</field><value name="PREDICTION"><shadow type="math_number_positive" id="mz_buy_over_fallback_pred"><field name="NUM">2</field></shadow></value></block></statement>
+      <block type="controls_if" id="mz_buy"><mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1" else="1"></mutation>
+        <value name="IF0"><block type="logic_compare" id="mz_is_o"><field name="OP">EQ</field><value name="A"><block type="variables_get" id="mz_dir_go"><field name="VAR" id="mz_direction">Trade Direction</field></block></value><value name="B"><block type="math_number" id="mz_o_code"><field name="NUM">4</field></block></value></block></value>
+        <statement name="DO0"><block type="apollo_purchase2" id="mz_buy_o"><field name="PURCHASE_LIST">DIGITOVER</field><value name="PREDICTION"><shadow type="math_number_positive" id="mz_bo_s"><field name="NUM">2</field></shadow><block type="variables_get" id="mz_bo_g"><field name="VAR" id="mz_prediction">Prediction</field></block></value></block></statement>
+        <value name="IF1"><block type="logic_compare" id="mz_is_u"><field name="OP">EQ</field><value name="A"><block type="variables_get" id="mz_dir_gu"><field name="VAR" id="mz_direction">Trade Direction</field></block></value><value name="B"><block type="math_number" id="mz_u_code"><field name="NUM">5</field></block></value></block></value>
+        <statement name="DO1"><block type="apollo_purchase2" id="mz_buy_u"><field name="PURCHASE_LIST">DIGITUNDER</field><value name="PREDICTION"><shadow type="math_number_positive" id="mz_bu_s"><field name="NUM">8</field></shadow><block type="variables_get" id="mz_bu_g"><field name="VAR" id="mz_prediction">Prediction</field></block></value></block></statement>
+        <statement name="ELSE"><block type="apollo_purchase2" id="mz_buy_fb"><field name="PURCHASE_LIST">DIGITOVER</field><value name="PREDICTION"><shadow type="math_number_positive" id="mz_bf_s"><field name="NUM">2</field></shadow></value></block></statement>
       </block>
     </statement>
   </block>

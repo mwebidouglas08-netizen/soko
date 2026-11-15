@@ -424,7 +424,7 @@
     background: linear-gradient(145deg, #071525, #030a13 78%);
     border: 1px solid #254660;
     border-radius: 6px;
-    width: min(880px, calc(100vw - 24px));
+    width: min(880px, calc(100% - 24px));
     overflow: hidden;
     box-shadow:
         0 22px 68px #000c,
@@ -692,7 +692,7 @@
         radial-gradient(circle at 92% 8%, #2563eb2e, #0000 30%), linear-gradient(#f8fbff 0%, #edf4fd 100%);
     border: 0.1rem solid #ffffffb3;
     border-radius: 2rem;
-    width: min(760px, calc(100vw - 1.2rem));
+    width: min(760px, calc(100% - 1.2rem));
     overflow: hidden;
     box-shadow:
         0 2.4rem 5.2rem #0f172a2e,

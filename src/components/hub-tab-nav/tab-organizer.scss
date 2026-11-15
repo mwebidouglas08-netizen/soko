@@ -17,7 +17,7 @@
 }
 
 .tab-organizer {
-    width: min(515px, calc(100vw - 32px));
+    width: min(515px, calc(100% - 32px));
     max-height: min(86vh, 780px);
     display: flex;
     flex-direction: column;

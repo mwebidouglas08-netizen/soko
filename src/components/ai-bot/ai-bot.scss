@@ -406,7 +406,7 @@
 
 @media (max-width: 480px) {
     .ai-dock { left: 0.9rem; bottom: 0.9rem; }
-    .ai-panel { width: calc(100vw - 1.8rem); max-height: 78vh; }
+    .ai-panel { width: calc(100% - 1.8rem); max-height: 78vh; }
     .ai-stats { grid-template-columns: repeat(3, 1fr); }
 }
 

@@ -4,11 +4,10 @@ import classNames from 'classnames';
 import { useStore } from '@/hooks/useStore';
 import { Localize, localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
+import { DBOT_TABS } from '@/constants/bot-contents';
 import Text from '@/components/shared_ui/text';
 import Button from '@/components/shared_ui/button';
 import './bot-monitor.scss';
-
-type TContractStage = typeof contract_stages;
 
 const formatCurrency = (amount: number, currency: string): string => {
     const sign = amount >= 0 ? '+' : '';
@@ -83,7 +82,7 @@ const BotMonitor = observer(() => {
                         text={localize('Back to Builder')}
                         secondary
                         onClick={() => {
-                            dashboard.setActiveTab(dashboard.BOT_BUILDER);
+                            dashboard.setActiveTab(DBOT_TABS.BOT_BUILDER);
                         }}
                     />
                     <Button

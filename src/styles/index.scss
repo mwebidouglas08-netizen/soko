@@ -122,8 +122,17 @@ body {
    app-root.tsx renders a fragment, not `.app-root` — and `#root .layout`
    outranks the bare `.layout` rule in layout.scss whatever order the bundler
    emits the stylesheets in. */
+/* Horizontal viewport insets are deliberately NOT applied to the shell.
+   `env(safe-area-inset-left/right)` only exists for a cutout that intrudes on a
+   SIDE (landscape), but several Android WebViews and iOS standalone shells
+   report a non-zero LEFT inset in portrait. Padding the shell there shifts the
+   entire app to the right and leaves a blank strip down the left edge, so the
+   app no longer fills the screen. Leaving the shell unpadded horizontally is
+   what guarantees it sits flush with both edges on every device; the vertical
+   notch inset is still reserved on `.layout` below. */
 #root {
-    padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+    padding-left: 0;
+    padding-right: 0;
 }
 
 #root .layout {

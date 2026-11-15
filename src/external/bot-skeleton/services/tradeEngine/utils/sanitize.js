@@ -13,13 +13,13 @@ export const expectPositiveInteger = (num, msg) => {
 };
 
 const expectOptions = options => {
-    const { symbol, contractTypes } = options;
+    const { symbol, contractTypes } = options || {};
 
     if (!symbol) {
         throw createError('OptionError', localize('Underlying market is not selected'));
     }
 
-    if (!contractTypes[0]) {
+    if (!Array.isArray(contractTypes) || !contractTypes[0]) {
         throw createError('OptionError', localize('Contract type is not selected'));
     }
 };

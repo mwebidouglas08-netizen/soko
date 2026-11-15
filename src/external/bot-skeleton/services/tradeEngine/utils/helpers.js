@@ -126,8 +126,10 @@ export const getLastDigit = tick => {
 };
 
 export const getLastDigitForList = (tick, pip_size = 0) => {
+    if (tick === undefined || tick === null) return NaN;
     const value = Number(tick).toFixed(pip_size);
-    return value[value.length - 1];
+    if (!value.length) return NaN;
+    return Number(value[value.length - 1]);
 };
 
 const getBackoffDelayInMs = (error_obj, delay_index) => {

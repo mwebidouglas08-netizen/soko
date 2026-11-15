@@ -154,11 +154,14 @@ export default Engine =>
         checkLastDigitsCondition(digit_count, condition, compare_value = 0) {
             const parsed_compare_value = Number.parseInt(compare_value, 10);
             const numeric_compare_value = Number.isNaN(parsed_compare_value) ? 0 : parsed_compare_value;
+            const parsed_digit_count = Number.parseInt(digit_count, 10);
+            const count = Number.isFinite(parsed_digit_count) ? Math.max(0, parsed_digit_count) : 0;
 
             return new Promise(resolve =>
                 this.getLastDigitList()
                     .then(digit_list => {
-                        const digits = digit_list.slice(-digit_count);
+                        const list = Array.isArray(digit_list) ? digit_list : [];
+                        const digits = count > 0 ? list.slice(-count) : [];
 
                         if (!digits.length) {
                             resolve(false);

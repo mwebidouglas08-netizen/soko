@@ -23,6 +23,8 @@ window.Blockly.Blocks.math_arithmetic = {
                         ['*', 'MULTIPLY'],
                         ['/', 'DIVIDE'],
                         ['^', 'POWER'],
+                        ['min', 'MIN'],
+                        ['max', 'MAX'],
                     ],
                 },
                 {
@@ -59,29 +61,40 @@ window.Blockly.Blocks.math_arithmetic = {
 };
 
 window.Blockly.JavaScript.javascriptGenerator.forBlock.math_arithmetic = block => {
+    const generator = window.Blockly.JavaScript.javascriptGenerator;
     const operators = {
-        ADD: ['+', window.Blockly.JavaScript.javascriptGenerator.ORDER_ADDITION],
-        MINUS: ['-', window.Blockly.JavaScript.javascriptGenerator.ORDER_SUBTRACTION],
-        MULTIPLY: ['*', window.Blockly.JavaScript.javascriptGenerator.ORDER_MULTIPLICATION],
-        DIVIDE: ['/', window.Blockly.JavaScript.javascriptGenerator.ORDER_DIVISION],
-        POWER: [null, window.Blockly.JavaScript.javascriptGenerator.ORDER_COMMA], // Handle power separately.
+        ADD: ['+', generator.ORDER_ADDITION],
+        MINUS: ['-', generator.ORDER_SUBTRACTION],
+        MULTIPLY: ['*', generator.ORDER_MULTIPLICATION],
+        DIVIDE: ['/', generator.ORDER_DIVISION],
+        POWER: [null, generator.ORDER_COMMA],
+        MIN: [null, generator.ORDER_FUNCTION_CALL],
+        MAX: [null, generator.ORDER_FUNCTION_CALL],
     };
 
-    const tuple = operators[block.getFieldValue('OP')];
+    const op = block.getFieldValue('OP');
+    const tuple = operators[op] || operators.ADD;
     const operator = tuple[0];
     const order = tuple[1];
 
-    const argument0 = window.Blockly.JavaScript.javascriptGenerator.valueToCode(block, 'A', order) || '0';
-    const argument1 = window.Blockly.JavaScript.javascriptGenerator.valueToCode(block, 'B', order) || '0';
+    const argument0 = generator.valueToCode(block, 'A', order) || '0';
+    const argument1 = generator.valueToCode(block, 'B', order) || '0';
 
-    let code;
-
-    // Power in JavaScript requires a special case since it has no operator.
-    if (!operator) {
-        code = `Math.pow(${argument0}, ${argument1})`;
-        return [code, window.Blockly.JavaScript.javascriptGenerator.ORDER_FUNCTION_CALL];
+    if (op === 'POWER') {
+        return [`Math.pow(${argument0}, ${argument1})`, generator.ORDER_FUNCTION_CALL];
     }
 
-    code = `${argument0} ${operator} ${argument1}`;
-    return [code, order];
+    if (op === 'MIN') {
+        return [`Math.min(${argument0}, ${argument1})`, generator.ORDER_FUNCTION_CALL];
+    }
+
+    if (op === 'MAX') {
+        return [`Math.max(${argument0}, ${argument1})`, generator.ORDER_FUNCTION_CALL];
+    }
+
+    if (!operator) {
+        return [`Math.pow(${argument0}, ${argument1})`, generator.ORDER_FUNCTION_CALL];
+    }
+
+    return [`${argument0} ${operator} ${argument1}`, order];
 };

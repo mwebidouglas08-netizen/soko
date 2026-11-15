@@ -298,11 +298,28 @@
 // logo + wordmark + chat) plus the auth buttons overflow the 390px viewport
 // and clip "Sign up". Shrink to fit: hide the wordmark and chat bubble, tighten
 // the auth-button margins, and let the left block shrink instead of overflowing.
-@media (max-width: 440px) {
-    .deriv-wrapper {
-        .deriv-wrapper__left {
+@media (max-width: 640px) {
+    .app-header {
+        width: 100%;
+        max-width: 100vw;
+        padding-inline: 0.4rem;
+        box-sizing: border-box;
+
+        .deriv-wrapper,
+        .deriv-wrapper__left,
+        .deriv-wrapper__right {
             min-width: 0;
+            max-width: 100%;
+        }
+
+        .deriv-wrapper__left {
+            flex: 1 1 auto;
             overflow: hidden;
+            gap: 0.2rem;
+        }
+
+        .deriv-wrapper__right {
+            flex: 0 0 auto;
         }
     }
 
@@ -315,19 +332,23 @@
     }
 
     .auth-actions {
-        gap: 0.4rem;
+        gap: 0.3rem;
+        padding-block: 0.4rem;
         button {
             margin-inline-end: 0;
             font-size: 1.2rem;
-            padding-inline: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            min-height: 3rem;
+            height: auto;
+            white-space: nowrap;
         }
     }
 
     .account-switcher {
         &__item {
             .deriv-account-switcher-item {
-                padding: 0.4rem 0.8rem;
-                
+                padding: 0.4rem 0.6rem;
+
                 &__detail {
                     .deriv-account-switcher-item__currency {
                         font-size: 1.2rem;

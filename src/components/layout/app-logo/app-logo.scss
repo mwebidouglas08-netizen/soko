@@ -91,8 +91,15 @@
     // here to avoid crowding. (The mobile drawer header still shows the name.)
     &--mobile {
         .app-header__logo {
-            padding-inline-start: 0.8rem;
-            padding-inline-end: 0.8rem;
+            padding-inline-start: 0.4rem;
+            padding-inline-end: 0.4rem;
+            border-inline-end: none;
+            height: 28px;
+        }
+
+        .app-header__logo-img {
+            max-width: 120px;
+            height: 24px;
         }
 
         .app-header__logo-text {

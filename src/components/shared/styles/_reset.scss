@@ -113,6 +113,24 @@ html {
     font-size: 10px;
 }
 
+@media (max-width: 768px) {
+    html {
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 480px) {
+    html {
+        font-size: 8px;
+    }
+}
+
+@media (max-width: 360px) {
+    html {
+        font-size: 7.5px;
+    }
+}
+
 body {
     line-height: 1;
     height: 100%;

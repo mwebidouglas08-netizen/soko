@@ -49,15 +49,16 @@ html, body {
     min-height: 100vh;
     overflow-x: hidden;
 }
+img, svg {
+    max-width: 100%;
+}
 @media (max-width: 768px) {
-    html { font-size: 16px; }
-    body { font-size: 16px; }
+    body { font-size: 1.5rem; }
     .bot {
-        --bot-content-width: 100vw;
-        --bot-content-height: calc(100dvh - 120px);
+        --bot-content-width: 100%;
+        --bot-content-height: calc(100dvh - 12rem);
     }
 }
 @media (max-width: 480px) {
-    html { font-size: 16px; }
-    body { font-size: 16px; }
+    body { font-size: 1.5rem; }
 }

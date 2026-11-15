@@ -956,32 +956,46 @@
    balance is always fully visible. */
 @media (max-width: 640px) {
     .acc-info {
-        padding: 6px 0.8rem;
+        padding: 4px 0.4rem;
         max-width: 100%;
         min-width: 0;
+        gap: 0.2rem;
 
         &__content {
             min-width: 0;
+            margin-inline-start: 0.4rem;
         }
 
         &__balance {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             white-space: nowrap;
+            line-height: 1.2;
+        }
+
+        &__account-type {
+            font-size: 1rem;
         }
 
         &__currency-icon {
-            width: 1.9rem;
-            height: 1.9rem;
-            margin-right: 0.5rem;
+            width: 1.8rem;
+            height: 1.8rem;
+            margin-right: 0.4rem;
+        }
+
+        &__select-arrow {
+            transform: scale(0.9);
         }
     }
 
     .currency-switch-select-wrapper {
-        padding-inline-end: 0.4rem;
+        padding-inline-end: 0.2rem;
     }
 
     .currency-switch-select {
-        min-width: 5.2rem;
-        padding: 0 2.2rem 0 0.8rem;
+        min-width: 4.8rem;
+        height: 2.8rem;
+        font-size: 1.1rem;
+        padding: 0 2rem 0 0.6rem;
+        background-position: calc(100% - 1.2rem) 55%, calc(100% - 0.8rem) 55%;
     }
 }

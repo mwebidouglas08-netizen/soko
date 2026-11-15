@@ -215,7 +215,8 @@
         transition:
             transform 0.3s ease,
             opacity 0.25s linear;
-        width: 320px;
+        width: min(320px, calc(100% - 1.6rem));
+        max-width: calc(100% - 1.6rem);
         top: 50px;
         right: unset;
         inset-inline-end: 0;

@@ -464,7 +464,7 @@
     /* ------------------------- running chips ------------------------- */
     &__chips {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
         gap: 0.8rem;
 
         > div {
@@ -710,7 +710,7 @@
     /* --------------------------- scoreboard --------------------------- */
     &__scoreboard {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
         border: 1px solid rgb(0 196 224 / 24%);
         border-radius: 1rem;
         background: #021226;

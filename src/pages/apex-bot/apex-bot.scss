@@ -13,7 +13,7 @@
 .cg-status-pill--running{background:var(--cg-success-bg);border-color:var(--cg-success);color:var(--cg-success)}
 .cg-status-pill--running .cg-status-pill__dot{background:var(--cg-success)}
 .cg-top-grid{grid-template-columns:1fr;align-items:stretch;gap:.45rem;width:100%;display:grid}
-.christmas-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:.45rem;display:grid}
+.christmas-stats{grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.45rem;display:grid}
 .stat-card,.cg-panel,.recovery-mode-banner,.error-banner,.christmas-info,.trade-history,.christmas-markets{background:var(--cg-panel);border:.1rem solid var(--cg-border);border-radius:var(--cg-radius-md);box-shadow:var(--cg-shadow-sm)}
 .stat-card{gap:.15rem;min-height:5.2rem;padding:.55rem .65rem;display:grid}
 .stat-card h3{color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-weight:var(--text-weight-bold);line-height:var(--text-lh-xs);text-transform:uppercase;margin:0}

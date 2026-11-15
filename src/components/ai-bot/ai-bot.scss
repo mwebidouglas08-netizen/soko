@@ -212,7 +212,7 @@
 
 .ai-stats {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(6.4rem, 1fr));
     gap: 0.4rem;
     margin-bottom: 0.8rem;
     > div {

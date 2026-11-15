@@ -111,8 +111,8 @@ const ReactJoyrideWrapper: React.FC<IReactJoyrideWrapperProps> = ({
                     right: 'unset',
                 },
                 overlay: {
-                    height: '100vh',
-                    width: '100vw',
+                    height: '100%',
+                    width: '100%',
                 },
                 // v3 dropped options.spotlightShadow; SVG cutout takes filter instead of box-shadow.
                 spotlight: {

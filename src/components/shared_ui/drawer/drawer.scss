@@ -12,13 +12,13 @@
     &--left {
         display: flex;
         flex-direction: row-reverse;
-        right: calc(100vw - 16px);
+        right: calc(100% - 16px);
     }
 
     &--right {
         display: flex;
         flex-direction: row;
-        left: calc(100vw - 16px);
+        left: calc(100% - 16px);
     }
 
     @include mobile-or-tablet-screen {

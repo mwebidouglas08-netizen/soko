@@ -294,8 +294,8 @@ body.landing-open {
 .lp__hero-orb--1 {
     top: -160px;
     left: -140px;
-    width: 600px;
-    height: 600px;
+    width: min(600px, 100%);
+    height: min(600px, 100%);
     opacity: 0.45;
     background: radial-gradient(circle, #00aeff59, #0000 70%);
     animation: lp-orb-a 10s ease-in-out infinite alternate;
@@ -304,8 +304,8 @@ body.landing-open {
 .lp__hero-orb--2 {
     top: -80px;
     right: -100px;
-    width: 450px;
-    height: 450px;
+    width: min(450px, 90%);
+    height: min(450px, 90%);
     opacity: 0.22;
     background: radial-gradient(circle, #ff1a8040, #0000 70%);
     animation: lp-orb-b 12s ease-in-out infinite alternate;
@@ -314,8 +314,8 @@ body.landing-open {
 .lp__hero-orb--3 {
     bottom: 0;
     left: 40%;
-    width: 300px;
-    height: 300px;
+    width: min(300px, 70%);
+    height: min(300px, 70%);
     opacity: 0.18;
     background: radial-gradient(circle, #34d39940, #0000 70%);
     animation: lp-orb-c 9s ease-in-out infinite alternate;
@@ -629,7 +629,7 @@ body.landing-open {
 /* Stats */
 .lp__stats {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
     gap: 14px;
     max-width: 1160px;
     margin: 0 auto;
@@ -1232,23 +1232,23 @@ body.landing-open {
     }
 
     .lp__steps {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
     }
 
     .lp__features {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
     }
 
     .lp__reviews {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
     }
 
     .lp__carousel-page {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
     }
 
     .lp__stats {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
     }
 
     .lp__section {

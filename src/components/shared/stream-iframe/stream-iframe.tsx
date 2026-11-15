@@ -42,7 +42,10 @@ const StreamIframe = ({
     return (
         <div className={clsx('stream__wrapper', is_loading && 'stream__wrapper--is-loading')}>
             {is_loading && (
-                <Skeleton.Square height={`calc(100vw * ${0.6625})`} style={{ marginTop: isMobile ? '35px' : '15px' }} />
+                <Skeleton.Square
+                    width='100%'
+                    style={{ aspectRatio: '100 / 66.25', marginTop: isMobile ? '35px' : '15px' }}
+                />
             )}
             <iframe
                 allowFullScreen={false}

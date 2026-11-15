@@ -374,8 +374,13 @@
             #020a16 url('../../assets/dashboard-bg-phone.png') center top / cover no-repeat;
 
         &__hero {
-            min-height: calc(100dvh - 6.4rem);
-            padding: 2.4rem 1.4rem 2rem;
+            /* Was `calc(100dvh - 6.4rem)`: on a 390x844 phone that made the hero
+               ~780px tall with its content pinned to the top, so roughly 500px of
+               empty background sat under the quote and every launcher card started
+               below the fold — the page read as unfilled. Size the hero to its
+               content and let the cards follow it immediately. */
+            min-height: 0;
+            padding: 1.6rem 1.4rem 1.2rem;
             justify-content: flex-start;
         }
 
@@ -471,4 +476,33 @@
 @keyframes lp-card-pulse {
     0%, to { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.1); opacity: 0.9; }
+}
+
+/* ---------------------------------------------------------------------------
+   Phone readability pass.
+
+   The phone block above compressed this view to fit the fold, leaving the
+   kicker at 8.5px and card helper text at 12.5px on a 390px screen — below the
+   point where text reads as clearly visible. These are the medium sizes: the
+   hierarchy is unchanged and every value still fits inside the card gutters, so
+   nothing re-wraps or clips.
+   --------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+    .launchpad {
+        &__kicker { font-size: 1.05rem; letter-spacing: 0.16em; }
+        &__greeting { font-size: 2.25rem; }
+        &__quote { font-size: 1.6rem; }
+        &__card { padding: 1.5rem 1.5rem 1.4rem; }
+        &__card-top { margin-bottom: 1.1rem; }
+        &__card-num { min-width: 2.9rem; height: 2.1rem; font-size: 1.15rem; }
+        &__card-icon {
+            width: 4.8rem;
+            height: 4.8rem;
+            svg { width: 2.4rem; height: 2.4rem; }
+        }
+        &__card-title { font-size: 1.85rem; }
+        &__card-subtitle { font-size: 1.4rem; line-height: 1.55; }
+        &__card-cta { font-size: 1.25rem; }
+        &__card-arrow { width: 3.4rem; height: 3.4rem; }
+    }
 }

@@ -84,208 +84,218 @@
             })();
         </script>
         <style>
-            html, body {
-                margin: 0;
-                min-height: 100%;
-                background: #030712;
-            }
-            body { min-height: 100vh; }
-            #root { min-height: 100vh; }
+            /* ------------------------------------------------------------------
+               Initialization screen — first paint, before the bundle evaluates.
+               Deliberately no photographs and no large blurred filters: it has to
+               render in the first frame on a mid-range phone. Depth comes from
+               layered radial gradients and border-only shapes. The palette is the
+               hub shell's own — navy #040b16, teal #64e1f3, warm gold #d8b45a.
+               ------------------------------------------------------------------ */
+            html, body { margin: 0; min-height: 100%; background: #040b16; }
+            body { min-height: 100vh; min-height: 100dvh; }
+            #root { min-height: 100vh; min-height: 100dvh; }
 
             #boot-splash {
                 position: fixed;
                 inset: 0;
                 z-index: 2147483000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+                display: grid;
+                place-items: center;
+                padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
                 box-sizing: border-box;
                 overflow: hidden;
-                font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
-                color: #f8fafc;
-                background:
-                    radial-gradient(1200px 600px at 10% -10%, rgba(99,102,241,0.35), transparent 60%),
-                    radial-gradient(900px 500px at 110% 110%, rgba(34,211,238,0.22), transparent 55%),
-                    linear-gradient(180deg, rgba(2,6,23,0.55), rgba(2,6,23,0.82)),
-                    url('/loader.jpg') center/cover no-repeat fixed;
                 isolation: isolate;
-            }
-            #boot-splash::before {
-                content: '';
-                position: absolute;
-                inset: -20%;
+                font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+                color: #e8eefc;
                 background:
-                    conic-gradient(from 180deg at 50% 50%, rgba(99,102,241,0.18), rgba(34,211,238,0.12), rgba(99,102,241,0.18));
-                filter: blur(60px);
-                opacity: 0.55;
-                animation: bootAurora 14s ease-in-out infinite alternate;
-                z-index: 0;
+                    radial-gradient(120% 78% at 50% -12%, #0d3b4a 0%, #061420 46%, #040b16 76%),
+                    #040b16;
             }
             #boot-splash::after {
                 content: '';
                 position: absolute;
                 inset: 0;
-                background:
-                    linear-gradient(to bottom, rgba(3,7,18,0.15) 0%, rgba(3,7,18,0.35) 45%, rgba(3,7,18,0.75) 100%),
-                    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.06), transparent 45%);
-                pointer-events: none;
                 z-index: 0;
+                pointer-events: none;
+                background:
+                    radial-gradient(58% 42% at 50% 40%, rgba(100,225,243,0.10), transparent 72%),
+                    linear-gradient(180deg, rgba(2,6,16,0.55), rgba(2,6,16,0) 30%, rgba(2,6,16,0.78));
+            }
+            .boot-grid {
+                position: absolute;
+                inset: -1px;
+                z-index: 0;
+                pointer-events: none;
+                background-image:
+                    linear-gradient(rgba(148,197,224,0.055) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(148,197,224,0.055) 1px, transparent 1px);
+                background-size: 46px 46px;
+                -webkit-mask-image: radial-gradient(66% 56% at 50% 44%, #000 0%, transparent 78%);
+                mask-image: radial-gradient(66% 56% at 50% 44%, #000 0%, transparent 78%);
             }
             .boot-grain {
                 position: absolute;
                 inset: 0;
-                opacity: 0.05;
-                background-image: radial-gradient(rgba(255,255,255,0.7) 0.5px, transparent 0.5px);
-                background-size: 3px 3px;
-                mix-blend-mode: soft-light;
-                pointer-events: none;
                 z-index: 0;
+                opacity: 0.035;
+                pointer-events: none;
+                background-image: radial-gradient(rgba(255,255,255,0.9) 0.5px, transparent 0.5px);
+                background-size: 3px 3px;
             }
             .boot-shell {
                 position: relative;
                 z-index: 1;
-                width: min(92vw, 640px);
+                width: min(88vw, 420px);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
                 text-align: center;
-                padding: clamp(20px, 4vw, 36px) clamp(16px, 3vw, 28px);
-                border-radius: 28px;
-                background: linear-gradient(180deg, rgba(15,23,42,0.28), rgba(15,23,42,0.12));
-                border: 1px solid rgba(255,255,255,0.12);
-                box-shadow: 0 30px 80px rgba(2,6,23,0.45), inset 0 1px 0 rgba(255,255,255,0.12);
-                backdrop-filter: blur(18px) saturate(140%);
-                -webkit-backdrop-filter: blur(18px) saturate(140%);
-                animation: bootRise 0.9s cubic-bezier(0.22,1,0.36,1) both;
             }
-            .boot-logo-wrap {
+            .boot-mark {
                 position: relative;
-                width: clamp(64px, 16vw, 88px);
-                height: clamp(64px, 16vw, 88px);
-                margin: 0 auto 18px;
+                width: 86px;
+                height: 86px;
+                margin: 0 0 22px;
+                display: grid;
+                place-items: center;
+                animation: bootRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
             }
-            .boot-ring, .boot-ring-inner {
+            .boot-mark-ring {
                 position: absolute;
                 inset: 0;
                 border-radius: 50%;
-                border: 1px solid rgba(99,102,241,0.55);
-                box-shadow: 0 0 24px rgba(99,102,241,0.25);
-                animation: bootSpin 18s linear infinite;
+                border: 1px solid rgba(216,180,90,0.45);
+                box-shadow: 0 0 26px rgba(100,225,243,0.10), inset 0 0 22px rgba(100,225,243,0.06);
             }
-            .boot-ring-inner {
-                inset: 7px;
-                border-color: rgba(34,211,238,0.45);
-                box-shadow: 0 0 20px rgba(34,211,238,0.2);
-                animation-direction: reverse;
-                animation-duration: 14s;
+            .boot-mark-ring--2 {
+                inset: 11px;
+                border-style: dashed;
+                border-color: rgba(100,225,243,0.38);
+                animation: bootSpin 16s linear infinite;
             }
-            .boot-logo {
+            .boot-mark-diamond {
+                width: 26px;
+                height: 26px;
+                border: 1px solid rgba(216,180,90,0.85);
+                transform: rotate(45deg);
+                box-shadow: 0 0 18px rgba(216,180,90,0.35);
+            }
+            .boot-mark-core {
                 position: absolute;
-                inset: 12px;
-                width: calc(100% - 24px);
-                height: calc(100% - 24px);
+                width: 7px;
+                height: 7px;
                 border-radius: 50%;
-                object-fit: cover;
-                border: 1px solid rgba(255,255,255,0.18);
-                box-shadow: 0 10px 30px rgba(2,6,23,0.45);
-                animation: bootPulse 4.5s ease-in-out infinite;
+                background: #64e1f3;
+                box-shadow: 0 0 16px rgba(100,225,243,0.85);
+                animation: bootPulse 2.6s ease-in-out infinite;
+            }
+            .boot-kicker {
+                margin-bottom: 12px;
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.34em;
+                text-transform: uppercase;
+                color: #7fa3bd;
+                animation: bootRise 0.6s 0.06s cubic-bezier(0.22, 1, 0.36, 1) both;
             }
             .boot-brand {
                 display: flex;
-                justify-content: center;
                 align-items: baseline;
-                gap: 0.35em;
-                flex-wrap: wrap;
-                margin-bottom: 10px;
-                letter-spacing: -0.03em;
+                gap: 0.28em;
                 line-height: 0.95;
+                letter-spacing: -0.02em;
+                animation: bootRise 0.6s 0.13s cubic-bezier(0.22, 1, 0.36, 1) both;
             }
-            .boot-brand-main {
-                font-size: clamp(2.2rem, 8vw, 4.6rem);
-                font-weight: 900;
-                background: linear-gradient(135deg, #818cf8 0%, #6366f1 45%, #22d3ee 100%);
-                -webkit-background-clip: text;
-                background-clip: text;
-                color: transparent;
-                filter: drop-shadow(0 0 18px rgba(99,102,241,0.25));
+            .boot-brand-main,
+            .boot-brand-accent { font-size: clamp(2rem, 8.5vw, 2.9rem); font-weight: 800; }
+            .boot-brand-main { color: #ffffff; }
+            .boot-brand-accent { color: #d8b45a; }
+            .boot-rule {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                width: min(76%, 260px);
+                margin: 16px 0 14px;
+                animation: bootRise 0.6s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
             }
-            .boot-brand-accent {
-                font-size: clamp(2.2rem, 8vw, 4.6rem);
-                font-weight: 900;
-                color: #e0f2fe;
-                text-shadow: 0 0 22px rgba(34,211,238,0.25);
+            .boot-rule::before,
+            .boot-rule::after {
+                content: '';
+                flex: 1;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(216,180,90,0.5));
             }
-            .boot-kicker {
-                font-size: 0.72rem;
-                letter-spacing: 0.28em;
-                text-transform: uppercase;
-                color: #c7d2fe;
-                font-weight: 700;
-                margin-bottom: 8px;
+            .boot-rule::after { background: linear-gradient(90deg, rgba(216,180,90,0.5), transparent); }
+            .boot-rule i {
+                width: 5px;
+                height: 5px;
+                transform: rotate(45deg);
+                background: #d8b45a;
+                opacity: 0.9;
             }
             .boot-tagline {
-                font-size: clamp(1.05rem, 2.8vw, 1.55rem);
-                line-height: 1.35;
-                color: #f8fafc;
-                font-weight: 600;
-                max-width: 28ch;
-                margin: 0 auto 22px;
+                margin: 0 0 26px;
+                max-width: 30ch;
+                font-size: 13px;
+                line-height: 1.6;
+                color: #a7bdd1;
                 text-wrap: balance;
+                animation: bootRise 0.6s 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
             }
             .boot-progress {
-                width: min(100%, 420px);
-                height: 6px;
-                margin: 0 auto 10px;
+                width: 100%;
+                height: 2px;
                 border-radius: 999px;
-                background: rgba(255,255,255,0.08);
+                background: rgba(148,197,224,0.16);
                 overflow: hidden;
-                border: 1px solid rgba(255,255,255,0.08);
+                animation: bootRise 0.6s 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
             }
             .boot-progress-fill {
+                display: block;
                 height: 100%;
-                width: 35%;
+                width: 6%;
                 border-radius: inherit;
-                background: linear-gradient(90deg, #6366f1, #22d3ee, #818cf8);
-                background-size: 200% 100%;
-                box-shadow: 0 0 18px rgba(99,102,241,0.45);
-                animation: bootLoad 2.2s ease-in-out infinite, bootShimmer 3s linear infinite;
+                background: linear-gradient(90deg, #d8b45a, #64e1f3);
+                box-shadow: 0 0 12px rgba(100,225,243,0.45);
+                animation: bootFill 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             }
             .boot-status {
-                font-size: 0.78rem;
-                color: #94a3b8;
-                letter-spacing: 0.08em;
+                margin-top: 12px;
+                font-size: 10.5px;
+                font-weight: 600;
+                letter-spacing: 0.22em;
                 text-transform: uppercase;
-                font-weight: 700;
+                color: #6d8aa3;
+                animation: bootRise 0.6s 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
             }
-            .boot-status strong {
-                color: #67e8f9;
-                text-transform: none;
-                letter-spacing: 0.02em;
-                font-weight: 700;
+            .boot-status strong { color: #9fd9e6; font-weight: 700; }
+            .boot-cursor {
+                display: inline-block;
+                width: 1px;
+                height: 1em;
+                margin-left: 6px;
+                vertical-align: -2px;
+                background: #64e1f3;
+                animation: bootBlink 1.05s steps(2, start) infinite;
             }
-            #boot-splash.boot-splash--out {
-                opacity: 0;
-                visibility: hidden;
-                transition: opacity 0.5s ease, visibility 0.5s ease;
-            }
-
-            @keyframes bootRise { from { opacity: 0; transform: translateY(18px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
-            @keyframes bootAurora { from { transform: translate3d(-2%, -1%, 0) scale(1); } to { transform: translate3d(2%, 2%, 0) scale(1.08); } }
+            @keyframes bootFill { from { width: 6%; } to { width: 92%; } }
             @keyframes bootSpin { to { transform: rotate(360deg); } }
-            @keyframes bootPulse { 0%,100% { transform: scale(1); box-shadow: 0 10px 30px rgba(2,6,23,0.45); } 50% { transform: scale(1.03); box-shadow: 0 14px 36px rgba(99,102,241,0.25); } }
-            @keyframes bootLoad { 0% { transform: translateX(-120%); } 50% { transform: translateX(10%); } 100% { transform: translateX(220%); } }
-            @keyframes bootShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
-
-            @media (max-height: 700px) {
-                .boot-shell { padding: 18px 16px; border-radius: 22px; }
-                .boot-tagline { margin-bottom: 16px; }
-                .boot-logo-wrap { margin-bottom: 12px; }
-            }
-            @media (max-width: 420px) {
-                .boot-shell { width: 100%; border-radius: 22px; }
-                .boot-kicker { letter-spacing: 0.2em; }
-            }
+            @keyframes bootPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.82); } }
+            @keyframes bootBlink { 50% { opacity: 0; } }
+            @keyframes bootRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
             @media (prefers-reduced-motion: reduce) {
-                #boot-splash *, #boot-splash::before { animation: none !important; transition: none !important; }
-                .boot-progress-fill { transform: none; width: 45%; }
+                .boot-mark,
+                .boot-mark-ring--2,
+                .boot-mark-core,
+                .boot-kicker,
+                .boot-brand,
+                .boot-rule,
+                .boot-tagline,
+                .boot-progress,
+                .boot-status,
+                .boot-cursor { animation: none !important; }
+                .boot-progress-fill { animation: none !important; width: 70%; }
             }
         </style>
     </head>
@@ -294,21 +304,23 @@
         <div id="popup_root" class="popup-root"></div>
         <div id="root"></div>
         <div id="boot-splash" role="status" aria-label="Loading TradingHubs">
+            <div class="boot-grid" aria-hidden="true"></div>
             <div class="boot-grain" aria-hidden="true"></div>
             <div class="boot-shell">
-                <div class="boot-logo-wrap">
-                    <div class="boot-ring"></div>
-                    <div class="boot-ring-inner"></div>
-                    <img class="boot-logo" src="/loader.jpg" alt="" />
+                <div class="boot-mark" aria-hidden="true">
+                    <span class="boot-mark-ring"></span>
+                    <span class="boot-mark-ring boot-mark-ring--2"></span>
+                    <span class="boot-mark-diamond"></span>
+                    <span class="boot-mark-core"></span>
                 </div>
                 <div class="boot-kicker">Precision Trading Workspace</div>
                 <div class="boot-brand" aria-label="TradingHubs">
-                    <span class="boot-brand-main">TRADING</span>
-                    <span class="boot-brand-accent">HUBS</span>
+                    <span class="boot-brand-main">TRADING</span><span class="boot-brand-accent">HUBS</span>
                 </div>
-                <p class="boot-tagline">Build, automate, and run trading strategies with clarity and confidence.</p>
-                <div class="boot-progress" aria-hidden="true"><div class="boot-progress-fill"></div></div>
-                <div class="boot-status">Initializing <strong id="bt-boot-status-text">Core</strong></div>
+                <div class="boot-rule" aria-hidden="true"><i></i></div>
+                <p class="boot-tagline">Build, automate and run trading strategies with clarity and confidence.</p>
+                <div class="boot-progress" aria-hidden="true"><span class="boot-progress-fill"></span></div>
+                <div class="boot-status">Initializing <strong id="bt-boot-status-text">Core</strong><span class="boot-cursor" aria-hidden="true"></span></div>
             </div>
         </div>
         <script>

@@ -76,7 +76,7 @@
 .history-time,.history-stake,.history-type,.market-price,.market-digits,.market-condition,.market-parity{color:var(--cg-text-muted);font-size:var(--text-size-xxs);font-variant-numeric:tabular-nums}
 .history-spot,.indicator,.market-parity,.markets-stat-chip{font-weight:var(--text-weight-bold);border-radius:999rem;align-items:center;width:-moz-fit-content;width:fit-content;display:inline-flex}
 .cg-empty-state{color:var(--cg-text-muted);font-size:var(--text-size-xs);text-align:center;padding:1.2rem}
-.markets-toolbar{grid-template-columns:minmax(0,1fr) minmax(20rem,34rem);align-items:center;gap:.55rem;display:grid}
+.markets-toolbar{grid-template-columns:minmax(0,1fr) minmax(min(100%, 20rem),34rem);align-items:center;gap:.55rem;display:grid}
 .markets-toolbar__stats{flex-wrap:wrap;gap:.6rem;min-width:0;display:flex}
 .markets-stat-chip{background:var(--cg-panel-alt);border:.1rem solid var(--cg-border);color:var(--cg-text-muted);font-size:var(--text-size-xxs);min-height:2.8rem;padding:.35rem .85rem}
 .markets-stat-chip--live{background:var(--cg-success-bg);border-color:var(--cg-success);color:var(--cg-success)}

@@ -162,4 +162,68 @@ export default class TradeEngine extends Balance(Purchase(Sell(OpenContract(Prop
             this.store.dispatch(proposalsReady());
         }
     }
+
+    async setSymbol(symbol) {
+        if (!symbol) return this.symbol;
+        if (symbol === this.symbol) return this.symbol;
+        this.symbol = symbol;
+        if (this.options) this.options.symbol = symbol;
+        if (this.tradeOptions) this.tradeOptions.symbol = symbol;
+        if (this.trade_option) this.trade_option = null;
+        if (this.data) this.data.proposals = [];
+        try {
+            if (this.store && this.store.dispatch) {
+                const { clearProposals } = require('./state/actions');
+                this.store.dispatch(clearProposals());
+            }
+        } catch (e) {}
+        try {
+            const { ticksService } = this.$scope || {};
+            if (ticksService && typeof ticksService.request === 'function') {
+                await ticksService.request({ symbol });
+            }
+        } catch (e) {}
+        try {
+            await this.watchTicks(symbol);
+        } catch (e) {}
+        return this.symbol;
+    }
+
+    async getVolatilitySymbols() {
+        const pick = arr => {
+            const list = [...new Set((arr || []).filter(Boolean))];
+            const open = list.filter(sym => {
+                try {
+                    const active = require('../../api/api-helpers').default?.instance?.active_symbols;
+                    return active && typeof active.isSymbolClosed === 'function' ? !active.isSymbolClosed(sym) : true;
+                } catch (e) { return true; }
+            });
+            const out = open.length ? open : list;
+            return out.length ? out : null;
+        };
+        try {
+            const ApiHelpers = require('../../api/api-helpers').default;
+            const helpers = ApiHelpers?.instance;
+            const active = helpers?.active_symbols;
+            if (active && typeof active.getAllSymbols === 'function') {
+                const all = active.getAllSymbols(false) || [];
+                const list = all
+                    .filter(s => s && s.market === 'synthetic_index' && (s.submarket === 'random_index' || s.submarket === 'continuous_indices' || /^(R_|1HZ|RDBEAR|RDBULL)/.test(s.symbol || '')))
+                    .map(s => s.symbol);
+                const picked = pick(list);
+                if (picked) return picked;
+            }
+        } catch (e) {}
+        try {
+            const { api_base } = require('../../api/api-base');
+            const symbols = api_base?.active_symbols || [];
+            const list = symbols
+                .filter(s => s && (s.market === 'synthetic_index' || /synthetic|random|volatility/i.test(s.submarket_display_name || '')))
+                .map(s => s.symbol || s.underlying_symbol)
+                .filter(sym => /^(R_|1HZ|RDBEAR|RDBULL)/.test(sym || ''));
+            const picked = pick(list);
+            if (picked) return picked;
+        } catch (e) {}
+        return ['R_10','R_25','R_50','R_75','R_100','1HZ10V','1HZ25V','1HZ50V','1HZ75V','1HZ100V','RDBEAR','RDBULL'];
+    }
 }

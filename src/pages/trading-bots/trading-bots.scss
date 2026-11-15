@@ -50,11 +50,11 @@
         gap: 1rem;
 
         @media (min-width: 561px) and (max-width: 860px) {
-            grid-template-columns: repeat(2, minmax(220px, 1fr));
+            grid-template-columns: repeat(2, minmax(min(100%, 220px), 1fr));
         }
 
         @media (min-width: 861px) {
-            grid-template-columns: repeat(3, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
         }
     }
 

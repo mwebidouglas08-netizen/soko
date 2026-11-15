@@ -13,3 +13,5 @@ import './nth_last_digit';
 import './analysis-blocks';
 import './stat';
 import './stat_list';
+
+import './maziwa_scan';

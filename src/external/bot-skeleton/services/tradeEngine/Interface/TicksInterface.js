@@ -12,6 +12,9 @@ const getTicksInterface = tradeEngine => {
         getLastDigitList: (...args) => tradeEngine.getLastDigitList(...args),
         getNthLastDigit: (...args) => tradeEngine.getNthLastDigit(...args),
         checkLastDigitsCondition: (...args) => tradeEngine.checkLastDigitsCondition(...args),
+        getVolatilitySymbols: (...args) => tradeEngine.getVolatilitySymbols(...args),
+        setSymbol: (...args) => tradeEngine.setSymbol(...args),
+        scanBestVolatilitySignal: (...args) => tradeEngine.scanBestVolatilitySignal(...args),
     };
 };
 

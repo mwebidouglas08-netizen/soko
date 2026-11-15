@@ -1139,7 +1139,9 @@ body.landing-open {
     }
 
     .lp__badge {
-        min-width: 240px;
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
     }
 
     .lp__steps {

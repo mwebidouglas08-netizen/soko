@@ -136,9 +136,9 @@
 
             // Position tooltip above the button
             &:before {
-                width: 280px !important; // Wider tooltip on mobile
-                min-width: 280px !important; // Ensure minimum width
-                max-width: 280px !important; // Ensure maximum width
+                width: min(280px, calc(100vw - 2rem)) !important; // Wider tooltip on mobile, capped to viewport
+                min-width: 0 !important;
+                max-width: calc(100vw - 2rem) !important; // Ensure maximum width
                 font-size: 12px; // Smaller font size
                 padding: 8px; // Smaller padding
                 white-space: normal !important; // Allow text to wrap

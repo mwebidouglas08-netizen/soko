@@ -10,8 +10,17 @@ const getBotInterface = tradeEngine => {
         stop: (...args) => tradeEngine.stop(...args),
         purchase: (contract_type, prediction) => tradeEngine.purchase(contract_type, prediction),
         getSymbol: () => tradeEngine.symbol,
-        getAskPrice: contract_type => Number(getProposal(contract_type, tradeEngine).ask_price),
-        getPayout: contract_type => Number(getProposal(contract_type, tradeEngine).payout),
+        setSymbol: symbol => tradeEngine.setSymbol(symbol),
+        getVolatilitySymbols: () => tradeEngine.getVolatilitySymbols(),
+        scanBestVolatilitySignal: opts => tradeEngine.scanBestVolatilitySignal(opts),
+        getAskPrice: contract_type => {
+            const p = getProposal(contract_type, tradeEngine);
+            return p && p.ask_price != null ? Number(p.ask_price) : NaN;
+        },
+        getPayout: contract_type => {
+            const p = getProposal(contract_type, tradeEngine);
+            return p && p.payout != null ? Number(p.payout) : NaN;
+        },
         getPurchaseReference: () => tradeEngine.getPurchaseReference(),
         isSellAvailable: () => tradeEngine.isSellAtMarketAvailable(),
         sellAtMarket: () => tradeEngine.sellAtMarket(),

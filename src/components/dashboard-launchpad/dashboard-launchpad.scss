@@ -152,6 +152,8 @@
 
         @media (max-width: 560px) {
             grid-template-columns: minmax(0, 1fr);
+            padding: 0;
+            gap: 1rem;
         }
     }
 

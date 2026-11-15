@@ -276,7 +276,14 @@ const RunPanel = observer(() => {
     }, [onMount, onUnmount]);
 
     React.useEffect(() => {
-        if (!isDesktop) {
+        if (isDesktop) return;
+        // Phones start with the drawer closed so the dashboard is readable —
+        // but never when a strategy is already loaded into the workspace, which
+        // is exactly the case after "Load bot" -> Bot Monitor. Collapsing it
+        // there hid the bot behind a toggle the user had to find and press.
+        const workspace = (window as any).Blockly?.derivWorkspace;
+        const loaded_blocks = workspace?.getAllBlocks?.()?.length ?? 0;
+        if (loaded_blocks === 0) {
             toggleDrawer(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

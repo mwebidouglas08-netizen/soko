@@ -27,6 +27,7 @@ const BotMonitor = observer(() => {
         run_id,
         toggleDrawer,
         stopMyBot,
+        onRunButtonClick,
         setActiveTabIndex,
         active_index,
     } = run_panel;
@@ -57,7 +58,14 @@ const BotMonitor = observer(() => {
     const handleRunStop = () => {
         if (isBotActive) {
             stopMyBot();
+            return;
         }
+        // This button used to render "Run Bot" while only the stop branch
+        // existed, so pressing it started nothing and the strategy never went
+        // live. Delegate to the run panel's own start path: it checks the login
+        // and the workspace, opens the drawer, then starts the engine (or writes
+        // the reason it refused into the Journal).
+        void onRunButtonClick?.();
     };
 
     useEffect(() => {
@@ -65,6 +73,24 @@ const BotMonitor = observer(() => {
         return () => {
             document.title = 'TradingHubs';
         };
+    }, []);
+
+    // Arriving here from "Load bot" should show the bot, not a collapsed panel.
+    // The run drawer is forced shut on phone mount (see components/run-panel),
+    // which left the user staring at an empty monitor and having to find the
+    // expand toggle before they could see the strategy's stake, TP/SL or the
+    // live contract. Open it on the Summary tab whenever a strategy is already
+    // loaded into the workspace or the bot is live.
+    useEffect(() => {
+        const blockly = (window as unknown as { Blockly?: { derivWorkspace?: { getAllBlocks?: () => unknown[] } } })
+            .Blockly;
+        const loaded_blocks = blockly?.derivWorkspace?.getAllBlocks?.()?.length ?? 0;
+        if (loaded_blocks > 0 || is_running || has_open_contract) {
+            setActiveTabIndex(0);
+            toggleDrawer(true);
+        }
+        // Mount-only: the user's own toggles must win after this.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

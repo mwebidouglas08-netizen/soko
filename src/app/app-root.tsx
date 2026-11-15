@@ -31,21 +31,22 @@ const AppRoot = () => {
     const store = useStore();
     const [booted, setBooted] = useState(false);
 
+    // Mount the shell straight away: index.html's intro is painted over it, so
+    // the app is already rendered behind the overlay and the dissolve reveals a
+    // live screen instead of a blank one.
     useEffect(() => {
-        const ready = () => {
-            if (typeof window.__hideBootSplash === 'function') {
-                window.__hideBootSplash();
-            }
-            setBooted(true);
-        };
-        if (document.readyState === 'complete') {
-            const t = window.setTimeout(ready, 1200);
-            return () => window.clearTimeout(t);
-        }
-        const onLoad = () => window.setTimeout(ready, 1200);
-        window.addEventListener('load', onLoad);
-        return () => window.removeEventListener('load', onLoad);
+        const t = window.setTimeout(() => setBooted(true), 50);
+        return () => window.clearTimeout(t);
     }, []);
+
+    // "App is on screen" signal for the intro. index.html owns the timing — it
+    // holds the splash for its minimum duration and then plays the dissolve — so
+    // this call arriving early can never cut the intro short.
+    useEffect(() => {
+        if (booted && typeof window.__hideBootSplash === 'function') {
+            window.__hideBootSplash();
+        }
+    }, [booted]);
 
     return (
         <>

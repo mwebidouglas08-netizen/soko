@@ -384,3 +384,40 @@
         }
     }
 }
+
+
+/* ---------------------------------------------------------------------------
+   Phones — header layering.
+
+   The account block lives in the right wrapper (see header.tsx). That wrapper
+   keeps its natural width, never clips (no `overflow: hidden`) and is lifted
+   above the app shell, so the Real/Demo trigger is always visible and always
+   receives the tap — nothing in the page below can cover it.
+   --------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+    .app-header {
+        position: relative;
+        z-index: 40;
+
+        .deriv-wrapper__left {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: visible;
+        }
+
+        .deriv-wrapper__right {
+            position: relative;
+            z-index: 7;
+            flex: 0 0 auto;
+            min-width: 0;
+            gap: 0.4rem;
+            overflow: visible;
+        }
+
+        .account-info {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+        }
+    }
+}

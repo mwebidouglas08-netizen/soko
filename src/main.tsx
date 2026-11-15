@@ -104,10 +104,12 @@ try {
         } else {
             setTimeout(markMounted, 0);
         }
-        // The boot splash must never outlive a successful mount.
+        // Ready signal for the intro splash. index.html enforces its own minimum
+        // on-screen time and plays the dissolve after that, so this timer is a
+        // "the bundle is alive" ping — not a deadline that can cut the intro off.
         window.setTimeout(() => {
             if (typeof window.__hideBootSplash === 'function') window.__hideBootSplash();
-        }, 2500);
+        }, 600);
     }
 } catch (err) {
     showFatalError(err instanceof Error ? err.message : String(err));

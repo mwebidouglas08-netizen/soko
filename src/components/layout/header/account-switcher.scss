@@ -1002,3 +1002,66 @@
         background-position: calc(100% - 1.2rem) 55%, calc(100% - 0.8rem) 55%;
     }
 }
+
+
+/* ---------------------------------------------------------------------------
+   Phones — make the Real/Demo switcher a real, reachable control.
+
+   On a phone this block used to live inside the header's left wrapper, which
+   carries `overflow: hidden`. Two things went wrong there: the trigger was
+   squeezed between the hamburger and the logo, so it sat under neighbouring
+   content and lost taps, and the panel it opens is absolutely positioned below
+   a 4.8rem header row — entirely outside that wrapper's box, so it was clipped
+   away and the Real/Demo tabs could not be seen or tapped at all.
+
+   The panel is `position: fixed` on phones now: a fixed element is positioned
+   against the viewport, so no ancestor's `overflow` can clip it and no sibling
+   can paint over the tabs. It is laid out as a full-width sheet under the
+   header, which is also far easier to hit with a thumb.
+   --------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+    .acc-info__wrapper {
+        position: relative;
+        z-index: 6;
+        gap: 0.4rem;
+        margin-right: 0;
+    }
+
+    .acc-info {
+        min-height: 3.4rem;
+        padding: 0.25rem 0.7rem;
+        border: 1px solid var(--general-section-1);
+        border-radius: 999px;
+        background: var(--general-main-2);
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .acc-info--interactive:active {
+        background: var(--state-hover);
+    }
+
+    .acc-dropdown {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 0px) + 5.4rem);
+        left: 0.8rem;
+        right: 0.8rem;
+        width: auto;
+        min-width: 0;
+        max-height: calc(100dvh - 6.6rem);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        z-index: 2147482500;
+        border: 1px solid var(--general-section-1);
+        border-radius: 1.4rem;
+        box-shadow: 0 26px 60px rgb(2 6 23 / 34%);
+    }
+
+    .acc-dropdown__tab {
+        padding: 1.2rem 0.8rem;
+        font-size: 1.3rem;
+    }
+
+    .acc-dropdown__account {
+        padding: 1.1rem 1.6rem;
+    }
+}

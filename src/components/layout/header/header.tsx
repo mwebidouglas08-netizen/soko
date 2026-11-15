@@ -134,24 +134,19 @@ const AppHeader = observer(() => {
         (position: 'left' | 'right' = 'right') => {
             // Show account switcher and logout when user is fully authenticated
             if (activeLoginid && !is_account_regenerating) {
-                if (position === 'left' && !isDesktop) {
-                    // For mobile left section - only account switcher
+                // The account switcher always renders in the right wrapper, on
+                // every screen size. That wrapper is a `flex: 0 0 auto` block
+                // that never clips its children, so on a phone the Real/Demo
+                // trigger stays fully visible and receives the tap. It used to
+                // be squeezed into the left wrapper (next to the hamburger and
+                // the logo), which overlapped the trigger with neighbouring
+                // content and clipped the panel it opens with `overflow: hidden`.
+                if (position === 'right') {
                     return (
                         <div className='auth-actions'>
                             <div className='account-info'>
                                 <AccountSwitcher activeAccount={activeAccount} />
                             </div>
-                        </div>
-                    );
-                } else if (position === 'right') {
-                    // For right section - transfer button (and account switcher on desktop)
-                    return (
-                        <div className='auth-actions'>
-                            {isDesktop && (
-                                <div className='account-info'>
-                                    <AccountSwitcher activeAccount={activeAccount} />
-                                </div>
-                            )}
                             <Button
                                 primary
                                 disabled={client?.is_logging_out || !authData?.currency}
@@ -240,7 +235,7 @@ const AppHeader = observer(() => {
                 <Wrapper variant='left'>
                     <MobileMenu onLogout={handleLogout} />
                     <AppLogo />
-                    {isDesktop ? <MenuItems /> : renderAccountSection('left')}
+                    {isDesktop && <MenuItems />}
                 </Wrapper>
                 <Wrapper variant='right'>
                     {renderAccountSection('right')}

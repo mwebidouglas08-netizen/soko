@@ -299,6 +299,31 @@
 // logo + wordmark + chat) plus the auth buttons overflow the 390px viewport
 // and clip "Sign up". Shrink to fit: hide the wordmark and chat bubble, tighten
 // the auth-button margins, and let the left block shrink instead of overflowing.
+/* The vendored `@deriv-com/ui` Header ships `.deriv-wrapper { width: 100% }`.
+   Inside a `justify-content: space-between` flex row that makes BOTH the left
+   and the right wrapper claim the full header width, so the left one collapses
+   to 0px and its children (hamburger + logo) spill out of the box while the
+   right one stretches across the whole bar. Measured on a 390px viewport:
+   `.deriv-wrapper__left` = 0px wide, `.deriv-wrapper__right` = 382px.
+   Neutralise the library width and let flex decide the split. */
+.app-header {
+    .deriv-wrapper {
+        width: auto;
+        min-width: 0;
+    }
+
+    .deriv-wrapper__left {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .deriv-wrapper__right {
+        flex: 0 0 auto;
+        min-width: 0;
+    }
+}
+
 @media (max-width: 640px) {
     .app-header {
         width: 100%;
@@ -315,7 +340,7 @@
 
         .deriv-wrapper__left {
             flex: 1 1 auto;
-            overflow: visible;
+            overflow: hidden;
             gap: 0.2rem;
         }
 

@@ -2,6 +2,59 @@
 // Removed IBM Plex Sans Google Font import - now using brand font from brand.config.json
 // Third-party developers can add their own font imports if needed
 
+/* ---------------------------------------------------------------------------
+   Root font scale — the single most important rule in this stylesheet.
+
+   Every size in this app (spacing, type, icons, panel widths) is expressed in
+   `rem`, and the whole design system was authored against a **10px** root font
+   (see `components/shared/styles/_reset.scss`, which declares
+   `html { font-size: 10px }`). That reset is not imported anywhere, so the
+   browser fell back to its default 16px root and every rem-based dimension
+   rendered 1.6x too large: the header overflowed, cards overlapped, and the
+   layout looked permanently "zoomed in" on phones.
+
+   Restoring the 10px base here fixes the scale globally. On narrow phones the
+   base is nudged down slightly with a fluid clamp so a 360px device still fits
+   the same content a 430px device does, without ever dropping below 9px (which
+   would make 1.2rem helper text unreadable).
+   --------------------------------------------------------------------------- */
+html {
+    font-size: 10px;
+    /* Stop iOS/Android from inflating text in landscape. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+
+    /* ---------------------------------------------------------------------
+       Shared shell metrics.
+
+       The fixed execution bar (`.controls__section`) is 6rem tall plus a 2px
+       top border, and it sits flush against the bottom of the viewport. Every
+       floating control (Risk pill, AI scanner bubble, bot dock) and every
+       scroll container has to clear it, and each one used to hard-code its own
+       guess — which is how the AI bubble ended up sitting on top of the Run
+       button. One variable, consumed everywhere, keeps them in agreement.
+       `--shell-safe-bottom` folds in the iOS home-indicator inset so nothing
+       hides behind it on a notched phone.
+       --------------------------------------------------------------------- */
+    --shell-bar-height: 6.2rem;
+    --shell-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --shell-float-gap: 1.2rem;
+    /* Distance from the viewport bottom to the first row of floating controls. */
+    --shell-float-bottom: calc(var(--shell-bar-height) + var(--shell-safe-bottom) + var(--shell-float-gap));
+}
+
+@media (max-width: 480px) {
+    html {
+        font-size: clamp(9px, 2.55vw, 10px);
+    }
+}
+
+@media (max-width: 360px) {
+    html {
+        font-size: 9px;
+    }
+}
+
 /* The bundled SmartCharts stylesheet ships `body,html{touch-action:none;margin:0}`.
    That reset is meant for a standalone chart, but here it lands on the whole
    document and disables every touch scroll gesture on mobile — the page renders
@@ -70,7 +123,17 @@ textarea {
     font: inherit;
 }
 
+/* iOS Safari zooms the whole page in when a focused form control renders below
+   16px, and never zooms back out — this is the "app is still zoomed in" symptom
+   users hit after tapping any input. Keep controls at 16px on touch-sized
+   screens; the surrounding layout is rem-based so it absorbs the difference. */
 @media (max-width: 768px) {
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+
     .bot {
         --bot-content-width: 100%;
         --bot-content-height: calc(100dvh - 12rem);

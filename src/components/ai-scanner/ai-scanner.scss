@@ -236,6 +236,15 @@
     position: fixed;
     bottom: 26px;
     right: 22px;
+
+    /* Phones: the execution bar is fixed to the viewport bottom, so the bubble
+       must sit above it. `--shell-float-bottom` is the shared metric the Risk
+       pill and bot dock also use — the old hard-coded 26px put this bubble
+       directly on top of the Run button. */
+    @media (max-width: 859px) {
+        bottom: var(--shell-float-bottom, 7.4rem);
+        right: 1.4rem;
+    }
 }
 .ai-scanner-button--pulsing .ai-scanner-button__status-dot {
     animation: 2s infinite ai-status-pulse;

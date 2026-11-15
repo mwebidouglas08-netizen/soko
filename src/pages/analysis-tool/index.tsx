@@ -266,7 +266,7 @@ const MarketCard = ({ market, view, settings, index, onOpen, selectedDigit, onLo
                     onOpen(market);
                 }
             }}
-            aria-label={`${market.displayName} ΓÇö open market detail`}
+            aria-label={`${market.displayName} — open market detail`}
         >
             <header className='pdt-card__head'>
                 <div className='pdt-card__id'>
@@ -482,8 +482,8 @@ const MarketModal = ({ market, onClose }: { market: PdtMarket | null; onClose: (
                         {status === 'CONNECTED'
                             ? 'Connected to Deriv Synthetic Index Engine'
                             : status === 'CONNECTING'
-                              ? 'Connecting to Deriv Synthetic Index EngineΓÇª'
-                              : 'Live feed reconnecting ΓÇö simulated ticks in the meantime'}
+                              ? 'Connecting to Deriv Synthetic Index Engine…'
+                              : 'Live feed reconnecting — simulated ticks in the meantime'}
                     </span>
                     {state && (
                         <div className='pdt-modal__numbers'>
@@ -609,7 +609,7 @@ const ScannerView = ({
             {view === 'overunder' && (
                 <div className='pdt-barrier'>
                     <span className='pdt-barrier__label'>
-                        OVER / UNDER BARRIER THRESHOLD ΓÇö Current Barrier: {settings.overUnderBarrier} (Over{' '}
+                        OVER / UNDER BARRIER THRESHOLD — Current Barrier: {settings.overUnderBarrier} (Over{' '}
                         {Math.floor(settings.overUnderBarrier)} / Under {Math.floor(settings.overUnderBarrier) + 1})
                     </span>
                     <div className='pdt-barrier__steps'>
@@ -649,7 +649,7 @@ const ScannerView = ({
                 <input
                     type='search'
                     className='pdt-search'
-                    placeholder='Search index (e.g. 10, 25, 100)ΓÇª'
+                    placeholder='Search index (e.g. 10, 25, 100)…'
                     aria-label='Search index'
                     value={query}
                     onChange={e => setQuery(e.target.value)}
@@ -740,7 +740,7 @@ const AnalysisToolPage = () => {
                 <div className='pdt-topbar__status'>
                     <span className={`pdt-conn pdt-conn--${status.toLowerCase()}`}>
                         <PulseDot on={status === 'CONNECTED'} />
-                        {status === 'CONNECTED' ? 'LIVE DERIV' : status === 'CONNECTING' ? 'CONNECTINGΓÇª' : 'SIMULATED'}
+                        {status === 'CONNECTED' ? 'LIVE DERIV' : status === 'CONNECTING' ? 'CONNECTING…' : 'SIMULATED'}
                     </span>
                     <button
                         type='button'
@@ -812,7 +812,7 @@ const AnalysisToolPage = () => {
 
             <HubNote tone='info'>
                 The scanner reads real Deriv tick streams and reports digit statistics with a confidence score. These
-                are historical frequencies, not predictions ΓÇö no signal guarantees a win. Nothing here places trades
+                are historical frequencies, not predictions — no signal guarantees a win. Nothing here places trades
                 on your behalf.
             </HubNote>
 

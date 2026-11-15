@@ -1017,10 +1017,12 @@ body.hub-view {
     scrollbar-color: var(--shell-border) transparent;
 
     @media (max-width: 859px) {
-        /* 10.4rem clears the fixed execution bar; the extra 1.6rem also clears
-           the floating Risk pill / AI bubble row that sits just above it, so the
-           last content on a page is never trapped under the floating controls. */
-        padding: 1.2rem 1rem 12rem;
+        /* Clear the fixed execution bar AND the floating Risk pill / AI bubble
+           row that sits above it, so the last content on a page is never
+           trapped under the floating controls. Derived from the shared shell
+           metrics rather than a magic number, so it stays correct if the bar
+           height or the iOS safe-area inset changes. */
+        padding: 1.2rem 1rem calc(var(--shell-float-bottom, 7.4rem) + 5.4rem);
     }
 }
 

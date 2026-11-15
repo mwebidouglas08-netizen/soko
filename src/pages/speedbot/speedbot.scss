@@ -22,6 +22,15 @@
 .speedbot__analysis-title{color:var(--text-prominent);font-weight:700;font-size:var(--text-size-xs);margin-bottom:8px}
 .speedbot__analysis-pattern{background:var(--general-main-1);border:1px solid var(--border-normal);color:var(--text-prominent);white-space:normal;border-radius:8px;margin-bottom:10px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-size:12px;line-height:1.4;overflow-x:auto}
 .speedbot__pattern-row{flex-wrap:wrap;align-items:center;gap:6px;display:flex}
+/* `.speedbot__pcts` had no rule at all, so its two `<em>` children stayed
+   inline and flowed into each other: on a 390px phone "Odd 100%" measured
+   286px wide and painted straight over "Even 0%". Give the pair a real flex
+   row that wraps, and keep each chip on one line. */
+.speedbot__pcts{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-left:auto}
+.speedbot__pcts em{font-style:normal;font-weight:700;font-size:var(--text-size-xs);white-space:nowrap;border-radius:999px;padding:2px 8px;border:1px solid var(--border-normal);background:var(--general-section-1)}
+.speedbot__pcts em.is-even{color:#00a651;border-color:#00a65173;background:#00a6511f}
+.speedbot__pcts em.is-odd{color:#d32f2f;border-color:#d32f2f73;background:#d32f2f1f}
+@media (max-width:600px){.speedbot__pcts{margin-left:0;flex:1 1 100%}}
 .speedbot__pattern-token{letter-spacing:.5px;border:1px solid var(--border-normal);background:var(--general-section-1);color:var(--text-prominent);border-radius:8px;justify-content:center;align-items:center;width:28px;height:28px;font-weight:800;display:inline-flex}
 .speedbot__pattern-token--even,.speedbot__pattern-token--over{color:#00a651;background:#00a6511f;border-color:#00a65173}
 .speedbot__pattern-token--odd,.speedbot__pattern-token--under{color:#d32f2f;background:#d32f2f1f;border-color:#d32f2f73}

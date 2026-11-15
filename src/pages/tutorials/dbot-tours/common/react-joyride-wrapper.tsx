@@ -75,6 +75,15 @@ const ReactJoyrideWrapper: React.FC<IReactJoyrideWrapperProps> = ({
 }) => {
     const { options: legacy_options, buttonNext, ...style_rest } = styles ?? {};
 
+    /* The tour tooltip used to be a fixed 440px wide, which is wider than a
+       390px phone viewport — the card hung off the right edge and its
+       Skip/Start buttons ended up underneath the fixed execution bar. Cap it to
+       the viewport (minus a 1.6rem gutter on each side) so it always fits, and
+       keep the desktop width as the upper bound. */
+    const tooltip_width =
+        legacy_options?.width ??
+        (typeof window !== 'undefined' ? Math.min(440, window.innerWidth - 32) : 440);
+
     return (
         <Joyride
             run
@@ -87,7 +96,7 @@ const ReactJoyrideWrapper: React.FC<IReactJoyrideWrapperProps> = ({
                 backgroundColor: legacy_options?.backgroundColor ?? 'var(--general-main-2)',
                 primaryColor: legacy_options?.primaryColor ?? 'var(--brand-red-coral)',
                 textColor: legacy_options?.textColor ?? 'var(--text-general)',
-                width: legacy_options?.width ?? 440,
+                width: tooltip_width,
                 ...legacy_options,
                 ...(disableCloseOnEsc ? { dismissKeyAction: false as const } : {}),
                 ...(disableOverlayClose ? { overlayClickAction: false as const } : {}),

@@ -166,7 +166,7 @@
 @media (max-width: 480px) {
     .bot-dock {
         right: 0.9rem;
-        bottom: 0.9rem;
+        bottom: var(--shell-float-bottom, 7.4rem);
         &__grid { grid-template-columns: 1fr; }
         &__panel { width: min(94vw, 360px); }
     }

@@ -362,10 +362,13 @@
     @media (max-width: 860px) {
         /* Bleed to the shell edges: cancel .main-content's padding so the art
            reaches the viewport on all four sides, then re-add the bottom pad so
-           the launcher cards still clear the fixed footer. */
-        margin: -1.2rem -1rem -10.4rem;
+           the launcher cards still clear the fixed footer. The bottom value is
+           derived from the shared shell metrics (execution bar + iOS safe area
+           + floating-control row) instead of a hard-coded 10.4rem, so the last
+           card can never end up under the Run button. */
+        margin: -1.2rem -1rem calc(-1 * (var(--shell-float-bottom, 7.4rem) + 5.4rem));
         min-height: calc(100dvh - 6.4rem);
-        padding-bottom: 10.4rem;
+        padding-bottom: calc(var(--shell-float-bottom, 7.4rem) + 5.4rem);
         background:
             linear-gradient(180deg, rgb(2 10 22 / 18%) 0%, rgb(2 10 22 / 0%) 22%, rgb(2 10 22 / 22%) 100%),
             #020a16 url('../../assets/dashboard-bg-phone.png') center top / cover no-repeat;

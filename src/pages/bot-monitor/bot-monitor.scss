@@ -59,6 +59,41 @@
 .bot-monitor__actions {
     display: flex;
     gap: 0.8rem;
+    flex-shrink: 0;
+}
+
+/* Phones: the header is a `space-between` row holding the brand block and two
+   buttons that each carry `min-width: 9rem`. At 390px that adds up to more than
+   the viewport, so the action buttons were pushed off the right edge (measured:
+   `.bot-monitor__actions` right edge at 451px on a 390px screen) and the Run /
+   Stop controls became unreachable. Let the header wrap and let the buttons
+   share the available width instead of forcing their minimum. */
+@media (max-width: 600px) {
+    .bot-monitor__header {
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 1.2rem 1.2rem;
+    }
+
+    .bot-monitor__brand {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .bot-monitor__app-name {
+        font-size: 1.5rem;
+    }
+
+    .bot-monitor__actions {
+        flex: 1 1 100%;
+        gap: 0.6rem;
+    }
+
+    .bot-monitor__btn--run-stop {
+        flex: 1 1 0;
+        min-width: 0;
+        height: 3.6rem;
+    }
 }
 
 .bot-monitor__btn--run-stop {

@@ -1,6 +1,7 @@
 .signal-ai-page {
     box-sizing: border-box;
     min-height: var(--tab-content-height, 100vh);
+    min-height: var(--tab-content-height, 100dvh);
     background: #000;
     justify-content: center;
     height: 100%;

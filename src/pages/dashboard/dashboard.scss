@@ -7,6 +7,7 @@
 
     position: relative;
     height: calc(100vh - 4.4rem);
+    height: calc(100dvh - 4.4rem);
     overflow: hidden;
 
     .toolbar__section {
@@ -185,6 +186,7 @@
 
             @include mobile-or-tablet-screen {
                 height: calc(100vh - 19rem);
+                height: calc(100dvh - 19rem);
                 align-items: flex-start;
                 padding: 1.6rem;
             }
@@ -308,6 +310,7 @@
             margin-inline-start: 1.6rem;
             display: none;
             height: calc(100vh - 16.7rem);
+            height: calc(100dvh - 16.7rem);
             overflow-y: auto;
 
             &--active {

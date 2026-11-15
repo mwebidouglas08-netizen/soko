@@ -104,9 +104,30 @@ body {
 .app-root {
     width: 100%;
     max-width: 100%;
-    min-height: 100dvh;
+    /* vh FIRST, dvh second — the later declaration wins, so the previous order
+       (dvh then vh) resolved to 100vh on every mobile browser. */
     min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
+}
+
+/* Notched and landscape phones.
+   index.html opts into `viewport-fit=cover`, so the document paints edge to
+   edge — underneath the status bar, the Dynamic Island and the rounded
+   corners. Only the boot splash ever consumed the top/left/right insets, which
+   left the app header sitting under the notch (controls unreadable and partly
+   untappable) and the widest pages clipped by the corner radius. Reserve the
+   insets on the shell itself. Each inset resolves to 0px on a device with no
+   cutout, so this is a no-op everywhere else. `#root` is the real mount node —
+   app-root.tsx renders a fragment, not `.app-root` — and `#root .layout`
+   outranks the bare `.layout` rule in layout.scss whatever order the bundler
+   emits the stylesheets in. */
+#root {
+    padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+}
+
+#root .layout {
+    padding-top: env(safe-area-inset-top, 0px);
 }
 
 img,

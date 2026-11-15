@@ -303,6 +303,7 @@
                     margin: -6.5rem 2.4rem;
                     width: 100%;
                     max-height: calc(100vh - 20rem);
+                    max-height: calc(100dvh - 20rem);
                     overflow: auto;
 
                     .tutorials-wrap {
@@ -314,6 +315,7 @@
 
                         flex-direction: column;
                         height: 100vh;
+                        height: 100dvh;
                         margin: unset;
 
                         svg {
@@ -334,6 +336,7 @@
 
                     @include mobile-or-tablet-screen {
                         height: calc(100vh - 22rem);
+                        height: calc(100dvh - 22rem);
                     }
                 }
 
@@ -346,6 +349,7 @@
                     &--border-bottom {
                         padding: 0 0.8rem;
                         height: 100vh;
+                        height: 100dvh;
 
                         li {
                             white-space: unset;
@@ -484,6 +488,7 @@
     &__search {
         @include mobile-or-tablet-screen {
             height: calc(100vh - 28rem);
+            height: calc(100dvh - 28rem);
             min-height: 100%;
             overflow: auto;
             background-color: var(--general-main-1);

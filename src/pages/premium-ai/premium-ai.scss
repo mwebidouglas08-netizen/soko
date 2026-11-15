@@ -28,7 +28,7 @@
 .ai-bots__strategy strong{font-size:1.65rem}
 .ai-bots__strategy p{color:var(--text-less-prominent,#cdc3ac);margin:0;font-size:1.08rem;line-height:1.45}
 .ai-bots__strategy em{color:rgb(var(--accent));align-self:end;margin-top:.25rem;font-size:.98rem;font-style:normal;font-weight:900}
-.ai-bots__command{grid-template-columns:minmax(35rem,.9fr) minmax(0,1.1fr);gap:1rem;display:grid}
+.ai-bots__command{grid-template-columns:minmax(min(35rem, 100%),.9fr) minmax(0,1.1fr);gap:1rem;display:grid}
 .ai-bots__setup,.ai-bots__markets,.ai-bots__status{background:var(--panel);-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);border:1px solid var(--line);border-radius:1rem;box-shadow:inset 0 1px #ffffff0f}
 .ai-bots__setup{align-content:start;align-self:start;gap:.65rem;padding:.75rem;display:grid}
 .ai-bots__section-title{align-items:center;gap:.45rem;padding:.1rem .15rem;display:flex}

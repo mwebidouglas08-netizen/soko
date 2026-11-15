@@ -127,6 +127,7 @@
 
     &__category-menu {
         height: calc(100vh - 33.6rem);
+        height: calc(100dvh - 33.6rem);
         overflow-y: scroll;
     }
 

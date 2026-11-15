@@ -12,6 +12,7 @@
 
     @include mobile-or-tablet-screen {
         height: calc(100vh - 80px);
+        height: calc(100dvh - 80px);
 
         .dc-btn {
             width: 100%;

@@ -251,11 +251,13 @@
 
             // to overwrite the height of the ThemedScrollbar
             max-height: calc(100vh - 23rem) !important;
+            max-height: calc(100dvh - 23rem) !important;
             margin-bottom: 1rem;
             overflow-y: auto;
 
             @include desktop-screen {
                 height: calc(100vh - 23.5rem) !important;
+                height: calc(100dvh - 23.5rem) !important;
             }
 
             @include mobile-screen {

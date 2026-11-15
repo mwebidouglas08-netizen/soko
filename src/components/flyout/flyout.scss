@@ -21,7 +21,9 @@
     top: 0;
     background-color: var(--general-main-2);
     height: calc(100vh - 232px);
+    height: calc(100dvh - 232px);
     max-height: calc(100vh - 232px);
+    max-height: calc(100dvh - 232px);
     z-index: 11;
     border-radius: $BORDER_RADIUS;
     font-size: 2em;
@@ -204,6 +206,7 @@
             font-size: 0.8em;
             overflow-y: auto;
             height: calc(100vh - 295px);
+            height: calc(100dvh - 295px);
 
             #{$flyout}__item {
                 margin-bottom: 0.8em;

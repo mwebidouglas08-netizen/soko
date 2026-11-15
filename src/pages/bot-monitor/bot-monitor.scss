@@ -1,10 +1,24 @@
 .bot-monitor {
-    position: fixed;
-    inset: 0;
+    /* Was `position: fixed; inset: 0; z-index: 1000`. That made the monitor a
+       full-viewport overlay painted ABOVE the app shell, so it buried the
+       header and the whole hub tab strip while `activeTab` still reported
+       "Bot Monitor" — the tab bar was there, just covered. It also escaped the
+       `.main-content` scroll container, which is the only thing allowed to
+       scroll in this fixed-height shell.
+
+       Bot Monitor is a hub VIEW (mounted by `pages/main/index.tsx` inside
+       `.main-hub`), so it must lay out in normal flow and fill its parent
+       instead of the viewport. `height: 100%` keeps the internal
+       `.bot-monitor__body` scroll region working, and the min-heights let it
+       fall back to viewport sizing if it is ever rendered standalone. */
+    position: relative;
+    inset: auto;
+    height: 100%;
+    min-height: calc(100dvh - 8.4rem);
     background: #030712;
     color: #f8fafc;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    z-index: 1000;
+    z-index: auto;
     overflow: hidden;
     display: flex;
     flex-direction: column;

@@ -7,6 +7,7 @@ import { useDevice } from '@deriv-com/ui';
 import { DBOT_TABS } from '@/constants/bot-contents';
 import Text from '@/components/shared_ui/text';
 import Button from '@/components/shared_ui/button';
+import { navigateToHubView } from '@/services/hub-navigation';
 import './bot-monitor.scss';
 
 const formatCurrency = (amount: number, currency: string): string => {
@@ -82,6 +83,11 @@ const BotMonitor = observer(() => {
                         text={localize('Back to Builder')}
                         secondary
                         onClick={() => {
+                            // The hub shell owns the active view as React state, so
+                            // setting the DBot tab alone left the user stranded on
+                            // this page (the button appeared to do nothing). Ask the
+                            // shell to switch views, then sync the DBot tab.
+                            navigateToHubView('bot-builder');
                             dashboard.setActiveTab(DBOT_TABS.BOT_BUILDER);
                         }}
                     />

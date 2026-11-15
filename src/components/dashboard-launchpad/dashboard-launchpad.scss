@@ -3,7 +3,14 @@
    quote) and the four glass launcher cards with per-card nav-color accents. */
 .launchpad {
     margin: -1.4rem -1.6rem 0;
-    max-width: 100%;
+    /* `max-width: 100%` resolves against the PARENT'S CONTENT BOX, so it capped
+       this element at the padded width and the negative side margins could only
+       bleed to the LEFT. The result was a dead strip down the right edge (20px
+       at 390px wide) with all content sitting ~10px left of centre — the
+       "blank space on one side / doesn't fill the screen" report. `none` lets
+       the negative margins expand symmetrically to the parent's padding box,
+       which is the full-bleed this rule is asking for. */
+    max-width: none;
     min-height: calc(100dvh - 12.4rem);
     display: flex;
     flex-direction: column;
@@ -385,7 +392,11 @@
         }
 
         &__kicker {
-            font-size: 0.85rem;
+            /* 0.85rem resolved to 8.45px at the phone root scale — below the
+               readable floor for an all-caps, letter-spaced label. 1.05rem
+               lands at ~10.4px, which stays legible without competing with
+               the greeting. */
+            font-size: 1.05rem;
             letter-spacing: 0.14em;
             flex-wrap: wrap;
             gap: 0.4rem;

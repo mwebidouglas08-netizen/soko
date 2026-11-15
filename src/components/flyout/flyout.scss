@@ -28,7 +28,7 @@
     margin-inline-start: $default-margin;
     margin-top: 20px;
     box-shadow: 0 2px 8px 0 var(--shadow-box);
-    min-width: 400px;
+    min-width: min(400px,100%);
     visibility: hidden;
 
     &__loading {

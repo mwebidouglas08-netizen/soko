@@ -301,7 +301,7 @@
 @media (max-width: 640px) {
     .app-header {
         width: 100%;
-        max-width: 100vw;
+        max-width: 100%;
         padding-inline: 0.4rem;
         box-sizing: border-box;
 
@@ -314,7 +314,7 @@
 
         .deriv-wrapper__left {
             flex: 1 1 auto;
-            overflow: hidden;
+            overflow: visible;
             gap: 0.2rem;
         }
 

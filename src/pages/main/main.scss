@@ -294,11 +294,11 @@
         }
 
         &--expanded {
-            width: calc(100vw - 39.8rem);
+            width: 100%;
         }
 
         &--modal {
-            width: 40rem;
+            width: 100%; max-width: 40rem;
         }
     }
 
@@ -306,7 +306,7 @@
         position: absolute;
         top: 0;
         inset-inline-start: 0;
-        width: 23.6rem;
+        width: 100%; max-width: 23.6rem;
         padding: 0.8rem;
         background: var(--general-main-1);
         z-index: 1;
@@ -771,7 +771,8 @@
    (its fixed-height `.main` fits inside the scroll container). */
 body.hub-view {
     .layout {
-        height: 100vh;
+        height: 100dvh;
+        min-height: 100vh;
         overflow: hidden;
     }
 

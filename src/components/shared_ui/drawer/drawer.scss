@@ -22,7 +22,7 @@
     }
 
     @include mobile-or-tablet-screen {
-        width: 100vw !important;
+        width: 100% !important;
         height: calc(100% - 10.1rem) !important;
         top: calc(100% - 9.8rem) !important;
     }

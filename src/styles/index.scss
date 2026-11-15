@@ -17,9 +17,13 @@ body {
 }
 
 body {
-    // Updated to use brand font variable from brand.config.json
     font-family: var(--brand-font-primary);
+    font-size: 1.4rem;
+    line-height: 1.5;
     background: var(--general-main-1);
+    color: var(--text-general);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .icon-general-fill-path {
@@ -35,30 +39,40 @@ body {
         }
     }
 }
-html, body {
+
+html,
+body {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
 }
-#root, .app-root {
+
+#root,
+.app-root {
     width: 100%;
     max-width: 100%;
     min-height: 100dvh;
     min-height: 100vh;
     overflow-x: hidden;
 }
-img, svg {
+
+img,
+svg,
+canvas,
+video {
     max-width: 100%;
 }
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
 @media (max-width: 768px) {
-    body { font-size: 1.5rem; }
     .bot {
         --bot-content-width: 100%;
         --bot-content-height: calc(100dvh - 12rem);
     }
-}
-@media (max-width: 480px) {
-    body { font-size: 1.5rem; }
 }

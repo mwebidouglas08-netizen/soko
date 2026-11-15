@@ -6,7 +6,7 @@
 
     &__container {
         &_#{$save-modal} {
-            min-width: 320px !important;
+            min-width: min(320px,100%) !important;
 
             .modal__content {
                 padding: 16px 24px;

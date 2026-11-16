@@ -19,7 +19,7 @@
     <variable id="mz_confidence">Confidence</variable>
   </variables>
   <block type="trade_definition" id="mz_trade_definition" deletable="false" x="0" y="60">
-    <comment pinned="false" h="320" w="680">Maziwa AI v6: scans all open live Deriv synthetic volatility markets in parallel and selects immediate high-confidence Over/Under digit entries using a live tick digit frequency/transition matrix, edge and safe-streak scoring, then switches to that market with the computed prediction/barrier. Uses consistent doubling martingale on loss (stake x2, capped) and resets to base stake after win. Trading is risky and probabilistic; no strategy can guarantee profits, no losses, or reliability with real funds. Test on demo first.</comment>
+    <comment pinned="false" h="320" w="680">Maziwa AI v7: scans all open live Deriv synthetic volatility markets in parallel and selects immediate high-confidence Over/Under digit entries using a live tick digit frequency/transition matrix, edge and safe-streak scoring, then switches to that market with the computed prediction/barrier. Uses loss-recovery sizing (tracks cumulative loss; doubles and targets next-win profit >= total loss recovered in that run, then resets) with capped stake, TP/SL, and max-trades guards. Trading is risky and probabilistic; no strategy can guarantee profits, no losses, or recovery. Test on demo first.</comment>
     <statement name="TRADE_OPTIONS">
       <block type="trade_definition_market" id="mz_market" deletable="false" movable="false">
         <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
@@ -99,15 +99,39 @@
       <next><block type="controls_if"><mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
         <value name="IF0"><block type="contract_check_result"><field name="CHECK_RESULT">win</field></block></value>
         <statement name="DO0">
-          <block type="variables_set"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
-          <next><block type="variables_set"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
-          <next><block type="variables_set"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="variables_get"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value></block></next></block></next></block>
+          <block type="controls_if"><mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+            <value name="IF0"><block type="logic_compare"><field name="OP">GTE</field><value name="A"><block type="read_details"><field name="DETAIL_INDEX">4</field></block></value><value name="B"><block type="variables_get"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value></block></value>
+            <statement name="DO0">
+              <block type="variables_set"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
+              <next><block type="variables_set"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
+              <next><block type="variables_set"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="variables_get"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value></block></next></block></next></block>
+            </statement>
+            <statement name="ELSE">
+              <block type="variables_set"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_arithmetic"><field name="OP">MAX</field>
+                <value name="A"><block type="math_arithmetic"><field name="OP">MINUS</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="read_details"><field name="DETAIL_INDEX">4</field></block></value></block></value>
+                <value name="B"><block type="math_number"><field name="NUM">0</field></block></value>
+              </block></value>
+              <next><block type="variables_set"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_arithmetic"><field name="OP">MIN</field>
+                <value name="A"><block type="math_arithmetic"><field name="OP">ADD</field>
+                  <value name="A"><block type="math_arithmetic"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="math_number"><field name="NUM">1.4</field></block></value></block></value>
+                  <value name="B"><block type="variables_get"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value>
+                </block></value>
+                <value name="B"><block type="variables_get"><field name="VAR" id="mz_max_stake">Max Stake</field></block></value>
+              </block></value></block></next></block>
+            </statement>
+          </block>
         </statement>
         <statement name="ELSE">
           <block type="math_change"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
           <next><block type="variables_set"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_arithmetic"><field name="OP">ADD</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="math_single"><field name="OP">ABS</field><value name="NUM"><block type="read_details"><field name="DETAIL_INDEX">4</field></block></value></block></value></block></value>
           <next><block type="variables_set"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_arithmetic"><field name="OP">MIN</field>
-            <value name="A"><block type="math_arithmetic"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_stake">Stake</field></block></value><value name="B"><block type="variables_get"><field name="VAR" id="mz_martingale">Martingale</field></block></value></block></value>
+            <value name="A"><block type="math_arithmetic"><field name="OP">MAX</field>
+              <value name="A"><block type="math_arithmetic"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_stake">Stake</field></block></value><value name="B"><block type="variables_get"><field name="VAR" id="mz_martingale">Martingale</field></block></value></block></value>
+              <value name="B"><block type="math_arithmetic"><field name="OP">ADD</field>
+                <value name="A"><block type="math_arithmetic"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="math_number"><field name="NUM">1.4</field></block></value></block></value>
+                <value name="B"><block type="variables_get"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value>
+              </block></value>
+            </block></value>
             <value name="B"><block type="variables_get"><field name="VAR" id="mz_max_stake">Max Stake</field></block></value>
           </block></value></block></next></block></next></block>
         </statement>

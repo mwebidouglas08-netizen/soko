@@ -1,4 +1,4 @@
-﻿import { localize } from '@deriv-com/translations';
+import { localize } from '@deriv-com/translations';
 import { modifyContextMenu } from '../../../utils';
 
 window.Blockly.Blocks.maziwa_scan_signal = {
@@ -55,7 +55,13 @@ window.Blockly.JavaScript.javascriptGenerator.forBlock.maziwa_scan_signal = bloc
     const minConfidence = g.valueToCode(block, 'MIN_CONFIDENCE', g.ORDER_ATOMIC) || '72';
     const windowSize = g.valueToCode(block, 'WINDOW', g.ORDER_ATOMIC) || '20';
     const maxSymbols = g.valueToCode(block, 'MAX_SYMBOLS', g.ORDER_ATOMIC) || '12';
-    const code = '(function(){ var _r = Bot.scanBestVolatilitySignal({minConfidence: ' + minConfidence + ', windowSize: ' + windowSize + ', maxSymbols: ' + maxSymbols + ', overBarrier: 2, underBarrier: 8}); if (_r && _r.contractType) { return [_r.symbol || \"\", (_r.contractType === \"DIGITOVER\" ? 4 : 5), Number(_r.prediction || 0), Number(_r.confidence || 0)]; } return []; }())';
+    const code =
+        '(function(){' +
+        'var _r=Bot.scanBestVolatilitySignal({minConfidence:' + minConfidence + ',windowSize:' + windowSize + ',maxSymbols:' + maxSymbols + ',overBarrier:2,underBarrier:8});' +
+        'if(_r&&_r.contractType){' +
+        'return [String((_r&&_r.symbol)||\'\'),((_r&&_r.contractType)===\'DIGITOVER\'?4:5),Number((_r&&_r.prediction)||0),Number((_r&&_r.confidence)||0)];' +
+        '}' +
+        'return [];})()';
     return [code, g.ORDER_FUNCTION_CALL];
 };
 
@@ -96,5 +102,5 @@ window.Blockly.Blocks.maziwa_set_symbol = {
 window.Blockly.JavaScript.javascriptGenerator.forBlock.maziwa_set_symbol = block => {
     const g = window.Blockly.JavaScript.javascriptGenerator;
     const symbol = g.valueToCode(block, 'SYMBOL', g.ORDER_ATOMIC) || "''";
-    return 'if (' + symbol + ') { Bot.setSymbol(' + symbol + '); }\\n';
+    return 'if(' + symbol + '){Bot.setSymbol(' + symbol + ');}\n';
 };

@@ -19,7 +19,7 @@
     <variable id="mz_confidence">Confidence</variable>
   </variables>
   <block type="trade_definition" id="mz_trade_definition" deletable="false" x="0" y="60">
-    <comment pinned="false" h="300" w="640">Maziwa AI v5: aggressively scans all open Deriv synthetic volatility markets in parallel and enters immediately on favorable high-confidence Over/Under setups (Over 2 / Under 8, 1 tick). Uses consistent doubling martingale on each loss (stake x2, capped by max stake) and resets to base stake after a win to recover losses. Trading is risky; martingale can cause rapid drawdown and large losses, outcomes are not guaranteed, and sufficient balance/exchange limits are required. Test on demo before using real funds.</comment>
+    <comment pinned="false" h="320" w="680">Maziwa AI v6: scans all open live Deriv synthetic volatility markets in parallel and selects immediate high-confidence Over/Under digit entries using a live tick digit frequency/transition matrix, edge and safe-streak scoring, then switches to that market with the computed prediction/barrier. Uses consistent doubling martingale on loss (stake x2, capped) and resets to base stake after win. Trading is risky and probabilistic; no strategy can guarantee profits, no losses, or reliability with real funds. Test on demo first.</comment>
     <statement name="TRADE_OPTIONS">
       <block type="trade_definition_market" id="mz_market" deletable="false" movable="false">
         <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>

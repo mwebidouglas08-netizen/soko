@@ -1,4 +1,4 @@
-﻿/* eslint-disable no-promise-executor-return */
+/* eslint-disable no-promise-executor-return */
 import debounce from 'lodash.debounce';
 import { getLocalizedErrorMessage } from '@/constants/backend-error-messages';
 import { localize } from '@deriv-com/translations';
@@ -352,12 +352,10 @@ export default Engine =>
         }
 
         async scanBestVolatilitySignal(opts = {}) {
-            const overBarrier = Number.isFinite(Number(opts.overBarrier)) ? Number(opts.overBarrier) : 2;
-            const underBarrier = Number.isFinite(Number(opts.underBarrier)) ? Number(opts.underBarrier) : 8;
-            const windowSize = Math.max(8, Math.min(60, Number(opts.windowSize) || 25));
-            const minHistory = Math.max(10, Math.min(windowSize, Number(opts.minHistory) || 15));
-            const minConfidence = Number.isFinite(Number(opts.minConfidence)) ? Number(opts.minConfidence) : 68;
-            const maxSymbols = Math.max(1, Math.min(60, Number(opts.maxSymbols) || 30));
+            const windowSize = Math.max(10, Math.min(80, Number(opts.windowSize) || 30));
+            const minHistory = Math.max(12, Math.min(windowSize, Number(opts.minHistory) || 20));
+            const minConfidence = Number.isFinite(Number(opts.minConfidence)) ? Number(opts.minConfidence) : 72;
+            const maxSymbols = Math.max(1, Math.min(60, Number(opts.maxSymbols) || 40));
 
             let candidates = Array.isArray(opts.symbols) && opts.symbols.length ? opts.symbols : null;
             if (!candidates) {
@@ -380,97 +378,177 @@ export default Engine =>
 
             const tickSvc = this.$scope?.ticksService;
 
+            const clamp01 = v => Math.max(0, Math.min(1, v));
+
             const evaluate = (digits, sym) => {
-                const n = digits.length;
-                if (n < minHistory) return null;
-                const recent = digits.slice(-windowSize);
-                const last1 = recent[recent.length - 1];
-                const last2 = recent.slice(-2);
-                const last3 = recent.slice(-3);
-                const last4 = recent.slice(-4);
-                const last5 = recent.slice(-5);
-                const last8 = recent.slice(-8);
+                if (!Array.isArray(digits) || digits.length < minHistory) return null;
+                const recent = digits.slice(-windowSize).filter(d => Number.isFinite(d) && d >= 0 && d <= 9);
+                if (recent.length < minHistory) return null;
 
-                const build = type => {
-                    const isOver = type === 'DIGITOVER';
-                    const barrier = isOver ? overBarrier : underBarrier;
-                    const isLoss = d => (isOver ? d <= barrier : d >= barrier);
-                    const lossDigits = isOver ? barrier + 1 : 10 - barrier;
-                    const expectedWin = 1 - lossDigits / 10;
+                const n = recent.length;
+                const last1 = recent[n - 1];
+                const last2 = recent[n - 2];
+                const last3 = n >= 3 ? recent[n - 3] : null;
 
-                    const winRate = recent.filter(d => !isLoss(d)).length / recent.length;
-                    const edge = winRate - expectedWin;
+                // Digit frequency matrix (recency-weighted) from live ticks
+                const freq = Array(10).fill(0);
+                const recentFreq = Array(10).fill(0);
+                const wRecent = Math.min(12, n);
+                for (let i = 0; i < n; i++) {
+                    const w = 0.35 + 0.65 * ((i + 1) / n); // older->lower, newer->higher
+                    freq[recent[i]] += w;
+                }
+                for (let i = n - wRecent; i < n; i++) {
+                    recentFreq[recent[i]] += 1;
+                }
+                const freqSum = freq.reduce((a, b) => a + b, 0) || 1;
 
+                // Transition matrix: P(next | prev digit) from live sequence
+                const trans = Array.from({ length: 10 }, () => Array(10).fill(0));
+                const transRow = Array(10).fill(0);
+                for (let i = 1; i < n; i++) {
+                    const a = recent[i - 1];
+                    const b = recent[i];
+                    if (a >= 0 && a <= 9 && b >= 0 && b <= 9) {
+                        trans[a][b] += 1;
+                        transRow[a] += 1;
+                    }
+                }
+
+                const probDigit = d => freq[d] / freqSum;
+                const probNextGivenLast = d => {
+                    if (last1 == null || transRow[last1] < 2) return probDigit(d);
+                    const pCond = trans[last1][d] / transRow[last1];
+                    // blend conditional and global recency-weighted frequency
+                    return 0.6 * pCond + 0.4 * probDigit(d);
+                };
+
+                const candidatesDefs = [];
+                // Over: win if digit > barrier => barrier 0..8
+                for (let barrier = 0; barrier <= 8; barrier++) candidatesDefs.push({ type: 'DIGITOVER', barrier });
+                // Under: win if digit < barrier => barrier 1..9
+                for (let barrier = 1; barrier <= 9; barrier++) candidatesDefs.push({ type: 'DIGITUNDER', barrier });
+
+                let best = null;
+                for (const def of candidatesDefs) {
+                    const isOver = def.type === 'DIGITOVER';
+                    const barrier = def.barrier;
+                    const isWin = d => (isOver ? d > barrier : d < barrier);
+                    const isLoss = d => !isWin(d);
+                    const winDigits = [];
+                    for (let d = 0; d <= 9; d++) if (isWin(d)) winDigits.push(d);
+                    const lossDigitsCount = 10 - winDigits.length;
+                    if (winDigits.length === 0 || winDigits.length === 10) continue;
+
+                    const theoretical = winDigits.length / 10;
+
+                    // Immediate live condition: last observed tick must be a win for this contract
+                    if (!isWin(last1)) continue;
+
+                    // Historical/live performance in window
+                    let wins = 0;
+                    let lossClusterRecent = 0;
+                    const last6 = recent.slice(-6);
+                    for (let i = 0; i < n; i++) if (isWin(recent[i])) wins++;
+                    for (let i = 0; i < last6.length; i++) if (isLoss(last6[i])) lossClusterRecent++;
+                    const winRate = wins / n;
+
+                    // Safe streak ending at latest tick
                     let safeStreak = 0;
-                    for (let k = recent.length - 1; k >= 0; k--) {
-                        if (!isLoss(recent[k])) safeStreak++;
+                    for (let i = n - 1; i >= 0; i--) {
+                        if (isWin(recent[i])) safeStreak++;
                         else break;
                     }
 
+                    // Matrix/model probability for next digit being in win set
+                    let pNext = 0;
+                    for (const d of winDigits) pNext += probNextGivenLast(d);
+                    pNext = clamp01(pNext);
+
+                    // Recent short-window win rate
+                    const shortWin = recentFreq.reduce((acc, c, d) => acc + (isWin(d) ? c : 0), 0) / wRecent;
+                    const edge = winRate - theoretical;
+                    const modelEdge = pNext - theoretical;
+
+                    // Hard filters to avoid weak/choppy/false entries
+                    if (safeStreak < 1) continue;
+                    if (lossClusterRecent >= 3) continue;
+                    if (last2 != null && isLoss(last2) && safeStreak < 2) continue; // unstable
+                    if (edge < -0.03 && modelEdge < 0) continue;
+                    if (winRate < theoretical - 0.08 && pNext < theoretical + 0.02) continue;
+
                     let score = 0;
-                    if (last1 != null && !isLoss(last1)) score += 22;
-                    else score -= 45;
+                    // live immediate strength
+                    score += Math.min(22, safeStreak * 5);
+                    if (last2 != null && isWin(last2)) score += 8;
+                    if (last3 != null && isWin(last3)) score += 6;
+                    if (last2 != null && isLoss(last2)) score -= 10;
 
-                    if (last2.length === 2 && last2.every(d => !isLoss(d))) score += 16;
-                    if (last2.some(isLoss)) score -= 14;
+                    // matrix/model edge (primary)
+                    score += Math.max(-20, Math.min(32, modelEdge * 120));
+                    score += Math.max(-12, Math.min(18, edge * 90));
 
-                    if (last3.length === 3 && last3.every(d => !isLoss(d))) score += 14;
-                    if (last3.length === 3 && last3.filter(isLoss).length >= 2) score -= 22;
+                    // consistency
+                    score += Math.max(-10, Math.min(14, (shortWin - theoretical) * 80));
+                    score += Math.max(-8, Math.min(10, (winRate - theoretical) * 70));
 
-                    if (last4.length >= 3 && last4.filter(d => !isLoss(d)).length >= 3) score += 10;
-                    if (last5.length >= 4 && last5.filter(d => !isLoss(d)).length >= 4) score += 10;
+                    // penalize recent losses
+                    score -= lossClusterRecent * 6;
 
-                    const recent6 = recent.slice(-6);
-                    const recentLoss6 = recent6.filter(isLoss).length;
-                    if (recentLoss6 === 0) score += 10;
-                    else if (recentLoss6 >= 3) score -= 22;
+                    // prefer stronger statistical contracts a bit (e.g. Over 2 / Under 7/8) when equal
+                    score += Math.min(6, (winDigits.length - 5) * 0.8);
 
-                    score += Math.max(-25, Math.min(30, edge * 110));
-                    if (edge < -0.02) score -= 12;
+                    // confidence 0-99
+                    const confidence = Math.max(0, Math.min(99, Math.round(50 + score)));
 
-                    const winRate8 = last8.length ? last8.filter(d => !isLoss(d)).length / last8.length : 0;
-                    score += Math.max(-12, Math.min(14, (winRate8 - expectedWin) * 80));
+                    // minimum quality gate per candidate before considering
+                    if (confidence < Math.max(60, minConfidence - 8)) continue;
+                    if (pNext < theoretical + 0.01 && edge < 0) continue;
 
-                    score += Math.min(20, safeStreak * 4);
-
-                    const volatility = new Set(last5).size;
-                    if (volatility >= 5 && safeStreak < 2) score -= 6;
-
-                    const confidence = Math.max(0, Math.min(99, Math.round(52 + score)));
-                    return {
+                    const candidate = {
                         symbol: sym,
-                        contractType: type,
+                        contractType: def.type,
                         prediction: barrier,
                         confidence,
+                        pNext,
                         winRate,
                         edge,
                         safeStreak,
-                        expectedWin,
+                        theoretical,
                     };
-                };
 
-                const over = build('DIGITOVER');
-                const under = build('DIGITUNDER');
-                if (!over && !under) return null;
-                return !under || over.confidence >= under.confidence ? over : under;
+                    if (
+                        !best ||
+                        candidate.confidence > best.confidence ||
+                        (candidate.confidence === best.confidence && candidate.pNext > best.pNext) ||
+                        (candidate.confidence === best.confidence && candidate.pNext === best.pNext && candidate.safeStreak > best.safeStreak)
+                    ) {
+                        best = candidate;
+                    }
+                }
+                return best;
             };
 
             const fetchDigits = async sym => {
-                let digits = [];
-                if (sym === this.symbol) {
-                    digits = await this.getLastDigitList();
-                } else if (tickSvc && typeof tickSvc.request === 'function') {
-                    const ticks = await tickSvc.request({ symbol: sym });
-                    digits = this.getLastDigitsFromList(ticks || []);
+                try {
+                    let digits = [];
+                    if (sym === this.symbol) {
+                        digits = await this.getLastDigitList();
+                    } else if (tickSvc && typeof tickSvc.request === 'function') {
+                        const ticks = await tickSvc.request({ symbol: sym });
+                        digits = this.getLastDigitsFromList(ticks || []);
+                    }
+                    return Array.isArray(digits) ? digits.filter(d => Number.isFinite(d)) : [];
+                } catch (e) {
+                    return [];
                 }
-                return Array.isArray(digits) ? digits.filter(d => Number.isFinite(d)) : [];
             };
 
             const settled = await Promise.all(
                 batch.map(async sym => {
                     try {
                         const digits = await fetchDigits(sym);
-                        if (digits.length < minHistory) return null;
+                        if (!digits || digits.length < minHistory) return null;
                         return evaluate(digits, sym);
                     } catch (e) {
                         return null;
@@ -482,6 +560,7 @@ export default Engine =>
             signals.sort(
                 (a, b) =>
                     b.confidence - a.confidence ||
+                    b.pNext - a.pNext ||
                     b.safeStreak - a.safeStreak ||
                     b.edge - a.edge ||
                     b.winRate - a.winRate
@@ -499,13 +578,24 @@ export default Engine =>
                 };
             }
 
-            if (!Number.isFinite(best.safeStreak) || best.safeStreak < 1) {
+            // Ensure engine is on the selected live market before returning (reliable/accurate entry)
+            try {
+                if (typeof this.setSymbol === 'function') {
+                    await this.setSymbol(best.symbol);
+                } else if (best.symbol && best.symbol !== this.symbol) {
+                    this.symbol = best.symbol;
+                    if (this.options) this.options.symbol = best.symbol;
+                    if (this.tradeOptions) this.tradeOptions.symbol = best.symbol;
+                    await this.watchTicks(best.symbol);
+                }
+            } catch (e) {
+                // if switch fails, do not signal trade
                 return {
                     symbol: best.symbol,
                     contractType: null,
                     prediction: null,
-                    confidence: best.confidence,
-                    reason: 'not_immediate',
+                    confidence: 0,
+                    reason: 'symbol_switch_failed',
                     candidates: batch.length,
                 };
             }
@@ -515,6 +605,7 @@ export default Engine =>
                 contractType: best.contractType,
                 prediction: best.prediction,
                 confidence: best.confidence,
+                pNext: best.pNext,
                 winRate: best.winRate,
                 edge: best.edge,
                 safeStreak: best.safeStreak,

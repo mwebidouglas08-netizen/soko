@@ -34,7 +34,7 @@ window.Blockly.Blocks.maziwa_scan_signal = {
             colourSecondary: window.Blockly.Colours.Base.colourSecondary,
             colourTertiary: window.Blockly.Colours.Base.colourTertiary,
             tooltip: localize(
-                'Scans open volatility markets and returns [symbol, direction(4=Over,5=Under), prediction, confidence]. Returns empty list when no selective signal is found.'
+                'Scans open live volatility markets using digit frequency/transition matrix and edge scoring, switches to the best market, and returns [symbol, direction(4=Over,5=Under), prediction, confidence] for immediate entry. Returns empty list when no strong signal is found.'
             ),
             category: window.Blockly.Categories.Tick_Analysis,
         };
@@ -57,7 +57,7 @@ window.Blockly.JavaScript.javascriptGenerator.forBlock.maziwa_scan_signal = bloc
     const maxSymbols = g.valueToCode(block, 'MAX_SYMBOLS', g.ORDER_ATOMIC) || '12';
     const code =
         '(function(){' +
-        'var _r=Bot.scanBestVolatilitySignal({minConfidence:' + minConfidence + ',windowSize:' + windowSize + ',maxSymbols:' + maxSymbols + ',overBarrier:2,underBarrier:8});' +
+        'var _r=Bot.scanBestVolatilitySignal({minConfidence:' + minConfidence + ',windowSize:' + windowSize + ',maxSymbols:' + maxSymbols + '});' +
         'if(_r&&_r.contractType){' +
         'return [String((_r&&_r.symbol)||\'\'),((_r&&_r.contractType)===\'DIGITOVER\'?4:5),Number((_r&&_r.prediction)||0),Number((_r&&_r.confidence)||0)];' +
         '}' +

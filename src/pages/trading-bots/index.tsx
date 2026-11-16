@@ -4,8 +4,6 @@ import { loadStrategyXml } from '@/pages/ai-trading-hub/deploy-strategy';
 import { VERTEX_DIGITS, QUANTUM_EDGE } from '@/pages/quick-bot';
 import { navigateToHubView } from '@/services/hub-navigation';
 import { HubPage, HubPageHeader } from '@/components/hub-page';
-import { botVisual } from '@/components/bot-visuals';
-import { botImage, type BotImageId } from '@/components/bot-images';
 import './trading-bots.scss';
 
 type CardBadge = 'QUICK' | 'PREMIUM' | 'FREE';
@@ -20,7 +18,7 @@ interface BotCard {
     preset?: 'vertex' | 'quantum';
 }
 
-/** Free bots grid — clean, human-made card design. */
+/** Trading bots grid. */
 const REFERENCE_CARDS: BotCard[] = [
     { id: 'maziwa', name: 'Maziwa AI', description: 'Live multi-market Over/Under scanner with strict signal confirmation, dynamic barrier selection, and cumulative-loss recovery controls.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'maziwa' },
     { id: 'vertex', name: 'Vertex Digits', description: 'Quick Over/Under + Even/Odd analysis bot. Stake 1.0, recovery ×2, pattern gate after every 3 trades.', kind: 'quick', badge: 'FREE', preset: 'vertex' },
@@ -38,39 +36,7 @@ const REFERENCE_CARDS: BotCard[] = [
     { id: 'quantum', name: 'Quantum Edge', description: 'Extreme-digit quick bot. Stake 0.8, recovery ×2, Over/Under on every trade.', kind: 'quick', badge: 'FREE', preset: 'quantum' },
 ];
 
-const IMAGE_MAP: Record<string, BotImageId> = {
-    maziwa: 'maziwa',
-    vertex: 'vertex',
-    quantum: 'quantum',
-    digit_nexus: 'digit-nexus-ai',
-    volt_scalper: 'volt-scalper',
-    apex_ai: 'apex-ai',
-    neutrade: 'neutrade-ai',
-    straddle: 'straddle-edge',
-    aurora: 'aurora-parity',
-    obsidian: 'obsidian-parity',
-    prism: 'prism-extremes',
-    pulsetrader: 'pulsetrader-ai',
-    titan: 'titan-range',
-    zenith: 'zenith-flow',
-};
 
-const THEME_MAP: Record<string, string> = {
-    maziwa: 'maziwa',
-    vertex: 'vertex',
-    quantum: 'quantum',
-    digit_nexus: 'digit-nexus-ai',
-    volt_scalper: 'volt-scalper',
-    apex_ai: 'apex-ai',
-    neutrade: 'neutrade-ai',
-    straddle: 'straddle-edge',
-    aurora: 'aurora-parity',
-    obsidian: 'obsidian-parity',
-    prism: 'prism-extremes',
-    pulsetrader: 'pulsetrader-ai',
-    titan: 'titan-range',
-    zenith: 'zenith-flow',
-};
 
 const TradingBotsPage = observer(() => {
     const [query, setQuery] = useState('');
@@ -86,8 +52,6 @@ const TradingBotsPage = observer(() => {
         return cards.filter(card => card.name.toLowerCase().includes(needle));
     }, [cards, query]);
 
-    const imageId = (cardId: string): BotImageId => IMAGE_MAP[cardId] ?? 'vertex';
-    const themeId = (cardId: string): string => THEME_MAP[cardId] ?? cardId;
 
     const onLoad = async (card: BotCard) => {
         setError(null);
@@ -168,44 +132,28 @@ const TradingBotsPage = observer(() => {
                 </div>
             ) : (
                 <div className='bots-grid'>
-                    {visible.map((card, i) => {
-                        const theme = botVisual(themeId(card.id));
-                        const imgId = imageId(card.id);
-                        const accent = theme.color || '#6366f1';
-                        const accent2 = theme.color2 || '#22d3ee';
-                        return (
-                            <article
-                                key={card.id}
-                                className='bots-card'
-                                style={{ '--bot-color': accent, '--bot-color-2': accent2, animationDelay: `${i * 45}ms` } as React.CSSProperties}
-                            >
-                                <div className='bots-card__shine' aria-hidden='true' />
-                                <div className='bots-card__media'>
-                                    <div className='bots-card__image-wrap'>
-                                        <img src={`data:image/svg+xml;base64,${btoa(botImage(imgId))}`} alt={card.name} loading='lazy' decoding='async' />
-                                    </div>
-                                    <div className='bots-card__meta'>
-                                        <span className={`bots-card__badge bots-card__badge--${card.badge.toLowerCase()}`}>{card.badge}</span>
-                                        <span className='bots-card__kind'>{card.kind === 'quick' ? 'Quick Bot' : 'Strategy'}</span>
-                                    </div>
-                                </div>
-                                <div className='bots-card__content'>
-                                    <h3 className='bots-card__name'>{card.name}</h3>
-                                    <p className='bots-card__desc'>{card.description}</p>
-                                </div>
-                                <div className='bots-card__footer'>
-                                    <button
-                                        type='button'
-                                        className='hub-btn hub-btn--primary bots-card__load'
-                                        disabled={busyId !== null}
-                                        onClick={() => onLoad(card)}
-                                    >
-                                        {busyId === card.id ? 'Loading…' : 'Load Bot'}
-                                    </button>
-                                </div>
-                            </article>
-                        );
-                    })}
+                    {visible.map(card => (
+                        <article key={card.id} className='bots-card'>
+                            <div className='bots-card__top'>
+                                <span className={`bots-card__badge bots-card__badge--${card.badge.toLowerCase()}`}>{card.badge}</span>
+                                <span className='bots-card__kind'>{card.kind === 'quick' ? 'Quick Bot' : 'Strategy'}</span>
+                            </div>
+                            <div className='bots-card__content'>
+                                <h3 className='bots-card__name'>{card.name}</h3>
+                                <p className='bots-card__desc'>{card.description}</p>
+                            </div>
+                            <div className='bots-card__footer'>
+                                <button
+                                    type='button'
+                                    className='hub-btn hub-btn--primary bots-card__load'
+                                    disabled={busyId !== null}
+                                    onClick={() => onLoad(card)}
+                                >
+                                    {busyId === card.id ? 'Loading…' : 'Load Bot'}
+                                </button>
+                            </div>
+                        </article>
+                    ))}
                 </div>
             )}
         </HubPage>

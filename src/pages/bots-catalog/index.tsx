@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { loadStrategyXml } from '@/pages/ai-trading-hub/deploy-strategy';
-import { botVisual, botIcon } from '@/components/bot-visuals';
 import './bots-catalog.scss';
 
 type Bot = {
@@ -96,39 +95,25 @@ const BotsCatalog = () => {
             )}
 
             <div className='bots-catalog__grid'>
-                {bots.map((bot, i) => {
-                    const theme = botVisual(bot.file);
-                    const accent = (theme.color as string) || '#6366f1';
-                    const accent2 = (theme.color2 as string) || '#22d3ee';
-                    const cardStyle: React.CSSProperties & { '--bot-color'?: string; '--bot-color-2'?: string } = {
-                        '--bot-color': accent,
-                        '--bot-color-2': accent2,
-                        animationDelay: `${i * 45}ms`,
-                    };
-                    return (
-                        <article key={bot.file} className='bots-card' style={cardStyle}>
-                            <div className='bots-card__shine' aria-hidden='true' />
-                            <div className='bots-card__hero'>
-                                <div className='bots-card__icon'>
-                                    <span className='bots-card__icon-symbol' dangerouslySetInnerHTML={{ __html: botIcon(theme.kind) }} />
-                                </div>
-                                <div className='bots-card__header'>
-                                    <span className='bots-card__tag'>{theme.tag}</span>
-                                    {theme.premium && <span className='bots-card__premium'>PREMIUM</span>}
-                                </div>
+                {bots.map(bot => (
+                    <article key={bot.file} className='bots-card'>
+                        <div className='bots-card__top'>
+                            <div className='bots-card__badges'>
+                                <span className='bots-card__tag'>{bot.tag}</span>
+                                {bot.premium && <span className='bots-card__premium'>PREMIUM</span>}
                             </div>
-                            <div className='bots-card__content'>
-                                <h3 className='bots-card__name'>{bot.name}</h3>
-                                <p className='bots-card__desc'>{bot.desc}</p>
-                            </div>
-                            <div className='bots-card__footer'>
-                                <button type='button' className='bots-card__load' onClick={() => onLoad(bot)} disabled={loading !== null}>
-                                    {loading === bot.file ? 'Loading…' : 'Load Bot'}
-                                </button>
-                            </div>
-                        </article>
-                    );
-                })}
+                        </div>
+                        <div className='bots-card__content'>
+                            <h3 className='bots-card__name'>{bot.name}</h3>
+                            <p className='bots-card__desc'>{bot.desc}</p>
+                        </div>
+                        <div className='bots-card__footer'>
+                            <button type='button' className='bots-card__load' onClick={() => onLoad(bot)} disabled={loading !== null}>
+                                {loading === bot.file ? 'Loading…' : 'Load Bot'}
+                            </button>
+                        </div>
+                    </article>
+                ))}
             </div>
         </div>
     );

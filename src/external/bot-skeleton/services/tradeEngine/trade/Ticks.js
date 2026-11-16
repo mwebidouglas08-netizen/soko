@@ -352,9 +352,9 @@ export default Engine =>
         }
 
         async scanBestVolatilitySignal(opts = {}) {
-            const windowSize = Math.max(10, Math.min(80, Number(opts.windowSize) || 30));
-            const minHistory = Math.max(12, Math.min(windowSize, Number(opts.minHistory) || 20));
-            const minConfidence = Number.isFinite(Number(opts.minConfidence)) ? Number(opts.minConfidence) : 70;
+            const windowSize = Math.max(12, Math.min(80, Number(opts.windowSize) || 30));
+            const minHistory = Math.max(15, Math.min(windowSize, Number(opts.minHistory) || 22));
+            const minConfidence = Number.isFinite(Number(opts.minConfidence)) ? Number(opts.minConfidence) : 82;
             const maxSymbols = Math.max(1, Math.min(60, Number(opts.maxSymbols) || 40));
 
             let candidates = Array.isArray(opts.symbols) && opts.symbols.length ? opts.symbols : null;
@@ -389,7 +389,6 @@ export default Engine =>
                 const last2 = n >= 2 ? recent[n - 2] : null;
                 const last3 = n >= 3 ? recent[n - 3] : null;
 
-                // Digit frequency matrix (recency-weighted) from live ticks
                 const freq = Array(10).fill(0);
                 const recentFreq = Array(10).fill(0);
                 const wRecent = Math.min(12, n);
@@ -402,7 +401,6 @@ export default Engine =>
                 }
                 const freqSum = freq.reduce((a, b) => a + b, 0) || 1;
 
-                // Transition matrix: P(next | prev digit) from live sequence
                 const trans = Array.from({ length: 10 }, () => Array(10).fill(0));
                 const transRow = Array(10).fill(0);
                 for (let i = 1; i < n; i++) {
@@ -416,15 +414,13 @@ export default Engine =>
 
                 const probDigit = d => freq[d] / freqSum;
                 const probNextGivenLast = d => {
-                    if (last1 == null || transRow[last1] < 2) return probDigit(d);
+                    if (last1 == null || transRow[last1] < 3) return probDigit(d);
                     const pCond = trans[last1][d] / transRow[last1];
-                    return 0.62 * pCond + 0.38 * probDigit(d);
+                    return 0.65 * pCond + 0.35 * probDigit(d);
                 };
 
                 const candidatesDefs = [];
-                // Over: win if digit > barrier => barrier 0..8
                 for (let barrier = 0; barrier <= 8; barrier++) candidatesDefs.push({ type: 'DIGITOVER', barrier });
-                // Under: win if digit < barrier => barrier 1..9
                 for (let barrier = 1; barrier <= 9; barrier++) candidatesDefs.push({ type: 'DIGITUNDER', barrier });
 
                 let best = null;
@@ -438,8 +434,7 @@ export default Engine =>
                     if (winDigits.length === 0 || winDigits.length === 10) continue;
 
                     const theoretical = winDigits.length / 10;
-                    // Immediate live condition: last observed tick must be a win for this contract
-                    if (!isWin(last1)) continue;
+                    if (!isWin(last1) || last2 == null || !isWin(last2)) continue;
 
                     let wins = 0;
                     let lossClusterRecent = 0;
@@ -462,45 +457,37 @@ export default Engine =>
                     const edge = winRate - theoretical;
                     const modelEdge = pNext - theoretical;
 
-                    // Hard filters to avoid weak/choppy/false entries
-                    if (safeStreak < 1) continue;
-                    if (lossClusterRecent >= 3) continue;
-                    if (last2 != null && isLoss(last2) && safeStreak < 2) continue;
-                    if (edge < -0.04 && modelEdge <= 0) continue;
-                    if (winRate < theoretical - 0.1 && pNext < theoretical + 0.015) continue;
+                    // strict no-guess gates from live data
+                    if (safeStreak < 2) continue;
+                    if (lossClusterRecent >= 2) continue;
+                    if (edge < 0.015) continue;
+                    if (modelEdge < 0.05) continue;
+                    if (pNext < theoretical + 0.05) continue;
+                    if (winRate < theoretical + 0.015) continue;
+                    if (shortWin < theoretical + 0.01) continue;
+                    if (last3 != null && isLoss(last3) && safeStreak < 3) continue;
 
-                    // Estimated value proxy: higher payout when theoretical (win prob) is lower
                     const payoutFactor = 1 / Math.max(0.1, theoretical);
-                    const ev = pNext * payoutFactor - 1; // rough expected value vs stake
-                    if (ev < -0.02 && modelEdge < 0.03) continue;
+                    const ev = pNext * payoutFactor - 1;
+                    if (ev < 0.06) continue;
+
+                    if (theoretical <= 0.5 && (modelEdge < 0.06 || pNext < theoretical + 0.06 || ev < 0.09)) continue;
+                    if (theoretical <= 0.4 && (modelEdge < 0.075 || safeStreak < 3 || ev < 0.13)) continue;
+                    if (theoretical <= 0.3 && (modelEdge < 0.09 || safeStreak < 4 || ev < 0.18)) continue;
 
                     let score = 0;
-                    // live immediate strength
-                    score += Math.min(22, safeStreak * 5);
-                    if (last2 != null && isWin(last2)) score += 8;
-                    if (last3 != null && isWin(last3)) score += 6;
-                    if (last2 != null && isLoss(last2)) score -= 10;
+                    score += Math.min(26, safeStreak * 5);
+                    if (last3 != null && isWin(last3)) score += 8;
+                    score += Math.max(0, Math.min(36, modelEdge * 135));
+                    score += Math.max(0, Math.min(22, edge * 105));
+                    score += Math.max(0, Math.min(16, (shortWin - theoretical) * 90));
+                    score += Math.max(0, Math.min(20, ev * 42));
 
-                    // edge/model quality
-                    score += Math.max(-20, Math.min(34, modelEdge * 125));
-                    score += Math.max(-14, Math.min(20, edge * 95));
-                    score += Math.max(-10, Math.min(14, (shortWin - theoretical) * 80));
-                    score += Math.max(-8, Math.min(10, (winRate - theoretical) * 70));
+                    const payoutBias = Math.max(0, (0.75 - theoretical)) * 18;
+                    score += payoutBias * clamp01(0.45 + modelEdge * 4 + ev * 1.5);
 
-                    // favor higher payout/value opportunities when signal is strong
-                    const payoutBias = Math.max(0, (0.75 - theoretical)) * 22; // 0 for very safe, higher for 3/4/5-win contracts
-                    score += payoutBias * clamp01(0.35 + modelEdge * 4 + ev * 2);
-                    score += Math.max(-12, Math.min(18, ev * 35));
-
-                    // penalize recent losses
-                    score -= lossClusterRecent * 6;
-
-                    const confidence = Math.max(0, Math.min(99, Math.round(50 + score)));
-                    if (confidence < Math.max(58, minConfidence - 10)) continue;
-                    if (pNext < theoretical + 0.008 && edge < -0.01) continue;
-
-                    // stricter for very high-payout (low prob) unless edge is clear
-                    if (theoretical <= 0.4 && (modelEdge < 0.02 || pNext < theoretical + 0.03)) continue;
+                    const confidence = Math.max(0, Math.min(99, Math.round(46 + score)));
+                    if (confidence < minConfidence) continue;
 
                     const candidate = {
                         symbol: sym,

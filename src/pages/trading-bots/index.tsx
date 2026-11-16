@@ -22,7 +22,7 @@ interface BotCard {
 
 /** Free bots grid — clean, human-made card design. */
 const REFERENCE_CARDS: BotCard[] = [
-    { id: 'maziwa', name: 'Maziwa AI', description: 'Premium high-frequency Over/Under scanner. Rotates all synthetic markets, prioritizes Over 2 and Under 8 signals, 1-tick trades with martingale and session risk controls.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'maziwa' },
+    { id: 'maziwa', name: 'Maziwa AI', description: 'Live multi-market Over/Under scanner with strict signal confirmation, dynamic barrier selection, and cumulative-loss recovery controls.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'maziwa' },
     { id: 'vertex', name: 'Vertex Digits', description: 'Quick Over/Under + Even/Odd analysis bot. Stake 1.0, recovery ×2, pattern gate after every 3 trades.', kind: 'quick', badge: 'FREE', preset: 'vertex' },
     { id: 'digit_nexus', name: 'Digit Nexus', description: 'Digit-frequency Over/Under strategy on Volatility markets with adaptive recovery.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'digit-nexus-ai' },
     { id: 'volt_scalper', name: 'Volt Scalper', description: 'Fast volatility scalping strategy with momentum-based entries and recovery.', kind: 'xml', badge: 'PREMIUM', xmlFile: 'volt-scalper' },
@@ -168,19 +168,28 @@ const TradingBotsPage = observer(() => {
                 </div>
             ) : (
                 <div className='bots-grid'>
-                    {visible.map(card => {
+                    {visible.map((card, i) => {
                         const theme = botVisual(themeId(card.id));
                         const imgId = imageId(card.id);
+                        const accent = theme.color || '#6366f1';
+                        const accent2 = theme.color2 || '#22d3ee';
                         return (
-                            <article key={card.id} className='bots-card' style={{ '--bot-color': theme.color } as React.CSSProperties}>
-                                <div className='bots-card__image'>
-                                    <img src={`data:image/svg+xml;base64,${btoa(botImage(imgId))}`} alt={card.name} loading='lazy' decoding='async' />
+                            <article
+                                key={card.id}
+                                className='bots-card'
+                                style={{ '--bot-color': accent, '--bot-color-2': accent2, animationDelay: `${i * 45}ms` } as React.CSSProperties}
+                            >
+                                <div className='bots-card__shine' aria-hidden='true' />
+                                <div className='bots-card__media'>
+                                    <div className='bots-card__image-wrap'>
+                                        <img src={`data:image/svg+xml;base64,${btoa(botImage(imgId))}`} alt={card.name} loading='lazy' decoding='async' />
+                                    </div>
+                                    <div className='bots-card__meta'>
+                                        <span className={`bots-card__badge bots-card__badge--${card.badge.toLowerCase()}`}>{card.badge}</span>
+                                        <span className='bots-card__kind'>{card.kind === 'quick' ? 'Quick Bot' : 'Strategy'}</span>
+                                    </div>
                                 </div>
                                 <div className='bots-card__content'>
-                                    <div className='bots-card__header'>
-                                        <span className={`bots-card__badge bots-card__badge--${card.badge.toLowerCase()}`}>{card.badge}</span>
-                                        <span className='bots-card__kind'>{card.kind === 'quick' ? 'Quick' : 'Strategy'}</span>
-                                    </div>
                                     <h3 className='bots-card__name'>{card.name}</h3>
                                     <p className='bots-card__desc'>{card.description}</p>
                                 </div>

@@ -12,7 +12,7 @@ type Bot = {
 };
 
 const BOTS: Bot[] = [
-    { file: 'maziwa', name: 'Maziwa AI', tag: 'PREMIUM', desc: 'High-frequency Over/Under scanner: Over 2 / Under 8, 1-tick, multi-market, martingale.', premium: true },
+    { file: 'maziwa', name: 'Maziwa AI', tag: 'PREMIUM', desc: 'Strict live Over/Under scanner: multi-market, dynamic barriers, confirmed signals, and recovery controls.', premium: true },
     { file: 'digit-nexus-ai', name: 'Digit Nexus', tag: 'DIGITS', desc: 'Digit frequency Over/Under entries.' },
     { file: 'volt-scalper', name: 'Volt Scalper', tag: 'SCALP', desc: 'Fast volatility scalping.' },
     { file: 'apex-ai', name: 'Apex AI', tag: 'PREMIUM', desc: 'Adaptive multi-market AI.', premium: true },
@@ -98,20 +98,26 @@ const BotsCatalog = () => {
             <div className='bots-catalog__grid'>
                 {bots.map((bot, i) => {
                     const theme = botVisual(bot.file);
-                    const cardStyle: React.CSSProperties & { '--bot-color'?: string } = {
-                        '--bot-color': theme.color as string,
-                        animationDelay: `${i * 80}ms`,
+                    const accent = (theme.color as string) || '#6366f1';
+                    const accent2 = (theme.color2 as string) || '#22d3ee';
+                    const cardStyle: React.CSSProperties & { '--bot-color'?: string; '--bot-color-2'?: string } = {
+                        '--bot-color': accent,
+                        '--bot-color-2': accent2,
+                        animationDelay: `${i * 45}ms`,
                     };
                     return (
                         <article key={bot.file} className='bots-card' style={cardStyle}>
-                            <div className='bots-card__icon'>
-                                <span className='bots-card__icon-symbol' dangerouslySetInnerHTML={{ __html: botIcon(theme.kind) }} />
-                            </div>
-                            <div className='bots-card__content'>
+                            <div className='bots-card__shine' aria-hidden='true' />
+                            <div className='bots-card__hero'>
+                                <div className='bots-card__icon'>
+                                    <span className='bots-card__icon-symbol' dangerouslySetInnerHTML={{ __html: botIcon(theme.kind) }} />
+                                </div>
                                 <div className='bots-card__header'>
                                     <span className='bots-card__tag'>{theme.tag}</span>
                                     {theme.premium && <span className='bots-card__premium'>PREMIUM</span>}
                                 </div>
+                            </div>
+                            <div className='bots-card__content'>
                                 <h3 className='bots-card__name'>{bot.name}</h3>
                                 <p className='bots-card__desc'>{bot.desc}</p>
                             </div>

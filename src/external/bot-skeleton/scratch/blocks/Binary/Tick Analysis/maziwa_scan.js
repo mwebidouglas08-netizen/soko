@@ -28,13 +28,31 @@ window.Blockly.Blocks.maziwa_scan_signal = {
                     check: 'Number',
                 },
             ],
+            message2: localize('loss streak %1 total P/L %2 recover %3'),
+            args2: [
+                {
+                    type: 'input_value',
+                    name: 'LOSS_STREAK',
+                    check: 'Number',
+                },
+                {
+                    type: 'input_value',
+                    name: 'TOTAL_PROFIT',
+                    check: 'Number',
+                },
+                {
+                    type: 'input_value',
+                    name: 'RECOVER_AMOUNT',
+                    check: 'Number',
+                },
+            ],
             output: 'Array',
             outputShape: window.Blockly.OUTPUT_SHAPE_ROUND,
             colour: window.Blockly.Colours.Base.colour,
             colourSecondary: window.Blockly.Colours.Base.colourSecondary,
             colourTertiary: window.Blockly.Colours.Base.colourTertiary,
             tooltip: localize(
-                'Scans open live volatility markets using digit frequency/transition matrix and edge scoring, switches to the best market, and returns [symbol, direction(4=Over,5=Under), prediction, confidence] for immediate entry. Returns empty list when no strong signal is found.'
+                'Scans open live volatility markets using digit frequency/transition matrix, trend, and edge/payout scoring, switches to the best market, and returns [symbol, direction(4=Over,5=Under), prediction, confidence, theoretical, ev]. Tightens selectivity during loss streak/recovery/drawdown. Returns empty list when no strong, conscious signal is found.'
             ),
             category: window.Blockly.Categories.Tick_Analysis,
         };
@@ -52,14 +70,17 @@ window.Blockly.Blocks.maziwa_scan_signal = {
 
 window.Blockly.JavaScript.javascriptGenerator.forBlock.maziwa_scan_signal = block => {
     const g = window.Blockly.JavaScript.javascriptGenerator;
-    const minConfidence = g.valueToCode(block, 'MIN_CONFIDENCE', g.ORDER_ATOMIC) || '72';
-    const windowSize = g.valueToCode(block, 'WINDOW', g.ORDER_ATOMIC) || '20';
-    const maxSymbols = g.valueToCode(block, 'MAX_SYMBOLS', g.ORDER_ATOMIC) || '12';
+    const minConfidence = g.valueToCode(block, 'MIN_CONFIDENCE', g.ORDER_ATOMIC) || '82';
+    const windowSize = g.valueToCode(block, 'WINDOW', g.ORDER_ATOMIC) || '25';
+    const maxSymbols = g.valueToCode(block, 'MAX_SYMBOLS', g.ORDER_ATOMIC) || '40';
+    const lossStreak = g.valueToCode(block, 'LOSS_STREAK', g.ORDER_ATOMIC) || '0';
+    const totalProfit = g.valueToCode(block, 'TOTAL_PROFIT', g.ORDER_ATOMIC) || '0';
+    const recoverAmount = g.valueToCode(block, 'RECOVER_AMOUNT', g.ORDER_ATOMIC) || '0';
     const code =
         '(function(){' +
-        'var _r=Bot.scanBestVolatilitySignal({minConfidence:' + minConfidence + ',windowSize:' + windowSize + ',maxSymbols:' + maxSymbols + '});' +
+        'var _r=Bot.scanBestVolatilitySignal({minConfidence:' + minConfidence + ',windowSize:' + windowSize + ',maxSymbols:' + maxSymbols + ',lossStreak:' + lossStreak + ',totalProfit:' + totalProfit + ',recoverAmount:' + recoverAmount + '});' +
         'if(_r&&_r.contractType){' +
-        'return [String((_r&&_r.symbol)||\'\'),((_r&&_r.contractType)===\'DIGITOVER\'?4:5),Number((_r&&_r.prediction)||0),Number((_r&&_r.confidence)||0)];' +
+        'return [String((_r&&_r.symbol)||\'\'),((_r&&_r.contractType)===\'DIGITOVER\'?4:5),Number((_r&&_r.prediction)||0),Number((_r&&_r.confidence)||0),Number((_r&&_r.theoretical)||0),Number((_r&&_r.ev)||0)];' +
         '}' +
         'return [];})()';
     return [code, g.ORDER_FUNCTION_CALL];

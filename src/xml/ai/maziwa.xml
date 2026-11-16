@@ -17,9 +17,11 @@
     <variable id="mz_max_stake">Max Stake</variable>
     <variable id="mz_scan">Scan</variable>
     <variable id="mz_confidence">Confidence</variable>
+    <variable id="mz_signal_theoretical">Signal Theoretical</variable>
+    <variable id="mz_signal_ev">Signal EV</variable>
   </variables>
   <block type="trade_definition" id="mz_trade_definition" deletable="false" x="0" y="60">
-    <comment pinned="false" h="340" w="700">Maziwa AI v10: strictly scans all open live Deriv synthetic volatility markets in parallel and enters only on confirmed high-confidence Over/Under signals (dynamic barriers, e.g. Over 2/3/4, Under 6/7/8) derived from live digit frequency/transition matrix, edge/value and multi-tick safe-streak confirmation. No-guess policy: skips when data is weak or unconfirmed. Switches market with computed prediction/barrier for immediate execution. Uses cumulative-loss recovery sizing with capped stake, TP/SL, and max-trades guards. Trading is risky and probabilistic; profits/loss-free outcomes cannot be guaranteed. Test on demo first.</comment>
+    <comment pinned="false" h="360" w="720">Maziwa AI v11 (conscious, risk-aware): scans all open live Deriv synthetic volatility markets and enters only on confirmed high-confidence Over/Under signals using live digit frequency/transition matrix, trend/momentum, edge and payout/EV checks. Execution is P&amp;L/drawdown/recovery aware: selectivity tightens under loss streak, negative total profit, or recovery pressure; stake sizing is capacity- and payout-conscious with no blind stake increases to reduce blow-up risk. No strategy can guarantee profits or eliminate losses; validate in demo. unconfirmed. Switches market with computed prediction/barrier for immediate execution. Uses cumulative-loss recovery sizing with capped stake, TP/SL, and max-trades guards. Trading is risky and probabilistic; profits/loss-free outcomes cannot be guaranteed. Test on demo first.</comment>
     <statement name="TRADE_OPTIONS">
       <block type="trade_definition_market" id="mz_market" deletable="false" movable="false">
         <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
@@ -49,7 +51,7 @@
     <statement name="INITIALIZATION">
       <block type="variables_set" id="mz_set_stake"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_number"><field name="NUM">0.35</field></block></value>
       <next><block type="variables_set" id="mz_set_base"><field name="VAR" id="mz_base_stake">Base Stake</field><value name="VALUE"><block type="math_number"><field name="NUM">0.35</field></block></value>
-      <next><block type="variables_set" id="mz_set_mg"><field name="VAR" id="mz_martingale">Martingale</field><value name="VALUE"><block type="math_number"><field name="NUM">2</field></block></value>
+      <next><block type="variables_set" id="mz_set_mg"><field name="VAR" id="mz_martingale">Martingale</field><value name="VALUE"><block type="math_number"><field name="NUM">1</field></block></value>
       <next><block type="variables_set" id="mz_set_tp"><field name="VAR" id="mz_take_profit">Take Profit</field><value name="VALUE"><block type="math_number"><field name="NUM">10</field></block></value>
       <next><block type="variables_set" id="mz_set_sl"><field name="VAR" id="mz_stop_loss">Stop Loss</field><value name="VALUE"><block type="math_number"><field name="NUM">50</field></block></value>
       <next><block type="variables_set" id="mz_set_mt"><field name="VAR" id="mz_max_trades">Max Trades</field><value name="VALUE"><block type="math_number"><field name="NUM">500</field></block></value>
@@ -61,7 +63,7 @@
       <next><block type="variables_set" id="mz_set_mls"><field name="VAR" id="mz_max_loss_streak">Max Loss Streak</field><value name="VALUE"><block type="math_number"><field name="NUM">999</field></block></value>
       <next><block type="variables_set" id="mz_set_dur"><field name="VAR" id="mz_duration">Duration</field><value name="VALUE"><block type="math_number"><field name="NUM">1</field></block></value>
       <next><block type="variables_set" id="mz_set_rec"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
-      <next><block type="variables_set" id="mz_set_ms"><field name="VAR" id="mz_max_stake">Max Stake</field><value name="VALUE"><block type="math_number"><field name="NUM">500</field></block></value>
+      <next><block type="variables_set" id="mz_set_ms"><field name="VAR" id="mz_max_stake">Max Stake</field><value name="VALUE"><block type="math_number"><field name="NUM">5</field></block></value>
       <next><block type="variables_set" id="mz_set_scan"><field name="VAR" id="mz_scan">Scan</field><value name="VALUE"><block type="lists_create_with"><mutation items="0"></mutation></block></value>
       <next><block type="variables_set" id="mz_set_conf"><field name="VAR" id="mz_confidence">Confidence</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
       </block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block>
@@ -72,19 +74,28 @@
         <statement name="DO"><block type="timeout" id="mz_delay"><statement name="TIMEOUTSTACK">
           <block type="variables_set" id="mz_do_scan"><field name="VAR" id="mz_scan">Scan</field>
             <value name="VALUE"><block type="maziwa_scan_signal">
-              <value name="MIN_CONFIDENCE"><shadow type="math_number"><field name="NUM">82</field></shadow></value>
+              <value name="MIN_CONFIDENCE"><shadow type="math_number"><field name="NUM">84</field></shadow></value>
               <value name="WINDOW"><shadow type="math_number"><field name="NUM">25</field></shadow></value>
               <value name="MAX_SYMBOLS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+              <value name="LOSS_STREAK"><block type="variables_get"><field name="VAR" id="mz_loss_streak">Loss Streak</field></block></value>
+              <value name="TOTAL_PROFIT"><block type="total_profit"></block></value>
+              <value name="RECOVER_AMOUNT"><block type="variables_get"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value>
             </block></value>
           <next><block type="controls_if" id="mz_use_scan"><value name="IF0"><block type="logic_compare"><field name="OP">GT</field>
             <value name="A"><block type="lists_length"><value name="VALUE"><block type="variables_get"><field name="VAR" id="mz_scan">Scan</field></block></value></block></value>
             <value name="B"><block type="math_number"><field name="NUM">0</field></block></value></block></value>
             <statement name="DO0">
               <block type="variables_set" id="mz_conf_set"><field name="VAR" id="mz_confidence">Confidence</field><value name="VALUE"><block type="lists_getIndex"><mutation statement="false" at="true"></mutation><field name="MODE">GET</field><field name="WHERE">FROM_START</field><value name="VALUE"><block type="variables_get"><field name="VAR" id="mz_scan">Scan</field></block></value><value name="AT"><block type="math_number"><field name="NUM">4</field></block></value></block></value>
+              <next><block type="variables_set" id="mz_sth_set"><field name="VAR" id="mz_signal_theoretical">Signal Theoretical</field><value name="VALUE"><block type="lists_getIndex"><mutation statement="false" at="true"></mutation><field name="MODE">GET</field><field name="WHERE">FROM_START</field><value name="VALUE"><block type="variables_get"><field name="VAR" id="mz_scan">Scan</field></block></value><value name="AT"><block type="math_number"><field name="NUM">5</field></block></value></block></value>
+              <next><block type="variables_set" id="mz_sev_set"><field name="VAR" id="mz_signal_ev">Signal EV</field><value name="VALUE"><block type="lists_getIndex"><mutation statement="false" at="true"></mutation><field name="MODE">GET</field><field name="WHERE">FROM_START</field><value name="VALUE"><block type="variables_get"><field name="VAR" id="mz_scan">Scan</field></block></value><value name="AT"><block type="math_number"><field name="NUM">6</field></block></value></block></value>
               <next><block type="maziwa_set_symbol" id="mz_apply_sym"><value name="SYMBOL"><block type="lists_getIndex"><mutation statement="false" at="true"></mutation><field name="MODE">GET</field><field name="WHERE">FROM_START</field><value name="VALUE"><block type="variables_get"><field name="VAR" id="mz_scan">Scan</field></block></value><value name="AT"><block type="math_number"><field name="NUM">1</field></block></value></block></value>
               <next><block type="variables_set" id="mz_set_dir_scan"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="lists_getIndex"><mutation statement="false" at="true"></mutation><field name="MODE">GET</field><field name="WHERE">FROM_START</field><value name="VALUE"><block type="variables_get"><field name="VAR" id="mz_scan">Scan</field></block></value><value name="AT"><block type="math_number"><field name="NUM">2</field></block></value></block></value>
               <next><block type="variables_set" id="mz_set_pred_scan"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="lists_getIndex"><mutation statement="false" at="true"></mutation><field name="MODE">GET</field><field name="WHERE">FROM_START</field><value name="VALUE"><block type="variables_get"><field name="VAR" id="mz_scan">Scan</field></block></value><value name="AT"><block type="math_number"><field name="NUM">3</field></block></value></block></value>
-              <next><block type="variables_set" id="mz_set_signal_true"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></next></block></next></block>
+              <next><block type="variables_set" id="mz_cap_stake"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_arithmetic"><field name="OP">MIN</field>
+                <value name="A"><block type="variables_get"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value>
+                <value name="B"><block type="variables_get"><field name="VAR" id="mz_max_stake">Max Stake</field></block></value>
+              </block></value>
+              <next><block type="variables_set" id="mz_set_signal_true"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></next></block></next></block></next></block></next></block>
             </statement>
           </block></next></block>
         </statement><value name="SECONDS"><block type="math_number"><field name="NUM">0.03</field></block></value></block></statement>
@@ -112,10 +123,7 @@
                 <value name="B"><block type="math_number"><field name="NUM">0</field></block></value>
               </block></value>
               <next><block type="variables_set"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_arithmetic"><field name="OP">MIN</field>
-                <value name="A"><block type="math_arithmetic"><field name="OP">ADD</field>
-                  <value name="A"><block type="math_arithmetic"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="math_number"><field name="NUM">1.4</field></block></value></block></value>
-                  <value name="B"><block type="variables_get"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value>
-                </block></value>
+                <value name="A"><block type="variables_get"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value>
                 <value name="B"><block type="variables_get"><field name="VAR" id="mz_max_stake">Max Stake</field></block></value>
               </block></value></block></next></block>
             </statement>
@@ -125,13 +133,7 @@
           <block type="math_change"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
           <next><block type="variables_set"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_arithmetic"><field name="OP">ADD</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="math_single"><field name="OP">ABS</field><value name="NUM"><block type="read_details"><field name="DETAIL_INDEX">4</field></block></value></block></value></block></value>
           <next><block type="variables_set"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_arithmetic"><field name="OP">MIN</field>
-            <value name="A"><block type="math_arithmetic"><field name="OP">MAX</field>
-              <value name="A"><block type="math_arithmetic"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_stake">Stake</field></block></value><value name="B"><block type="variables_get"><field name="VAR" id="mz_martingale">Martingale</field></block></value></block></value>
-              <value name="B"><block type="math_arithmetic"><field name="OP">ADD</field>
-                <value name="A"><block type="math_arithmetic"><field name="OP">MULTIPLY</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_recover_amount">Recover Amount</field></block></value><value name="B"><block type="math_number"><field name="NUM">1.4</field></block></value></block></value>
-                <value name="B"><block type="variables_get"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value>
-              </block></value>
-            </block></value>
+            <value name="A"><block type="variables_get"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value>
             <value name="B"><block type="variables_get"><field name="VAR" id="mz_max_stake">Max Stake</field></block></value>
           </block></value></block></next></block></next></block>
         </statement>

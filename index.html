@@ -1,8 +1,14 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en" dir="auto" class="light">
     <head>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="theme-color" content="#050a14" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="title" content="Build a trading bot without coding | TradingHubs." />
         <meta
@@ -87,7 +93,7 @@
             /* ==================================================================
                Intro / initialization screen.
 
-               Painted by the browser on the very first frame — no bundle, no
+               Painted by the browser on the very first frame â€” no bundle, no
                webfonts, no photographs and no large blur filters, so it appears
                instantly even on a cold, mid-range phone. Depth comes from
                layered radial gradients (cheap) plus border-only shapes.
@@ -461,7 +467,7 @@
 
                 /* The bar reaches 100% at INTRO_MS, the splash holds for HOLD_MS
                    and then dissolves over FADE_MS. MIN_VISIBLE is a hard floor:
-                   nothing — not main.tsx, not the React shell — can dismiss the
+                   nothing â€” not main.tsx, not the React shell â€” can dismiss the
                    intro before it, which is what used to make it flash past. */
                 var INTRO_MS = reduce ? 700 : 4200;
                 var HOLD_MS = reduce ? 150 : 520;
@@ -529,3 +535,4 @@
         </script>
     </body>
 </html>
+

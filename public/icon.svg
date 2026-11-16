@@ -1,0 +1,31 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#071020"/>
+      <stop offset="100%" stop-color="#0a2236"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22e7ff"/>
+      <stop offset="100%" stop-color="#d8b45a"/>
+    </linearGradient>
+    <linearGradient id="area" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#22e7ff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#d8b45a" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#bg)"/>
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="none" stroke="#64e1f3" stroke-opacity="0.25" stroke-width="6"/>
+  <ellipse cx="256" cy="256" rx="150" ry="150" fill="#22e7ff" opacity="0.08"/>
+  <path d="M112 348 L194 286 L256 308 L328 204 L400 154 L400 400 L112 400 Z" fill="url(#area)"/>
+  <polyline points="112,348 194,286 256,308 328,204 400,154" fill="none" stroke="url(#line)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <circle cx="112" cy="348" r="14" fill="#f0f8ff"/>
+  <circle cx="194" cy="286" r="14" fill="#f0f8ff"/>
+  <circle cx="256" cy="308" r="14" fill="#f0f8ff"/>
+  <circle cx="328" cy="204" r="14" fill="#f0f8ff"/>
+  <circle cx="400" cy="154" r="22" fill="#d8b45a"/>
+  <circle cx="400" cy="154" r="9" fill="#050a14"/>
+</svg>

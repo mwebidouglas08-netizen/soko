@@ -354,7 +354,7 @@ export default Engine =>
         async scanBestVolatilitySignal(opts = {}) {
             const windowSize = Math.max(10, Math.min(80, Number(opts.windowSize) || 30));
             const minHistory = Math.max(12, Math.min(windowSize, Number(opts.minHistory) || 20));
-            const minConfidence = Number.isFinite(Number(opts.minConfidence)) ? Number(opts.minConfidence) : 72;
+            const minConfidence = Number.isFinite(Number(opts.minConfidence)) ? Number(opts.minConfidence) : 70;
             const maxSymbols = Math.max(1, Math.min(60, Number(opts.maxSymbols) || 40));
 
             let candidates = Array.isArray(opts.symbols) && opts.symbols.length ? opts.symbols : null;
@@ -371,13 +371,12 @@ export default Engine =>
                 return { symbol: this.symbol, contractType: null, prediction: null, confidence: 0, reason: 'no_symbols' };
             }
 
-            const start = Number.isInteger(this._maziwaScanCursor) ? this._maziwaScanCursor : 0;
-            const rotated = candidates.slice(start).concat(candidates.slice(0, start));
+            const startIdx = Number.isInteger(this._maziwaScanCursor) ? this._maziwaScanCursor : 0;
+            const rotated = candidates.slice(startIdx).concat(candidates.slice(0, startIdx));
             const batch = rotated.slice(0, Math.min(maxSymbols, rotated.length));
-            this._maziwaScanCursor = (start + Math.max(1, batch.length)) % candidates.length;
+            this._maziwaScanCursor = (startIdx + Math.max(1, batch.length)) % candidates.length;
 
             const tickSvc = this.$scope?.ticksService;
-
             const clamp01 = v => Math.max(0, Math.min(1, v));
 
             const evaluate = (digits, sym) => {
@@ -387,7 +386,7 @@ export default Engine =>
 
                 const n = recent.length;
                 const last1 = recent[n - 1];
-                const last2 = recent[n - 2];
+                const last2 = n >= 2 ? recent[n - 2] : null;
                 const last3 = n >= 3 ? recent[n - 3] : null;
 
                 // Digit frequency matrix (recency-weighted) from live ticks
@@ -395,7 +394,7 @@ export default Engine =>
                 const recentFreq = Array(10).fill(0);
                 const wRecent = Math.min(12, n);
                 for (let i = 0; i < n; i++) {
-                    const w = 0.35 + 0.65 * ((i + 1) / n); // older->lower, newer->higher
+                    const w = 0.3 + 0.7 * ((i + 1) / n);
                     freq[recent[i]] += w;
                 }
                 for (let i = n - wRecent; i < n; i++) {
@@ -419,8 +418,7 @@ export default Engine =>
                 const probNextGivenLast = d => {
                     if (last1 == null || transRow[last1] < 2) return probDigit(d);
                     const pCond = trans[last1][d] / transRow[last1];
-                    // blend conditional and global recency-weighted frequency
-                    return 0.6 * pCond + 0.4 * probDigit(d);
+                    return 0.62 * pCond + 0.38 * probDigit(d);
                 };
 
                 const candidatesDefs = [];
@@ -437,15 +435,12 @@ export default Engine =>
                     const isLoss = d => !isWin(d);
                     const winDigits = [];
                     for (let d = 0; d <= 9; d++) if (isWin(d)) winDigits.push(d);
-                    const lossDigitsCount = 10 - winDigits.length;
                     if (winDigits.length === 0 || winDigits.length === 10) continue;
 
                     const theoretical = winDigits.length / 10;
-
                     // Immediate live condition: last observed tick must be a win for this contract
                     if (!isWin(last1)) continue;
 
-                    // Historical/live performance in window
                     let wins = 0;
                     let lossClusterRecent = 0;
                     const last6 = recent.slice(-6);
@@ -453,19 +448,16 @@ export default Engine =>
                     for (let i = 0; i < last6.length; i++) if (isLoss(last6[i])) lossClusterRecent++;
                     const winRate = wins / n;
 
-                    // Safe streak ending at latest tick
                     let safeStreak = 0;
                     for (let i = n - 1; i >= 0; i--) {
                         if (isWin(recent[i])) safeStreak++;
                         else break;
                     }
 
-                    // Matrix/model probability for next digit being in win set
                     let pNext = 0;
                     for (const d of winDigits) pNext += probNextGivenLast(d);
                     pNext = clamp01(pNext);
 
-                    // Recent short-window win rate
                     const shortWin = recentFreq.reduce((acc, c, d) => acc + (isWin(d) ? c : 0), 0) / wRecent;
                     const edge = winRate - theoretical;
                     const modelEdge = pNext - theoretical;
@@ -473,9 +465,14 @@ export default Engine =>
                     // Hard filters to avoid weak/choppy/false entries
                     if (safeStreak < 1) continue;
                     if (lossClusterRecent >= 3) continue;
-                    if (last2 != null && isLoss(last2) && safeStreak < 2) continue; // unstable
-                    if (edge < -0.03 && modelEdge < 0) continue;
-                    if (winRate < theoretical - 0.08 && pNext < theoretical + 0.02) continue;
+                    if (last2 != null && isLoss(last2) && safeStreak < 2) continue;
+                    if (edge < -0.04 && modelEdge <= 0) continue;
+                    if (winRate < theoretical - 0.1 && pNext < theoretical + 0.015) continue;
+
+                    // Estimated value proxy: higher payout when theoretical (win prob) is lower
+                    const payoutFactor = 1 / Math.max(0.1, theoretical);
+                    const ev = pNext * payoutFactor - 1; // rough expected value vs stake
+                    if (ev < -0.02 && modelEdge < 0.03) continue;
 
                     let score = 0;
                     // live immediate strength
@@ -484,26 +481,26 @@ export default Engine =>
                     if (last3 != null && isWin(last3)) score += 6;
                     if (last2 != null && isLoss(last2)) score -= 10;
 
-                    // matrix/model edge (primary)
-                    score += Math.max(-20, Math.min(32, modelEdge * 120));
-                    score += Math.max(-12, Math.min(18, edge * 90));
-
-                    // consistency
+                    // edge/model quality
+                    score += Math.max(-20, Math.min(34, modelEdge * 125));
+                    score += Math.max(-14, Math.min(20, edge * 95));
                     score += Math.max(-10, Math.min(14, (shortWin - theoretical) * 80));
                     score += Math.max(-8, Math.min(10, (winRate - theoretical) * 70));
+
+                    // favor higher payout/value opportunities when signal is strong
+                    const payoutBias = Math.max(0, (0.75 - theoretical)) * 22; // 0 for very safe, higher for 3/4/5-win contracts
+                    score += payoutBias * clamp01(0.35 + modelEdge * 4 + ev * 2);
+                    score += Math.max(-12, Math.min(18, ev * 35));
 
                     // penalize recent losses
                     score -= lossClusterRecent * 6;
 
-                    // prefer stronger statistical contracts a bit (e.g. Over 2 / Under 7/8) when equal
-                    score += Math.min(6, (winDigits.length - 5) * 0.8);
-
-                    // confidence 0-99
                     const confidence = Math.max(0, Math.min(99, Math.round(50 + score)));
+                    if (confidence < Math.max(58, minConfidence - 10)) continue;
+                    if (pNext < theoretical + 0.008 && edge < -0.01) continue;
 
-                    // minimum quality gate per candidate before considering
-                    if (confidence < Math.max(60, minConfidence - 8)) continue;
-                    if (pNext < theoretical + 0.01 && edge < 0) continue;
+                    // stricter for very high-payout (low prob) unless edge is clear
+                    if (theoretical <= 0.4 && (modelEdge < 0.02 || pNext < theoretical + 0.03)) continue;
 
                     const candidate = {
                         symbol: sym,
@@ -515,13 +512,14 @@ export default Engine =>
                         edge,
                         safeStreak,
                         theoretical,
+                        ev,
                     };
 
                     if (
                         !best ||
                         candidate.confidence > best.confidence ||
-                        (candidate.confidence === best.confidence && candidate.pNext > best.pNext) ||
-                        (candidate.confidence === best.confidence && candidate.pNext === best.pNext && candidate.safeStreak > best.safeStreak)
+                        (candidate.confidence === best.confidence && candidate.ev > best.ev) ||
+                        (candidate.confidence === best.confidence && candidate.ev === best.ev && candidate.pNext > best.pNext)
                     ) {
                         best = candidate;
                     }
@@ -560,10 +558,10 @@ export default Engine =>
             signals.sort(
                 (a, b) =>
                     b.confidence - a.confidence ||
+                    b.ev - a.ev ||
                     b.pNext - a.pNext ||
                     b.safeStreak - a.safeStreak ||
-                    b.edge - a.edge ||
-                    b.winRate - a.winRate
+                    b.edge - a.edge
             );
 
             const best = signals[0] || null;
@@ -578,7 +576,6 @@ export default Engine =>
                 };
             }
 
-            // Ensure engine is on the selected live market before returning (reliable/accurate entry)
             try {
                 if (typeof this.setSymbol === 'function') {
                     await this.setSymbol(best.symbol);
@@ -589,7 +586,6 @@ export default Engine =>
                     await this.watchTicks(best.symbol);
                 }
             } catch (e) {
-                // if switch fails, do not signal trade
                 return {
                     symbol: best.symbol,
                     contractType: null,
@@ -609,6 +605,7 @@ export default Engine =>
                 winRate: best.winRate,
                 edge: best.edge,
                 safeStreak: best.safeStreak,
+                ev: best.ev,
                 reason: 'selected',
                 candidates: batch.length,
             };

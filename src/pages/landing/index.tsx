@@ -685,10 +685,10 @@ const Landing = ({ onEnter, isLoggedIn = false }: LandingProps) => {
             {/* ------------------------------ backdrop ----------------------------- */}
             <div className='lp__backdrop' aria-hidden='true'>
                 <picture>
-                    <source media='(max-width: 899px)' srcSet='/static/media/landing-backdrop-mobile.534cef31.webp' type='image/webp' />
-                    <source media='(min-width: 900px)' srcSet='/static/media/landing-backdrop.34bd4858.webp' type='image/webp' />
-                    <source media='(max-width: 899px)' srcSet='/static/media/landing-backdrop-mobile.534cef31.jpg' />
-                    <img src='/static/media/landing-backdrop.34bd4858.jpg' alt='' decoding='async' fetchPriority='high' />
+                    <source media='(max-width: 899px)' srcSet='/static/media/landing-backdrop-mobile.3b0a0e3e.webp' type='image/webp' />
+                    <source media='(min-width: 900px)' srcSet='/static/media/landing-backdrop.5ab5b8d3.webp' type='image/webp' />
+                    <source media='(max-width: 899px)' srcSet='/static/media/landing-backdrop-mobile.3b0a0e3e.jpg' />
+                    <img src='/static/media/landing-backdrop.5ab5b8d3.jpg' alt='' decoding='async' fetchPriority='high' />
                 </picture>
                 <span className='lp__veil' />
                 <span className='lp__veil lp__veil--side' />

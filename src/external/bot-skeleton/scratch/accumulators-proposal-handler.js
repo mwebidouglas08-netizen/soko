@@ -26,7 +26,7 @@ export const handleProposalRequestForAccumulators = instance => {
     const top_parent_block = instance?.getTopParent();
     const market_block = top_parent_block?.getChildByType('trade_definition_market');
     const underlying_symbol = market_block?.getFieldValue('SYMBOL_LIST');
-    const currency = DBotStore.instance.client.currency;
+    const currency = DBotStore?.instance?.client?.currency;
     const growth_rate = instance?.getFieldValue('GROWTHRATE_LIST') || 0.01;
     const amount = instance?.childBlocks_?.[0]?.getField('NUM')?.getValue() || 0;
     const proposal_request = {

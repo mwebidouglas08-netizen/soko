@@ -25,7 +25,11 @@ const getMiscInterface = tradeEngine => {
         },
         getTotalRuns: () => tradeEngine.getTotalRuns(),
         getBalance: type => tradeEngine.getBalance(type),
-        getTotalProfit: toString => tradeEngine.getTotalProfit(toString, tradeEngine.tradeOptions.currency),
+        getTotalProfit: toString =>
+            tradeEngine.getTotalProfit(
+                toString,
+                tradeEngine?.tradeOptions?.currency || tradeEngine?.options?.currency || ''
+            ),
     };
 };
 

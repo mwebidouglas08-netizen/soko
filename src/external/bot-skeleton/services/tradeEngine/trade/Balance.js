@@ -25,10 +25,11 @@ export default Engine =>
 
         // eslint-disable-next-line class-methods-use-this
         getBalance(type) {
-            const { client } = DBotStore.instance;
-            const balance = (client && client.balance) || 0;
+            const client = DBotStore?.instance?.client;
+            const balance = client?.balance ?? 0;
+            const currency = client?.currency || '';
 
-            balance_string = getFormattedText(balance, client.currency, false);
+            balance_string = getFormattedText(balance, currency, false);
             return type === 'STR' ? balance_string : balance;
         }
     };

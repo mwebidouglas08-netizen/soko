@@ -70,17 +70,19 @@
     list-style: none;
 }
 
-.lp button {
+/* Reset by element, scored through :where() so a component class can still win.
+   (`.lp button` would out-specify every `.lp-btn--*` modifier below it.) */
+.lp :where(button),
+.lp :where(a) {
     font: inherit;
     color: inherit;
     background: none;
     border: 0;
-    cursor: pointer;
+    text-decoration: none;
 }
 
-.lp a {
-    color: inherit;
-    text-decoration: none;
+.lp :where(button) {
+    cursor: pointer;
 }
 
 .lp img,
@@ -141,7 +143,9 @@ body.lp-open .app-footer {
     align-items: center;
     gap: 20px;
     height: 74px;
-    padding: 0 clamp(16px, 4vw, 48px);
+    /* Align the bar's contents with the 1240px content column, not the viewport,
+       so the wordmark sits directly above the hero headline. */
+    padding: 0 max(clamp(16px, 4vw, 48px), calc((100vw - 1240px) / 2));
     border-bottom: 1px solid transparent;
     background: rgb(7 10 9 / 72%);
     backdrop-filter: blur(14px);

@@ -21,7 +21,7 @@
     <variable id="mz_signal_ev">Signal EV</variable>
   </variables>
   <block type="trade_definition" id="mz_trade_definition" deletable="false" x="0" y="60">
-    <comment pinned="false" h="360" w="720">Maziwa AI v11 (conscious, risk-aware): scans all open live Deriv synthetic volatility markets and enters only on confirmed high-confidence Over/Under signals using live digit frequency/transition matrix, trend/momentum, edge and payout/EV checks. Execution is P&amp;L/drawdown/recovery aware: selectivity tightens under loss streak, negative total profit, or recovery pressure; stake sizing is capacity- and payout-conscious with no blind stake increases to reduce blow-up risk. No strategy can guarantee profits or eliminate losses; validate in demo. unconfirmed. Switches market with computed prediction/barrier for immediate execution. Uses cumulative-loss recovery sizing with capped stake, TP/SL, and max-trades guards. Trading is risky and probabilistic; profits/loss-free outcomes cannot be guaranteed. Test on demo first.</comment>
+    <comment pinned="false" h="380" w="740">Maziwa AI v12 (intelligent safe-entry, risk-aware): continuously scans all open live Deriv synthetic volatility markets in real time and waits for a confirmed safe-entry digit/barrier using live tick frequency, transition matrix, trend/momentum, edge and payout/EV assurance. No blind or forced trades. After a loss/drawdown it becomes more selective (higher-confidence, safer payout setups) and keeps stake capped (no blind stake increases) to pursue recovery cautiously. Trading is risky: no strategy can guarantee profits or eliminate losses; validate in demo. unconfirmed. Switches market with computed prediction/barrier for immediate execution. Uses cumulative-loss recovery sizing with capped stake, TP/SL, and max-trades guards. Trading is risky and probabilistic; profits/loss-free outcomes cannot be guaranteed. Test on demo first.</comment>
     <statement name="TRADE_OPTIONS">
       <block type="trade_definition_market" id="mz_market" deletable="false" movable="false">
         <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
@@ -74,7 +74,7 @@
         <statement name="DO"><block type="timeout" id="mz_delay"><statement name="TIMEOUTSTACK">
           <block type="variables_set" id="mz_do_scan"><field name="VAR" id="mz_scan">Scan</field>
             <value name="VALUE"><block type="maziwa_scan_signal">
-              <value name="MIN_CONFIDENCE"><shadow type="math_number"><field name="NUM">84</field></shadow></value>
+              <value name="MIN_CONFIDENCE"><shadow type="math_number"><field name="NUM">86</field></shadow></value>
               <value name="WINDOW"><shadow type="math_number"><field name="NUM">25</field></shadow></value>
               <value name="MAX_SYMBOLS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
               <value name="LOSS_STREAK"><block type="variables_get"><field name="VAR" id="mz_loss_streak">Loss Streak</field></block></value>

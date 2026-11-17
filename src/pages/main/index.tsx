@@ -69,7 +69,20 @@ const Main = observer(() => {
     const { ui, dashboard } = useStore() ?? {};
     const [requestedView, setRequestedView] = useState<HubViewId>('dashboard');
     const activeView = resolveView(requestedView);
-    const [showLanding, setShowLanding] = useState(() => wantsLanding() || !hasSeenLanding());
+    // Coming back from Deriv's OAuth screen means the visitor already chose to
+    // enter, so the callback is never covered by the front page again.
+    const isOauthReturn = (): boolean => {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            return params.has('code') && params.has('state');
+        } catch {
+            return false;
+        }
+    };
+
+    const [showLanding, setShowLanding] = useState(
+        () => !isOauthReturn() && (wantsLanding() || !hasSeenLanding())
+    );
 
     useEffect(() => {
         ui?.setActiveHubView?.(activeView === 'dashboard' ? 'dashboard' : 'ai-hub');

@@ -169,3 +169,175 @@ textarea {
         --bot-content-height: calc(100dvh - 12rem);
     }
 }
+
+/* ===========================================================================
+   House polish layer — "midnight ledger"
+
+   A small, additive coat over the vendored UI kit so the in-app chrome matches
+   the landing page and the boot sequence: brass accents, a single visible focus
+   ring that is never removed, and a scrollbar that reads as part of the desk
+   instead of an OS artefact.
+
+   Deliberately narrow: it styles the auth buttons, selection, scrollbars and
+   focus, and nothing else. Every rule is scoped so a future kit upgrade cannot
+   be silently broken by it.
+   =========================================================================== */
+
+:root {
+    --tl-brass: #d8b45a;
+    --tl-brass-soft: #eacd8b;
+    --tl-teal: #64e1f3;
+    --tl-ink: #050c17;
+}
+
+/* ------------------------------ focus ring ------------------------------- */
+
+/* One ring, everywhere, and it survives on dark and light themes. `:focus`
+   without `:where()` would outrank component styles that set their own
+   outline; `:where()` keeps specificity at zero so anything deliberate wins. */
+:where(a, button, [role='button'], summary, [tabindex]):focus-visible,
+:where(input, select, textarea):focus-visible {
+    outline: 2px solid var(--tl-teal);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* A mouse click should not paint a ring; only keyboard navigation should. */
+:where(a, button, [role='button'], summary):focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ------------------------------- selection ------------------------------- */
+
+::selection {
+    background: rgba(216, 180, 90, 0.32);
+    color: #fff8e8;
+}
+
+::-moz-selection {
+    background: rgba(216, 180, 90, 0.32);
+    color: #fff8e8;
+}
+
+/* ------------------------- header auth buttons --------------------------- */
+
+/* The header renders exactly two buttons while signed out: Log in (tertiary)
+   then Sign up (primary_light). Styling them positionally is stable across kit
+   versions, whereas the generated hashed class names are not. Signed-in and
+   loading states render a different shape, so they are untouched. */
+.auth-actions button {
+    min-height: 3.2rem;
+    padding-inline: 1.4rem;
+    border-radius: 2px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition:
+        color 0.24s ease,
+        border-color 0.24s ease,
+        background 0.24s ease,
+        transform 0.24s ease,
+        box-shadow 0.24s ease;
+}
+
+.auth-actions button:first-child {
+    border: 1px solid rgba(232, 238, 252, 0.22);
+    background: transparent;
+    color: var(--text-prominent);
+}
+
+.auth-actions button:first-child:hover:not(:disabled) {
+    border-color: rgba(216, 180, 90, 0.6);
+    color: var(--tl-brass-soft);
+    background: rgba(216, 180, 90, 0.08);
+}
+
+.auth-actions button:last-child {
+    border: 1px solid rgba(255, 236, 196, 0.5);
+    background: linear-gradient(178deg, #f0d192 0%, #d8b45a 46%, #c39c42 100%);
+    color: #10203a;
+    box-shadow: 0 10px 24px -14px rgba(216, 180, 90, 0.8);
+}
+
+.auth-actions button:last-child:hover:not(:disabled) {
+    background: linear-gradient(178deg, #f6dcae 0%, #e0bd67 46%, #cca64c 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px -14px rgba(216, 180, 90, 0.9);
+}
+
+.auth-actions button:disabled {
+    /* The kit sets opacity: 1 for the "no app id yet" state; keep the buttons
+       readable but neutral rather than looking like a live brass CTA. */
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.auth-actions button:last-child:disabled {
+    background: rgba(216, 180, 90, 0.22);
+    border-color: rgba(216, 180, 90, 0.3);
+    color: rgba(16, 32, 58, 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-actions button:hover:not(:disabled) {
+        transform: none;
+    }
+}
+
+/* ------------------------------- scrollbars ------------------------------ */
+
+/* The hub and the landing page both scroll inside their own container, so the
+   scrollbar is part of the design language rather than a browser default. */
+@supports (scrollbar-width: thin) {
+    .main-content,
+    .lp {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(216, 180, 90, 0.45) transparent;
+    }
+}
+
+.main-content::-webkit-scrollbar,
+.lp::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.main-content::-webkit-scrollbar-track,
+.lp::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.main-content::-webkit-scrollbar-thumb,
+.lp::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+    background-color: rgba(216, 180, 90, 0.4);
+}
+
+.main-content::-webkit-scrollbar-thumb:hover,
+.lp::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(216, 180, 90, 0.65);
+}
+
+/* ---------------------------- utility guards ----------------------------- */
+
+/* Long market names and account ids must wrap rather than blow out a flex row
+   on a 360px phone. */
+.main-content,
+.auth-actions,
+.account-info {
+    min-width: 0;
+}
+
+/* Respect the OS "reduce transparency" style by dropping the heavy blur the
+   landing page uses for its sticky bar. */
+@media (prefers-reduced-transparency: reduce) {
+    .lp__topbar,
+    .lp__drawer {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: #050c17;
+    }
+}

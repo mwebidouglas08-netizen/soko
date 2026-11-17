@@ -895,21 +895,31 @@
                 .boot-brand { font-size: clamp(1.8rem, 6vw, 2.4rem); }
             }
 
+            /* Very short landscape (phones on their side): seal on the left,
+               everything else stacked in the right column. Explicit placement keeps
+               auto-flow from shuffling the seal into the second row. */
             @media (orientation: landscape) and (max-height: 460px) {
                 .boot-shell {
                     display: grid;
                     grid-template-columns: auto minmax(0, 1fr);
-                    gap: 22px;
+                    column-gap: 22px;
                     align-items: center;
                     text-align: left;
                     width: min(92vw, 640px);
                 }
-                .boot-mark { margin: 0; }
-                .boot-shell > *:not(.boot-mark) { justify-self: stretch; }
+                .boot-mark { grid-column: 1; grid-row: 1 / span 5; margin: 0; }
+                .boot-kicker,
+                .boot-brand,
+                .boot-rule,
+                .boot-tagline,
+                .boot-progress,
+                .boot-skip { grid-column: 2; }
+                .boot-brand,
+                .boot-rule { justify-content: flex-start; }
                 .boot-rule { margin: 10px 0; }
                 .boot-checklist,
                 .boot-foot { display: none; }
-                .boot-skip { margin-top: 12px; align-self: start; }
+                .boot-skip { margin-top: 12px; justify-self: start; }
             }
 
             /* -------------------------------- a11y ------------------------------- */

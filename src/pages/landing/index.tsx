@@ -512,6 +512,8 @@ const Landing = ({ onEnter, isLoggedIn = false }: LandingProps) => {
                 if (node && node.getBoundingClientRect().top - top <= 140) current = id;
             });
             setActiveSection(current);
+            /* the photograph is pinned, so a slow counter-shift reads as depth */
+            el.style.setProperty('--lp-bg-shift', Math.min(40, el.scrollTop * 0.07).toFixed(1) + 'px');
         };
         const onScroll = () => {
             if (frame) return;
@@ -680,6 +682,18 @@ const Landing = ({ onEnter, isLoggedIn = false }: LandingProps) => {
 
     return (
         <div className={'lp' + (menuOpen ? ' is-menu-open' : '')} ref={rootRef}>
+            {/* ------------------------------ backdrop ----------------------------- */}
+            <div className='lp__backdrop' aria-hidden='true'>
+                <picture>
+                    <source media='(max-width: 899px)' srcSet='/static/media/landing-backdrop-mobile.534cef31.webp' type='image/webp' />
+                    <source media='(min-width: 900px)' srcSet='/static/media/landing-backdrop.34bd4858.webp' type='image/webp' />
+                    <source media='(max-width: 899px)' srcSet='/static/media/landing-backdrop-mobile.534cef31.jpg' />
+                    <img src='/static/media/landing-backdrop.34bd4858.jpg' alt='' decoding='async' fetchPriority='high' />
+                </picture>
+                <span className='lp__veil' />
+                <span className='lp__veil lp__veil--side' />
+            </div>
+
             <header className={'lp__topbar' + (stuck ? ' is-stuck' : '')}>
                 <div className='lp__progress' aria-hidden='true'>
                     <span style={{ transform: 'scaleX(' + progress + ')' }} />
@@ -1022,6 +1036,20 @@ const Landing = ({ onEnter, isLoggedIn = false }: LandingProps) => {
                         <p className='lp__desk-caption'>Interactive preview. Nothing here places a real trade.</p>
                     </div>
                 </div>
+
+                <a
+                    className='lp__cue'
+                    href='#lp-how'
+                    onClick={event => {
+                        event.preventDefault();
+                        goTo('lp-how');
+                    }}
+                >
+                    <span className='lp__cue-track' aria-hidden='true'>
+                        <i />
+                    </span>
+                    Scroll to explore
+                </a>
             </section>
 
             {/* ------------------------------- stats ------------------------------ */}

@@ -24,7 +24,7 @@ import { subscribeHubNavigation } from '@/services/hub-navigation';
 import DashboardLaunchpad from '@/components/dashboard-launchpad';
 import BotsCatalog from '@/pages/bots-catalog';
 import BotMonitor from '@/pages/bot-monitor';
-import Landing from '@/pages/landing';
+import Landing, { hasSeenLanding, markLandingSeen } from '@/pages/landing';
 import { DBOT_TABS } from '@/constants/bot-contents';
 import './main.scss';
 
@@ -51,15 +51,25 @@ const LEGACY_VIEW_REDIRECT: Partial<Record<HubViewId, HubViewId>> = {
 
 const resolveView = (view: HubViewId): HubViewId => LEGACY_VIEW_REDIRECT[view] ?? view;
 
-const LandingSeenKey = 'mwx_landing_seen';
+/**
+ * The front page is an overlay over the hub, so it can be reopened deliberately
+ * with `?landing=1` or `#landing` — the only way back to a page that otherwise
+ * shows once per device.
+ */
+const wantsLanding = (): boolean => {
+    try {
+        if (window.location.hash.replace('#', '').toLowerCase() === 'landing') return true;
+        return new URLSearchParams(window.location.search).get('landing') === '1';
+    } catch {
+        return false;
+    }
+};
 
 const Main = observer(() => {
     const { ui, dashboard } = useStore() ?? {};
     const [requestedView, setRequestedView] = useState<HubViewId>('dashboard');
     const activeView = resolveView(requestedView);
-    const [showLanding, setShowLanding] = useState(() => {
-        try { return localStorage.getItem(LandingSeenKey) !== '1'; } catch { return true; }
-    });
+    const [showLanding, setShowLanding] = useState(() => wantsLanding() || !hasSeenLanding());
 
     useEffect(() => {
         ui?.setActiveHubView?.(activeView === 'dashboard' ? 'dashboard' : 'ai-hub');
@@ -125,10 +135,12 @@ const Main = observer(() => {
         </div>
     );
 
-    // First-visit landing overlay. Dismisses into the hub on enter; remembers
-    // the choice in localStorage so it only shows once per device/browser.
-    const handleEnter = () => {
-        try { localStorage.setItem(LandingSeenKey, '1'); } catch { /* private mode */ }
+    // First-visit landing overlay. Dismisses into the hub, remembers the choice
+    // on this device, and honours a requested view (catalog, builder, chart…)
+    // so the front page can hand off to the screen its button promised.
+    const handleEnter = (view?: HubViewId) => {
+        markLandingSeen();
+        if (view) setRequestedView(view);
         setShowLanding(false);
     };
 

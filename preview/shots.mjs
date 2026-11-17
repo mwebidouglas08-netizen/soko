@@ -42,7 +42,7 @@ try {
     await page.screenshot({ path: `${out}/00-no-landing.png` });
     console.log('NO_LANDING');
 }
-await page.waitForTimeout(3000);
+await page.waitForTimeout(7500);
 await page.screenshot({ path: `${out}/01-hero.png` });
 await metrics(page, 'hero');
 
@@ -90,7 +90,7 @@ const mob = await browser.newContext({ viewport: { width: 390, height: 844 }, is
 const m = await mob.newPage();
 await m.goto(URL, { waitUntil: 'domcontentloaded' });
 await m.waitForSelector('.lp', { timeout: 120000 });
-await m.waitForTimeout(3000);
+await m.waitForTimeout(7500);
 await m.screenshot({ path: `${out}/20-mobile-hero.png` });
 await metrics(m, 'mobile');
 await m.click('.lp-burger');

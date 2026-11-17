@@ -408,16 +408,36 @@ body.lp-open .app-footer {
 }
 
 .lp-drawer__inner {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 6px;
     width: min(360px, 88vw);
     height: 100%;
-    padding: 88px 22px 28px;
+    padding: 78px 22px 28px;
     background: var(--lp-ink-2);
     border-left: 1px solid var(--lp-line);
     animation: lp-slide-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
     overflow-y: auto;
+}
+
+.lp-drawer__close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--lp-line);
+    border-radius: 9px;
+    color: var(--lp-muted);
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.lp-drawer__close:hover {
+    color: var(--lp-paper);
+    border-color: var(--lp-line-gold);
 }
 
 .lp-drawer__eyebrow {
@@ -1661,10 +1681,11 @@ body.lp-open .app-footer {
 }
 
 .lp-final__note {
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    margin-top: 22px;
+    margin: 24px auto 0;
     font-family: var(--lp-mono);
     font-size: 10px;
     letter-spacing: 0.08em;
@@ -1676,6 +1697,10 @@ body.lp-open .app-footer {
 .lp-final__note svg {
     flex: 0 0 auto;
     color: var(--lp-muted);
+}
+
+.lp-final__note span {
+    max-width: 420px;
 }
 
 /* ------------------------------------------------------------------- footer */

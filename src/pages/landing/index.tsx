@@ -4,8 +4,9 @@ import './landing.scss';
 /* ============================================================================
  * TradingHubs.site — first-visit landing ("midnight ledger")
  *
- * Ink-navy paper, brass rules, editorial serif. Self-contained: no images, no
- * remote state. Every button either enters the workspace (onEnter) or hands
+ * Ink-navy paper, brass rules, editorial serif. The only image is the graded
+ * trading-desk photograph from /static/media (see CREDITS.md); every other
+ * surface is CSS. Each button either enters the workspace (onEnter) or hands
  * off to Deriv OAuth through the same generator the header uses.
  * ========================================================================== */
 
@@ -685,10 +686,10 @@ const Landing = ({ onEnter, isLoggedIn = false }: LandingProps) => {
             {/* ------------------------------ backdrop ----------------------------- */}
             <div className='lp__backdrop' aria-hidden='true'>
                 <picture>
-                    <source media='(max-width: 899px)' srcSet='/static/media/landing-backdrop-mobile.3b0a0e3e.webp' type='image/webp' />
-                    <source media='(min-width: 900px)' srcSet='/static/media/landing-backdrop.5ab5b8d3.webp' type='image/webp' />
-                    <source media='(max-width: 899px)' srcSet='/static/media/landing-backdrop-mobile.3b0a0e3e.jpg' />
-                    <img src='/static/media/landing-backdrop.5ab5b8d3.jpg' alt='' decoding='async' fetchPriority='high' />
+                    <source media='(max-width: 899px)' srcSet='/static/media/landing-backdrop-mobile.b084643f.webp' type='image/webp' />
+                    <source media='(min-width: 900px)' srcSet='/static/media/landing-backdrop.8632b5c9.webp' type='image/webp' />
+                    <source media='(max-width: 899px)' srcSet='/static/media/landing-backdrop-mobile.b084643f.jpg' />
+                    <img src='/static/media/landing-backdrop.8632b5c9.jpg' alt='' decoding='async' fetchPriority='high' />
                 </picture>
                 <span className='lp__veil' />
                 <span className='lp__veil lp__veil--side' />

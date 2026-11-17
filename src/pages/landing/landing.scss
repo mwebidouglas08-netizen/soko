@@ -114,10 +114,10 @@ body.landing-open {
     inset: 0;
     background: linear-gradient(
         180deg,
-        rgba(5, 12, 23, 0.5) 0%,
-        rgba(5, 12, 23, 0.34) 26%,
-        rgba(5, 12, 23, 0.46) 58%,
-        rgba(5, 12, 23, 0.88) 100%
+        rgba(5, 12, 23, 0.55) 0%,
+        rgba(5, 12, 23, 0.37) 26%,
+        rgba(5, 12, 23, 0.51) 58%,
+        rgba(5, 12, 23, 0.96) 100%
     );
 }
 
@@ -125,7 +125,7 @@ body.landing-open {
     background:
         radial-gradient(1100px 620px at 86% 4%, rgba(100, 225, 243, 0.09), transparent 62%),
         radial-gradient(900px 520px at 2% 2%, rgba(216, 180, 90, 0.09), transparent 58%),
-        linear-gradient(96deg, rgba(4, 10, 19, 0.8) 0%, rgba(4, 10, 19, 0.4) 42%, rgba(4, 10, 19, 0) 74%);
+        linear-gradient(96deg, rgba(4, 10, 19, 0.88) 0%, rgba(4, 10, 19, 0.44) 42%, rgba(4, 10, 19, 0) 74%);
 }
 
 /* ------------------------------ scroll cue -------------------------------- */

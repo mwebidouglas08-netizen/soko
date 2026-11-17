@@ -328,6 +328,8 @@ const useDragScroll = () => {
     const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
         if (event.pointerType === 'touch') return; // native touch scrolling is smoother
         const node = event.currentTarget;
+        // A grid that fits is not a carousel — never swallow its clicks.
+        if (node.scrollWidth <= node.clientWidth + 4) return;
         drag.current = { active: true, startX: event.clientX, startLeft: node.scrollLeft, moved: false };
         node.classList.add('is-dragging');
     };
@@ -492,6 +494,8 @@ const Landing = ({ onEnter }: LandingProps) => {
             setAuthBusy(kind);
             try {
                 const url = await generateOAuthURL(kind === 'signup' ? 'registration' : undefined);
+                // Signing in *is* entering: a visitor who comes back from Deriv
+                // should land in the workspace, not on this page again.
                 if (!url) {
                     setAuthError(
                         'Sign-in is not configured for this deployment yet — you can still explore the workspace.'
@@ -499,6 +503,7 @@ const Landing = ({ onEnter }: LandingProps) => {
                     setAuthBusy(null);
                     return;
                 }
+                markLandingSeen();
                 window.location.assign(url);
             } catch {
                 setAuthError('We could not reach Deriv just now. Please try again in a moment.');

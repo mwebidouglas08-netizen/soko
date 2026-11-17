@@ -598,8 +598,22 @@ const Landing = ({ onEnter }: LandingProps) => {
             </header>
 
             {navOpen && (
-                <div className='lp-drawer' role='dialog' aria-modal='true' aria-label='Menu'>
-                    <div className='lp-drawer__inner'>
+                <div
+                    className='lp-drawer'
+                    role='dialog'
+                    aria-modal='true'
+                    aria-label='Menu'
+                    onClick={() => setNavOpen(false)}
+                >
+                    <div className='lp-drawer__inner' onClick={event => event.stopPropagation()}>
+                        <button
+                            type='button'
+                            className='lp-drawer__close'
+                            onClick={() => setNavOpen(false)}
+                            aria-label='Close menu'
+                        >
+                            <Icon name='close' size={18} />
+                        </button>
                         <p className='lp-drawer__eyebrow'>Navigate</p>
                         {NAV_LINKS.map(link => (
                             <button key={link.id} type='button' className='lp-drawer__link' onClick={() => scrollTo(link.id)}>
@@ -1113,7 +1127,10 @@ const Landing = ({ onEnter }: LandingProps) => {
                         </div>
                         <p className='lp-final__note'>
                             <Icon name='shield' size={14} />
-                            Trading involves risk of loss. Synthetic indices are high risk and not suitable for everyone.
+                            <span>
+                                Trading involves risk of loss. Synthetic indices are high risk and not suitable for
+                                everyone.
+                            </span>
                         </p>
                     </div>
 

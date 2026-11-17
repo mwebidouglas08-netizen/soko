@@ -32,6 +32,8 @@ export const TAPE_MARKETS: TapeMarket[] = [
     { symbol: 'R_75', label: 'Volatility 75 Index', short: 'V75', base: 39300 },
     { symbol: 'R_100', label: 'Volatility 100 Index', short: 'V100', base: 618 },
     { symbol: 'R_25', label: 'Volatility 25 Index', short: 'V25', base: 2867 },
+    { symbol: 'R_10', label: 'Volatility 10 Index', short: 'V10', base: 6420 },
+    { symbol: 'R_50', label: 'Volatility 50 Index', short: 'V50', base: 246 },
     { symbol: 'BOOM1000', alt: 'BOOM1000N', label: 'Boom 1000 Index', short: 'Boom 1000', base: 15030 },
     { symbol: 'CRASH500', alt: 'CRASH500N', label: 'Crash 500 Index', short: 'Crash 500', base: 8100 },
     { symbol: 'stpRNG', label: 'Step Index', short: 'Step', base: 7294 },

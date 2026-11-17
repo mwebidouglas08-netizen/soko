@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <xml xmlns="https://developers.google.com/blockly/xml" collection="false" is_dbot="true">
   <variables>
     <variable id="mz_stake">Stake</variable>
@@ -21,7 +22,7 @@
     <variable id="mz_signal_ev">Signal EV</variable>
   </variables>
   <block type="trade_definition" id="mz_trade_definition" deletable="false" x="0" y="60">
-    <comment pinned="false" h="380" w="740">Maziwa AI v12 (intelligent safe-entry, risk-aware): continuously scans all open live Deriv synthetic volatility markets in real time and waits for a confirmed safe-entry digit/barrier using live tick frequency, transition matrix, trend/momentum, edge and payout/EV assurance. No blind or forced trades. After a loss/drawdown it becomes more selective (higher-confidence, safer payout setups) and keeps stake capped (no blind stake increases) to pursue recovery cautiously. Trading is risky: no strategy can guarantee profits or eliminate losses; validate in demo. unconfirmed. Switches market with computed prediction/barrier for immediate execution. Uses cumulative-loss recovery sizing with capped stake, TP/SL, and max-trades guards. Trading is risky and probabilistic; profits/loss-free outcomes cannot be guaranteed. Test on demo first.</comment>
+    <comment pinned="false" h="380" w="740">Maziwa AI v12 (intelligent safe-entry, risk-aware): continuously scans all open live Deriv synthetic volatility markets in real time and waits for a confirmed safe-entry digit/barrier using live tick frequency, transition matrix, trend/momentum, edge and payout/EV assurance. No blind or forced trades. After a loss/drawdown it becomes more selective (higher-confidence, safer payout setups) and keeps stake capped (no blind stake increases) to pursue recovery cautiously. Trading is risky: no strategy can guarantee profits or eliminate losses; validate in demo.</comment>
     <statement name="TRADE_OPTIONS">
       <block type="trade_definition_market" id="mz_market" deletable="false" movable="false">
         <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
@@ -66,7 +67,9 @@
       <next><block type="variables_set" id="mz_set_ms"><field name="VAR" id="mz_max_stake">Max Stake</field><value name="VALUE"><block type="math_number"><field name="NUM">5</field></block></value>
       <next><block type="variables_set" id="mz_set_scan"><field name="VAR" id="mz_scan">Scan</field><value name="VALUE"><block type="lists_create_with"><mutation items="0"></mutation></block></value>
       <next><block type="variables_set" id="mz_set_conf"><field name="VAR" id="mz_confidence">Confidence</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
-      </block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block>
+      <next><block type="variables_set" id="mz_set_sth"><field name="VAR" id="mz_signal_theoretical">Signal Theoretical</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
+      <next><block type="variables_set" id="mz_set_sev"><field name="VAR" id="mz_signal_ev">Signal EV</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
+      </block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block>
     </statement>
     <statement name="SUBMARKET">
       <block type="variables_set" id="mz_reset_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean"><field name="BOOL">FALSE</field></block></value>
@@ -95,7 +98,7 @@
                 <value name="A"><block type="variables_get"><field name="VAR" id="mz_base_stake">Base Stake</field></block></value>
                 <value name="B"><block type="variables_get"><field name="VAR" id="mz_max_stake">Max Stake</field></block></value>
               </block></value>
-              <next><block type="variables_set" id="mz_set_signal_true"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></next></block></next></block></next></block></next></block>
+              <next><block type="variables_set" id="mz_set_signal_true"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block>
             </statement>
           </block></next></block>
         </statement><value name="SECONDS"><block type="math_number"><field name="NUM">0.03</field></block></value></block></statement>

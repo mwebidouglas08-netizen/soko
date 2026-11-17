@@ -414,10 +414,13 @@ const Landing = ({ onEnter }: LandingProps) => {
 
     useEffect(() => {
         const previous = document.body.style.overflow;
-        document.body.classList.add('lp-open');
+        // `landing-open` is the hook the shell's own stylesheets already read to
+        // hide the floating audio toggle and the risk pill, so the front page
+        // never has app chrome floating over it.
+        document.body.classList.add('lp-open', 'landing-open');
         document.body.style.overflow = 'hidden';
         return () => {
-            document.body.classList.remove('lp-open');
+            document.body.classList.remove('lp-open', 'landing-open');
             document.body.style.overflow = previous;
         };
     }, []);

@@ -43,6 +43,7 @@ const BootSplash = ({ onDone }: { onDone?: () => void }) => {
     return (
         <div className={`bt-splash ${leaving ? 'bt-splash--leave' : ''}`} role='status' aria-label='Loading TradingHubs'>
             <div className='boot-sky' aria-hidden='true'>
+                <span className='boot-bg-image' />
                 <span className='boot-glow--teal' />
                 <span className='boot-glow--gold' />
                 <span className='boot-aura' />

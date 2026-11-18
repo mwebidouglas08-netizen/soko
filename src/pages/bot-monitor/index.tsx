@@ -54,6 +54,9 @@ const BotMonitor = observer(() => {
     };
 
     const isBotActive = is_running || has_open_contract;
+    const totalContracts = won_contracts + lost_contracts;
+    const winRate = totalContracts > 0 ? ((won_contracts / totalContracts) * 100).toFixed(1) : '0.0';
+    const marketsTraded = new Set(txns?.map((tx: any) => tx.symbol).filter(Boolean)).size;
 
     const handleRunStop = () => {
         if (isBotActive) {
@@ -99,8 +102,8 @@ const BotMonitor = observer(() => {
                 <div className='bot-monitor__brand'>
                     <div className='bot-monitor__logo'></div>
                     <div className='bot-monitor__title'>
-                        <strong className='bot-monitor__app-name'>Dollarprinter</strong>
-                        <span className='bot-monitor__subtitle'>Precision Trading Workspace</span>
+                        <strong className='bot-monitor__bot-name'>Maziwa AI v13</strong>
+                        <span className='bot-monitor__subtitle'>Martingale Recovery • Volatility Scanner</span>
                     </div>
                 </div>
                 <div className='bot-monitor__actions'>
@@ -194,6 +197,14 @@ const BotMonitor = observer(() => {
                             <div className='bot-monitor__stat-card'>
                                 <div className='bot-monitor__stat-label'>{localize('Contracts Lost')}</div>
                                 <div className='bot-monitor__stat-value'>{lost_contracts}</div>
+                            </div>
+                            <div className='bot-monitor__stat-card bot-monitor__stat-card--winrate'>
+                                <div className='bot-monitor__stat-label'>{localize('Win Rate')}</div>
+                                <div className='bot-monitor__stat-value'>{winRate}%</div>
+                            </div>
+                            <div className='bot-monitor__stat-card bot-monitor__stat-card--markets'>
+                                <div className='bot-monitor__stat-label'>{localize('Markets Traded')}</div>
+                                <div className='bot-monitor__stat-value'>{marketsTraded}</div>
                             </div>
                         </div>
 

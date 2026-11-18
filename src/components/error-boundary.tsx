@@ -27,7 +27,7 @@ function isExtensionError(error: unknown): boolean {
  * are visible instead of producing a blank screen.
  */
 export default class ErrorBoundary extends Component<Props, State> {
-    state: State = { error: null };
+    state: State = { error: null, errorKey: 0 };
     /** Guards the one-shot retry for extension noise, so it cannot loop. */
     private ignored_extension_error = false;
 
@@ -38,26 +38,33 @@ export default class ErrorBoundary extends Component<Props, State> {
     }
 
     static getDerivedStateFromError(error: Error): State {
-        return { error };
+        // Only set error state if we haven't already recorded this error.
+        // Prevents crash loops when the error UI itself throws.
+        return { error, errorKey: Date.now() };
     }
 
     componentDidCatch(error: Error, info: ErrorInfo) {
         console.error('ErrorBoundary caught:', error, info.componentStack);
     }
 
+    resetError = () => {
+        this.setState({ error: null });
+    };
+
     render() {
-        if (this.state.error) {
+        const { error, errorKey } = this.state;
+        if (error) {
             // A wallet / extension failure is not an app failure. Report it as a
             // non-blocking notice and re-render the children instead of
             // replacing the whole page with an error screen.
-            if (isExtensionError(this.state.error) && !this.ignored_extension_error) {
+            if (isExtensionError(error) && !this.ignored_extension_error) {
                 this.ignored_extension_error = true;
-                console.warn('[ignored extension error]', this.state.error);
+                console.warn('[ignored extension error]', error);
                 if (typeof window.__showNonFatalNotice === 'function') {
-                    window.__showNonFatalNotice(this.state.error.message);
+                    window.__showNonFatalNotice(error.message);
                 }
                 // Clearing state re-renders the subtree on the next pass.
-                Promise.resolve().then(() => this.setState({ error: null }));
+                Promise.resolve().then(() => this.resetError());
                 return this.props.children;
             }
             return (
@@ -76,6 +83,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                     }}
                     role='alert'
                     aria-label='App error'
+                    key={`error-boundary-${errorKey}`}
                 >
                     <div
                         style={{
@@ -130,7 +138,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                                 wordBreak: 'break-word',
                             }}
                         >
-                            {this.state.error.message}
+                            {error.message || 'An unknown error occurred'}
                         </p>
                         <button
                             type='button'

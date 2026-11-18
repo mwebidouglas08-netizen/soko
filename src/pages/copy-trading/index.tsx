@@ -129,7 +129,7 @@ const CopyTradingPage = observer(() => {
         <HubPage className='copy-page'>
             <HubPageHeader
                 title='Copy Trader'
-                subtitle='Mirror a master account’s trades to copier accounts with a multiplier and cap.'
+                subtitle='Copy trades from a master account to one or more copier accounts.'
                 badge={
                     <>
                         <span className={`hub-badge ${STATUS_TONE[state.status] ?? 'hub-badge--idle'}`}>
@@ -149,8 +149,8 @@ const CopyTradingPage = observer(() => {
                 }
             />
 
-            <HubNote tone='risk'>
-                Demo copiers only by default. Enable <strong>Allow real copiers</strong> only if you accept real-money risk.
+            <HubNote tone='info'>
+                Copies trades from a master account to copier accounts automatically.
                 The stake multiplier scales both wins and losses.
             </HubNote>
 
@@ -158,23 +158,23 @@ const CopyTradingPage = observer(() => {
                 <HubNote tone='info'>
                     Connect your Deriv account to start copy trading.{' '}
                     <button type='button' className='hub-btn hub-btn--primary hub-btn--sm' onClick={() => run_panel?.showLoginDialog?.()}>
-                        Log in to connect
+                        Log in
                     </button>
                 </HubNote>
             )}
 
             <section className='hub-section' aria-label='Master account'>
-                <h3>Master account</h3>
+                <h3>Master Account</h3>
                 <div className='copy-master'>
                     <label className='hub-field'>
-                        Master API token
-                        <input
-                            type='password'
-                            autoComplete='off'
-                            placeholder='Paste the master token'
-                            value={masterToken}
-                            onChange={e => setMasterToken(e.target.value)}
-                        />
+                        Master API Token
+                            <input
+                                type='password'
+                                autoComplete='off'
+                                placeholder='Paste the master API token'
+                                value={masterToken}
+                                onChange={e => setMasterToken(e.target.value)}
+                            />
                     </label>
                     <button
                         type='button'
@@ -182,7 +182,7 @@ const CopyTradingPage = observer(() => {
                         disabled={state.status === 'connecting' || state.status === 'stopping' || (isLoggedIn && !masterToken.trim())}
                         onClick={connect}
                     >
-                        {state.status === 'connecting' ? 'Connecting…' : state.master.connected ? 'Reconnect' : 'Connect & start'}
+                        {state.status === 'connecting' ? 'Connecting…' : state.master.connected ? 'Reconnect' : 'Connect Master'}
                     </button>
                     <button
                         type='button'
@@ -190,7 +190,7 @@ const CopyTradingPage = observer(() => {
                         disabled={!isRunning}
                         onClick={stop}
                     >
-                        Stop
+                        Stop Copying
                     </button>
                 </div>
 
@@ -213,14 +213,14 @@ const CopyTradingPage = observer(() => {
             </section>
 
             <section className='hub-section' aria-label='Copiers'>
-                <h3>Copiers ({state.copiers.length})</h3>
+                <h3>Copier Accounts ({state.copiers.length})</h3>
                 <div className='copy-add'>
                     <label className='hub-field'>
-                        Copier token
+                        Copier API Token
                         <input
                             type='password'
                             autoComplete='off'
-                            placeholder='Account API token (demo recommended)'
+                            placeholder='Paste copier API token'
                             value={copierToken}
                             onChange={e => setCopierToken(e.target.value)}
                         />
@@ -240,7 +240,7 @@ const CopyTradingPage = observer(() => {
                         disabled={!copierToken.trim()}
                         onClick={addCopier}
                     >
-                        Add copier
+                        Add Copier
                     </button>
                 </div>
 
@@ -288,8 +288,8 @@ const CopyTradingPage = observer(() => {
                 )}
             </section>
 
-            <section className='hub-section' aria-label='Replication settings'>
-                <h3>Replication settings</h3>
+            <section className='hub-section' aria-label='Copy settings'>
+                <h3>Copy Settings</h3>
                 <div className='copy-settings'>
                     <label className='copy-toggle'>
                         <input
@@ -297,7 +297,7 @@ const CopyTradingPage = observer(() => {
                             checked={state.settings.replicationEnabled}
                             onChange={e => copyTrading.setSettings({ replicationEnabled: e.target.checked })}
                         />
-                        <span>Replication enabled</span>
+                        <span>Copy trades automatically</span>
                     </label>
                     <label className='copy-toggle'>
                         <input
@@ -306,17 +306,17 @@ const CopyTradingPage = observer(() => {
                             onChange={e => {
                                 if (e.target.checked) {
                                     const ok = window.confirm(
-                                        'Allow REAL-money copier accounts? Replicated orders will spend real funds. Continue?'
+                                        'Allow copiers to trade with real money? This uses real funds. Continue?'
                                     );
                                     if (!ok) return;
                                 }
                                 copyTrading.setSettings({ allowRealCopiers: e.target.checked });
                             }}
                         />
-                        <span>Allow real copiers (real funds)</span>
+                        <span>Allow real-money copiers</span>
                     </label>
                     <label className='hub-field'>
-                        Stake multiplier (0.1 – 10)
+                        Stake Multiplier (0.1 – 10)
                         <input
                             type='number'
                             step={0.1}
@@ -326,14 +326,15 @@ const CopyTradingPage = observer(() => {
                             onChange={e => setMultiplierDraft(e.target.value)}
                             onBlur={commitMultiplier}
                         />
+                        <span style={{fontSize: '0.85rem', color: 'var(--text-muted)'}}>Multiplies both wins and losses</span>
                     </label>
                     <label className='hub-field'>
-                        Stake cap (empty = no cap)
+                        Max Stake per Trade (leave empty for no limit)
                         <input
                             type='number'
                             step={0.1}
                             min={0}
-                            placeholder='No cap'
+                            placeholder='No limit'
                             value={capDraft}
                             onChange={e => setCapDraft(e.target.value)}
                             onBlur={commitCap}
@@ -400,9 +401,8 @@ const CopyTradingPage = observer(() => {
                 )}
             </section>
 
-            <HubNote tone='risk'>
-                Copy trading replicates the master’s decisions, not guaranteed results. Start with a multiplier
-                of 1, a tight stake cap, and demo accounts.
+            <HubNote tone='info'>
+                Copy trading follows the master account’s trades automatically. Start with multiplier 1, a tight stake cap, and demo accounts.
             </HubNote>
         </HubPage>
     );

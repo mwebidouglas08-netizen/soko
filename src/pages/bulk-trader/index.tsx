@@ -166,7 +166,7 @@ const BulkTraderPage = observer(() => {
         <HubPage className='bulk-page'>
             <HubPageHeader
                 title='Bulk Trader'
-                subtitle="Fires one identical contract N times in a burst, with a concurrency cap and live progress. Buys use Deriv's public data for pricing and require an authorized session for orders."
+                subtitle="Place the same contract many times at once, with progress tracking and concurrency controls."
                 badge={
                     <>
                         <span className={`hub-badge ${STATUS_TONE[state.status] ?? 'hub-badge--idle'}`}>
@@ -186,11 +186,9 @@ const BulkTraderPage = observer(() => {
                 }
             />
 
-            <HubNote tone='risk'>
-                N parallel buys multiply your exposure by N. At {money(Number(form.stake) || 0)} × {form.count}{' '}
-                contracts, a full run commits up to{' '}
-                <strong>{money(totalExposure)} in total stake</strong> before any settlement — and every losing
-                contract loses its stake. Size the count like you would size leverage, not like a loop counter.
+            <HubNote tone='info'>
+                This opens {form.count} contracts at once. Your total exposure is up to {money(totalExposure)} before any settlement.
+                Size the count carefully — like leverage, not like a loop counter.
             </HubNote>
 
             {paperLocked && (
@@ -203,9 +201,9 @@ const BulkTraderPage = observer(() => {
                 </HubNote>
             )}
 
-            <section className='bulk-controls' aria-label='Bulk trade parameters'>
+            <section className='bulk-controls' aria-label='Trade settings'>
                 <label className='hub-field'>
-                    Symbol
+                    Market
                     <select value={form.symbol} onChange={e => patch('symbol', e.target.value)}>
                         {SYMBOLS.map(s => (
                             <option key={s.symbol} value={s.symbol}>
@@ -215,7 +213,7 @@ const BulkTraderPage = observer(() => {
                     </select>
                 </label>
                 <label className='hub-field'>
-                    Contract type
+                    Contract Type
                     <select
                         value={form.contractType}
                         onChange={e => patch('contractType', e.target.value as BulkTradeConfig['contractType'])}
@@ -240,7 +238,7 @@ const BulkTraderPage = observer(() => {
                     </label>
                 )}
                 <label className='hub-field'>
-                    Stake
+                    Stake Amount
                     <input
                         type='number'
                         step={0.35}
@@ -250,7 +248,7 @@ const BulkTraderPage = observer(() => {
                     />
                 </label>
                 <label className='hub-field'>
-                    Count (1-50)
+                    Number of Contracts (1-50)
                     <input
                         type='number'
                         min={1}
@@ -269,7 +267,7 @@ const BulkTraderPage = observer(() => {
                     />
                 </label>
                 <label className='hub-field'>
-                    Unit
+                    Duration Unit
                     <select
                         value={form.durationUnit}
                         onChange={e => patch('durationUnit', e.target.value as BulkTradeConfig['durationUnit'])}
@@ -282,7 +280,7 @@ const BulkTraderPage = observer(() => {
                     </select>
                 </label>
                 <label className='hub-field'>
-                    Max concurrent
+                    Max Concurrent Contracts
                     <input
                         type='number'
                         min={1}
@@ -314,7 +312,7 @@ const BulkTraderPage = observer(() => {
                     />
                     <span>
                         Allow live trading{' '}
-                        {!isLoggedIn ? '(log in first)' : isDemo ? '(demo orders)' : '(REAL funds)'}
+                        {!isLoggedIn ? '(log in first)' : isDemo ? '(demo orders)' : '(real funds)'}
                     </span>
                 </label>
                 <div className='hub-actions'>
@@ -324,7 +322,7 @@ const BulkTraderPage = observer(() => {
                         disabled={state.status === 'starting' || state.status === 'running' || state.status === 'stopping'}
                         onClick={onStart}
                     >
-                        {state.status === 'starting' ? 'Starting…' : 'Start'}
+                        {state.status === 'starting' ? 'Starting…' : 'Start Trading'}
                     </button>
                     <button
                         type='button'
@@ -335,7 +333,7 @@ const BulkTraderPage = observer(() => {
                         Stop
                     </button>
                     <button type='button' className='hub-btn hub-btn--danger' onClick={onEmergencyStop}>
-                        Emergency stop
+                        Emergency Stop
                     </button>
                 </div>
             </section>
@@ -427,9 +425,9 @@ const BulkTraderPage = observer(() => {
                 )}
             </section>
 
-            <HubNote tone='risk'>
-                Honest note: a bulk run is N separate contracts, not one diversified position — losing streaks cost
-                the stake on every leg. Paper trading simulates fills and settlements; it never spends real funds.
+            <HubNote tone='info'>
+                Each contract is separate — losing streaks cost the stake on every contract. Paper trading simulates
+                fills without spending real funds.
             </HubNote>
         </HubPage>
     );

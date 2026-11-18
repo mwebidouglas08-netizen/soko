@@ -6,6 +6,8 @@ declare global {
         __webpack_public_path__?: string;
         /** Set by index.html's boot script; hides the splash overlay. */
         __hideBootSplash?: () => void;
+        /** Hides the splash immediately, bypassing the minimum on-screen time. */
+        __skipBootSplash?: () => void;
         // ---- Runtime error policy (see index.html + main.tsx) ----
         /** True once React has painted: from then on runtime errors are non-fatal. */
         __appMounted?: boolean;

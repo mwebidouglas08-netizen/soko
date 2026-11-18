@@ -53,12 +53,31 @@ const resolveView = (view: HubViewId): HubViewId => LEGACY_VIEW_REDIRECT[view] ?
 
 const LandingSeenKey = 'mwx_landing_seen';
 
+/** Reads the stored Deriv login without throwing in private-mode browsers. */
+const hasStoredLogin = () => {
+    try {
+        return Boolean(window.localStorage.getItem('active_loginid'));
+    } catch {
+        return false;
+    }
+};
+
 const Main = observer(() => {
     const { ui, dashboard } = useStore() ?? {};
     const [requestedView, setRequestedView] = useState<HubViewId>('dashboard');
     const activeView = resolveView(requestedView);
+    // First-visit gate. The intro shows once per device/install, can be reopened
+    // with ?landing=1 or ?welcome=1, and is always suppressed on the way back
+    // from Deriv OAuth (?code=…) so a login round-trip never lands on marketing.
     const [showLanding, setShowLanding] = useState(() => {
-        try { return localStorage.getItem(LandingSeenKey) !== '1'; } catch { return true; }
+        try {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('code')) return false;
+            if (params.has('landing') || params.has('welcome')) return true;
+            return localStorage.getItem(LandingSeenKey) !== '1';
+        } catch {
+            return true;
+        }
     });
 
     useEffect(() => {
@@ -134,7 +153,7 @@ const Main = observer(() => {
 
     return (
         <>
-            {showLanding && <Landing onEnter={handleEnter} />}
+            {showLanding && <Landing onEnter={handleEnter} isLoggedIn={hasStoredLogin()} />}
             {!showLanding && (
                 <div className='main-dashboard'>
                     <VersionBanner />

@@ -31,6 +31,12 @@ export default class ErrorBoundary extends Component<Props, State> {
     /** Guards the one-shot retry for extension noise, so it cannot loop. */
     private ignored_extension_error = false;
 
+    componentDidMount() {
+        // Expose extension-error detector to window so main.tsx can suppress
+        // MetaMask / wallet errors before they reach the fatal-error handler.
+        window.__isExtensionError = isExtensionError;
+    }
+
     static getDerivedStateFromError(error: Error): State {
         return { error };
     }
@@ -61,34 +67,98 @@ export default class ErrorBoundary extends Component<Props, State> {
                         alignItems: 'center',
                         justifyContent: 'center',
                         minHeight: '100vh',
-                        background: '#050a14',
-                        color: '#fff',
-                        fontFamily: 'IBM Plex Sans, sans-serif',
+                        background: '#030712',
+                        color: '#e8eefc',
+                        fontFamily: "'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif",
                         flexDirection: 'column',
-                        gap: '16px',
                         padding: '24px',
-                        textAlign: 'center',
+                        boxSizing: 'border-box',
                     }}
+                    role='alert'
+                    aria-label='App error'
                 >
-                    <p style={{ fontSize: '18px', fontWeight: 600 }}>Something went wrong</p>
-                    <p style={{ fontSize: '14px', color: '#aaa', maxWidth: '600px', wordBreak: 'break-word' }}>
-                        {this.state.error.message}
-                    </p>
-                    <button
-                        type='button'
-                        onClick={() => window.location.reload()}
+                    <div
                         style={{
-                            padding: '8px 24px',
-                            borderRadius: '4px',
-                            border: 'none',
-                            background: '#ff444f',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            fontSize: '14px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '16px',
+                            padding: '40px 32px',
+                            borderRadius: '24px',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            boxShadow: '0 24px 64px rgba(2, 6, 16, 0.55)',
+                            maxWidth: '520px',
+                            textAlign: 'center',
+                            backdropFilter: 'blur(12px)',
                         }}
                     >
-                        Refresh
-                    </button>
+                        <div
+                            style={{
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '50%',
+                                background: 'rgba(255, 165, 0, 0.15)',
+                                color: '#fbbf24',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '24px',
+                                boxShadow: '0 0 24px rgba(251, 191, 36, 0.25)',
+                            }}
+                        >
+                            ⚠
+                        </div>
+                        <h2
+                            style={{
+                                margin: 0,
+                                fontSize: '20px',
+                                fontWeight: 700,
+                                color: '#ffffff',
+                                letterSpacing: '-0.02em',
+                            }}
+                        >
+                            Something went wrong
+                        </h2>
+                        <p
+                            style={{
+                                margin: 0,
+                                fontSize: '14px',
+                                color: '#94a3b8',
+                                maxWidth: '420px',
+                                lineHeight: '1.6',
+                                wordBreak: 'break-word',
+                            }}
+                        >
+                            {this.state.error.message}
+                        </p>
+                        <button
+                            type='button'
+                            onClick={() => window.location.reload()}
+                            style={{
+                                marginTop: '8px',
+                                padding: '10px 28px',
+                                borderRadius: '10px',
+                                border: 'none',
+                                background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                                color: '#000',
+                                fontWeight: 700,
+                                fontSize: '14px',
+                                cursor: 'pointer',
+                                boxShadow: '0 0 24px rgba(251, 191, 36, 0.4)',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                ':hover': {
+                                    transform: 'translateY(-1px)',
+                                    boxShadow: '0 0 32px rgba(251, 191, 36, 0.6)',
+                                },
+                                ':active': {
+                                    transform: 'translateY(0)',
+                                },
+                            }}
+                        >
+                            Reload App
+                        </button>
+                    </div>
                 </div>
             );
         }

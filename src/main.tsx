@@ -22,8 +22,22 @@ type FatalPolicy = {
     __showFatalError?: (message: string) => void;
     __reportError?: (err: unknown, label: string) => void;
     __appMounted?: boolean;
+    __isExtensionError?: (err: unknown) => boolean;
 };
 const bootPolicy = window as unknown as FatalPolicy;
+
+/**
+ * Wallet / browser-extension errors (MetaMask, Coinbase, Phantom, etc.) are
+ * not app failures. Detect them by stack/message so they never crash the app.
+ */
+function isExtensionError(error: unknown): boolean {
+    if (typeof window !== 'undefined' && typeof window.__isExtensionError === 'function') {
+        return window.__isExtensionError(error);
+    }
+    const text = error instanceof Error ? `${error.stack || ''}${error.message}` : String(error ?? '');
+    return /(chrome|moz|safari|safari-web|ms-browser)-extension:\/\//i.test(text) ||
+        /metamask|ethereum|evmask|eth_requestAccounts|wallet_?connect|coinbase|trust ?wallet|phantom/i.test(text);
+}
 
 // Last-resort fallback, used only when index.html's script is unavailable.
 let fatalErrorShown = false;
@@ -71,14 +85,23 @@ window.addEventListener(
     'error',
     event => {
         const target = event.target as unknown as HTMLElement | null;
-        // A failed <img>/<audio>/<link> is not an app crash - ignore it here.
+        // A failed /<audio>/<link> is not an app crash - ignore it here.
         if (target && target !== (window as unknown as EventTarget) && target.tagName) return;
+        // Suppress browser-extension / wallet errors (MetaMask etc.)
+        if (isExtensionError(event.error || event.message)) {
+            console.warn('[ignored extension error]', event.error || event.message);
+            return;
+        }
         reportError(event.error || event.message, 'error');
     },
     true
 );
 
 window.addEventListener('unhandledrejection', event => {
+    if (isExtensionError(event.reason)) {
+        console.warn('[ignored extension rejection]', event.reason);
+        return;
+    }
     reportError(event.reason, 'unhandledrejection');
 });
 

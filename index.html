@@ -91,33 +91,33 @@
         </script>
         <style>
             /* ==================================================================
-               Intro / initialization screen.
+               Intro / initialization screen — v2 “Hub Core”.
 
-               Painted by the browser on the very first frame â€” no bundle, no
-               webfonts, no photographs and no large blur filters, so it appears
-               instantly even on a cold, mid-range phone. Depth comes from
-               layered radial gradients (cheap) plus border-only shapes.
+               Painted by the browser on the very first frame â€” no bundle,
+               no webfonts, no photographs and no large blur filters, so it
+               appears instantly even on a cold, mid-range phone. Depth comes
+               from layered radial gradients, animated aurora pulls, grain and
+               border-only shapes (cheap). Every element is pointer-interactive
+               (subtle parallax / press pulse) without delaying boot.
 
-               Choreography (delay / duration, expo-out, so each element
-               decelerates into place while the next is still travelling):
+               Choreography:
 
-                 0.00  mark        1.10s   scale .92 -> 1
-                 0.28  kicker      0.85s
-                 0.40  wordmark    1.15s   the longest move; carries the frame
-                 0.58  gold rule   0.95s   scaleX .18 -> 1, drawn outward
-                 0.70  tagline     0.90s
-                 0.84  progress    0.85s
+                 0.00  shield      1.2s   scale .88 -> 1
+                 0.14  aura        0.9s
+                 0.26  grid/pulse  1.0s
+                 0.40  wordmark    1.10s (longest move; carries frame)
+                 0.56  gold rule   0.95s   scaleX .18 -> 1
+                 0.72  tagline     0.90s
+                 0.86  progress    0.85s
                  0.96  status + %  0.75s
-                 1.00  bar fill    4.20s   driven from script, ends at 100%
-                 1.60  caret blink (delayed so it never blinks on an empty line)
+                 1.00  bar fill    4.2s   driven from script, ends 100%
+                 1.60  caret blink
 
-               The last entrance settles at ~1.7s, the bar completes at 4.2s,
-               the splash holds ~0.5s and then dissolves over 0.85s. That hold is
-               enforced in script (MIN_VISIBLE), never by the animation, so a
-               fast boot cannot make the intro flash past.
+               Last entrance settles ~1.7s; bar completes 4.2s; splash holds
+               ~0.5s then dissolves over 0.85s. Hold enforced in script
+               (MIN_VISIBLE), never by animation, so a fast boot never cuts it.
                ================================================================== */
-            html,
-            body { margin: 0; min-height: 100%; background: #040b16; }
+            html, body { margin: 0; min-height: 100%; background: #030712; }
             body { min-height: 100vh; min-height: 100dvh; }
             #root { min-height: 100vh; min-height: 100dvh; }
 
@@ -135,22 +135,32 @@
                 font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
                 color: #e8eefc;
                 background:
-                    radial-gradient(120% 78% at 50% -12%, #0d3b4a 0%, #061420 46%, #040b16 76%),
-                    #040b16;
+                    radial-gradient(140% 90% at 50% -10%, rgba(99, 102, 241, 0.14), transparent 58%),
+                    radial-gradient(110% 100% at 100% 110%, rgba(34, 211, 238, 0.12), transparent 55%),
+                    linear-gradient(180deg, rgba(2, 6, 16, 0.45), rgba(2, 6, 16, 0.92));
                 -webkit-tap-highlight-color: transparent;
+                cursor: default;
             }
 
-            .boot-sky,
-            .boot-sky span { position: absolute; inset: 0; pointer-events: none; }
-            .boot-glow--teal { background: radial-gradient(52% 38% at 50% 34%, rgba(100, 225, 243, 0.16), transparent 72%); }
-            .boot-glow--gold { background: radial-gradient(40% 30% at 78% 84%, rgba(216, 180, 90, 0.12), transparent 74%); }
+            /* ---- interactive ambient sky ---- */
+            .boot-sky { position: absolute; inset: 0; pointer-events: none; }
+            .boot-sky span { position: absolute; inset: 0; }
+            .boot-glow--teal { background: radial-gradient(56% 44% at 50% 30%, rgba(34, 211, 238, 0.18), transparent 70%); }
+            .boot-glow--gold { background: radial-gradient(44% 34% at 82% 88%, rgba(216, 180, 90, 0.14), transparent 72%); }
+            .boot-aura {
+                background: conic-gradient(from 210deg at 50% 50%, rgba(99, 102, 241, 0.20), rgba(34, 211, 238, 0.16), rgba(129, 140, 248, 0.20), rgba(99, 102, 241, 0.20));
+                filter: blur(64px);
+                opacity: 0.55;
+                animation: btAurora 18s ease-in-out infinite alternate;
+                will-change: transform;
+            }
             .boot-grid {
                 background-image:
-                    linear-gradient(rgba(148, 197, 224, 0.055) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(148, 197, 224, 0.055) 1px, transparent 1px);
-                background-size: 46px 46px;
-                -webkit-mask-image: radial-gradient(66% 56% at 50% 44%, #000 0%, transparent 78%);
-                mask-image: radial-gradient(66% 56% at 50% 44%, #000 0%, transparent 78%);
+                    linear-gradient(rgba(148, 197, 224, 0.06) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(148, 197, 224, 0.06) 1px, transparent 1px);
+                background-size: 50px 50px;
+                -webkit-mask-image: radial-gradient(66% 56% at 50% 44%, #000 0%, transparent 76%);
+                mask-image: radial-gradient(66% 56% at 50% 44%, #000 0%, transparent 76%);
             }
             .boot-grain {
                 opacity: 0.035;
@@ -159,89 +169,102 @@
             }
             .boot-vignette {
                 background:
-                    linear-gradient(180deg, rgba(2, 6, 16, 0.5), rgba(2, 6, 16, 0) 26%, rgba(2, 6, 16, 0.72)),
-                    radial-gradient(120% 100% at 50% 50%, transparent 52%, rgba(2, 6, 16, 0.55) 100%);
+                    linear-gradient(180deg, rgba(2, 6, 16, 0.6), rgba(2, 6, 16, 0) 28%, rgba(2, 6, 16, 0.8)),
+                    radial-gradient(120% 100% at 50% 50%, transparent 54%, rgba(2, 6, 16, 0.6) 100%);
             }
 
+            /* ---- pressable brand card ---- */
             .boot-shell {
                 position: relative;
-                z-index: 1;
-                width: min(88vw, 430px);
+                z-index: 2;
+                width: min(92vw, 460px);
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 text-align: center;
+                filter: drop-shadow(0 24px 64px rgba(2, 6, 16, 0.55));
             }
+            .boot-shell:hover { transform: translateY(-2px); }
+            .boot-shell:active { transform: scale(0.975); }
 
             .boot-mark {
                 position: relative;
-                width: 88px;
-                height: 88px;
-                margin: 0 0 24px;
+                width: 92px;
+                height: 92px;
+                margin: 0 0 22px;
                 display: grid;
                 place-items: center;
-                animation: btMarkIn 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+                animation: btMarkIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+                cursor: pointer;
             }
+            .boot-mark:hover .boot-mark-core { box-shadow: 0 0 28px rgba(100, 225, 243, 0.95); }
+            .boot-mark:active .boot-mark-core { transform: scale(1.25); transition: transform 0.12s ease; }
             .boot-mark-halo {
                 position: absolute;
-                inset: -22px;
+                inset: -26px;
                 border-radius: 50%;
-                background: radial-gradient(circle, rgba(100, 225, 243, 0.14), transparent 68%);
+                background: radial-gradient(circle, rgba(34, 211, 238, 0.16), transparent 66%);
+                animation: btHalo 5s ease-in-out infinite;
             }
             .boot-mark-ring {
                 position: absolute;
                 inset: 0;
                 border-radius: 50%;
-                border: 1px solid rgba(216, 180, 90, 0.45);
-                animation: btRingIn 1.2s 0.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+                border: 1px solid rgba(216, 180, 90, 0.5);
+                animation: btRingIn 1.2s 0.04s cubic-bezier(0.16, 1, 0.3, 1) both;
             }
             .boot-mark-ring--inner {
-                inset: 12px;
+                inset: 14px;
                 border-style: dashed;
-                border-color: rgba(100, 225, 243, 0.38);
+                border-color: rgba(100, 225, 243, 0.4);
                 animation:
                     btRingIn 1.2s 0.12s cubic-bezier(0.16, 1, 0.3, 1) both,
-                    bootSpin 26s 1s linear infinite;
+                    bootSpin 22s 1s linear infinite;
             }
-            .boot-mark-diamond {
-                position: absolute;
-                width: 26px;
-                height: 26px;
-                border: 1px solid rgba(216, 180, 90, 0.85);
-                transform: rotate(45deg);
-                box-shadow: 0 0 18px rgba(216, 180, 90, 0.3);
+            .boot-mark-img {
+                position: relative;
+                width: 70px;
+                height: 70px;
+                border-radius: 50%;
+                overflow: hidden;
+                border: 1px solid rgba(255, 255, 255, 0.22);
+                box-shadow: 0 14px 40px rgba(2, 6, 16, 0.55);
                 animation: btDiamondIn 0.95s 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+                cursor: pointer;
             }
+            .boot-mark-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
             .boot-mark-core {
                 position: absolute;
-                width: 7px;
-                height: 7px;
+                width: 9px;
+                height: 9px;
                 border-radius: 50%;
                 background: #64e1f3;
-                box-shadow: 0 0 16px rgba(100, 225, 243, 0.85);
-                animation: bootPulse 2.8s 0.5s ease-in-out infinite;
+                box-shadow: 0 0 20px rgba(100, 225, 243, 0.9);
+                animation: bootPulse 3s 0.5s ease-in-out infinite;
             }
 
             .boot-kicker {
-                margin-bottom: 12px;
+                margin-bottom: 10px;
                 font-size: 10px;
                 font-weight: 700;
-                letter-spacing: 0.34em;
+                letter-spacing: 0.38em;
                 text-transform: uppercase;
-                color: #7fa3bd;
-                animation: btRise 0.85s 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+                color: #8ab4f8;
+                animation: btRise 0.85s 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
             }
             .boot-brand {
                 display: flex;
                 align-items: baseline;
                 justify-content: center;
-                gap: 0.24em;
-                line-height: 0.95;
-                animation: btTracking 1.15s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+                gap: 0.22em;
+                line-height: 0.94;
+                animation: btTracking 1.12s 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+                cursor: pointer;
             }
+            .boot-brand:hover { letter-spacing: -0.005em; transition: letter-spacing 0.25s ease; }
             .boot-brand-main,
             .boot-brand-accent {
-                font-size: clamp(2rem, 8.5vw, 2.9rem);
+                font-size: clamp(2.1rem, 9vw, 3.1rem);
                 font-weight: 800;
                 letter-spacing: -0.02em;
             }
@@ -252,50 +275,51 @@
                 align-items: center;
                 justify-content: center;
                 gap: 10px;
-                width: min(76%, 260px);
+                width: min(80%, 300px);
                 margin: 16px 0 14px;
                 transform-origin: center;
-                animation: btRule 0.95s 0.58s cubic-bezier(0.16, 1, 0.3, 1) both;
+                animation: btRule 0.95s 0.54s cubic-bezier(0.16, 1, 0.3, 1) both;
             }
-            .boot-rule::before,
-            .boot-rule::after {
+            .boot-rule::before, .boot-rule::after {
                 content: '';
                 flex: 1;
                 height: 1px;
-                background: linear-gradient(90deg, transparent, rgba(216, 180, 90, 0.5));
+                background: linear-gradient(90deg, transparent, rgba(216, 180, 90, 0.55));
             }
-            .boot-rule::after { background: linear-gradient(90deg, rgba(216, 180, 90, 0.5), transparent); }
+            .boot-rule::after { background: linear-gradient(90deg, rgba(216, 180, 90, 0.55), transparent); }
             .boot-rule i {
-                width: 5px;
-                height: 5px;
+                width: 6px;
+                height: 6px;
                 transform: rotate(45deg);
                 background: #d8b45a;
-                opacity: 0.9;
+                opacity: 0.95;
+                box-shadow: 0 0 12px rgba(216, 180, 90, 0.7);
             }
             .boot-tagline {
-                margin: 0 0 28px;
-                max-width: 30ch;
-                font-size: 13px;
-                line-height: 1.6;
+                margin: 0 0 26px;
+                max-width: 32ch;
+                font-size: clamp(13px, 2.6vw, 14px);
+                line-height: 1.65;
                 color: #a7bdd1;
                 text-wrap: balance;
-                animation: btRise 0.9s 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+                animation: btRise 0.9s 0.66s cubic-bezier(0.16, 1, 0.3, 1) both;
             }
 
+            /* ---- progress ---- */
             .boot-progress {
                 width: 100%;
                 display: flex;
                 flex-direction: column;
-                gap: 11px;
-                animation: btRise 0.85s 0.84s cubic-bezier(0.16, 1, 0.3, 1) both;
+                gap: 12px;
+                animation: btRise 0.85s 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
             }
             .boot-progress-track {
                 position: relative;
                 display: block;
                 width: 100%;
-                height: 2px;
+                height: 3px;
                 border-radius: 999px;
-                background: rgba(148, 197, 224, 0.16);
+                background: rgba(148, 197, 224, 0.14);
                 overflow: hidden;
             }
             .boot-progress-fill {
@@ -304,30 +328,30 @@
                 width: 0;
                 height: 100%;
                 border-radius: inherit;
-                background: linear-gradient(90deg, #d8b45a, #64e1f3);
-                background-size: 200% 100%;
-                box-shadow: 0 0 12px rgba(100, 225, 243, 0.45);
-                transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-                animation: btSheen 2.6s 1s linear infinite;
+                background: linear-gradient(90deg, #d8b45a, #6366f1, #22d3ee);
+                background-size: 250% 100%;
+                box-shadow: 0 0 16px rgba(34, 211, 238, 0.5);
+                transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+                animation: btSheen 2.8s 0.9s linear infinite;
             }
             .boot-progress-meta {
                 display: flex;
                 align-items: baseline;
                 justify-content: space-between;
                 gap: 12px;
-                animation: btRise 0.75s 0.96s cubic-bezier(0.16, 1, 0.3, 1) both;
+                animation: btRise 0.75s 0.94s cubic-bezier(0.16, 1, 0.3, 1) both;
             }
             .boot-status {
-                font-size: 10.5px;
+                font-size: 11px;
                 font-weight: 600;
-                letter-spacing: 0.22em;
+                letter-spacing: 0.24em;
                 text-transform: uppercase;
                 color: #6d8aa3;
                 text-align: start;
             }
             .boot-status strong { color: #9fd9e6; font-weight: 700; }
             .boot-pct {
-                font-size: 10.5px;
+                font-size: 11px;
                 font-weight: 700;
                 letter-spacing: 0.06em;
                 color: #9fd9e6;
@@ -350,61 +374,58 @@
                 text-align: center;
                 font-size: 9px;
                 font-weight: 700;
-                letter-spacing: 0.3em;
+                letter-spacing: 0.34em;
                 text-transform: uppercase;
-                color: rgba(125, 152, 176, 0.6);
+                color: rgba(125, 152, 176, 0.65);
                 animation: btRise 1s 1s cubic-bezier(0.16, 1, 0.3, 1) both;
             }
 
-            /* Exit: dissolve, never a jump cut. */
+            /* ---- exit: dissolve, never a jump cut ---- */
             #boot-splash.boot-leaving {
                 opacity: 0;
                 pointer-events: none;
                 transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1);
             }
             #boot-splash.boot-leaving .boot-shell {
-                transform: scale(1.035);
+                transform: scale(1.04);
                 opacity: 0;
-                transition:
-                    transform 0.85s cubic-bezier(0.4, 0, 0.2, 1),
-                    opacity 0.7s ease;
+                transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.7s ease;
             }
             #boot-splash.boot-leaving .boot-foot { opacity: 0; transition: opacity 0.35s ease; }
 
-            @keyframes btMarkIn { from { opacity: 0; transform: scale(0.9) translateY(8px); } to { opacity: 1; transform: none; } }
-            @keyframes btRingIn { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: scale(1); } }
-            @keyframes btDiamondIn { from { opacity: 0; transform: rotate(45deg) scale(0.5); } to { opacity: 1; transform: rotate(45deg) scale(1); } }
+            /* ---- keyframes ---- */
+            @keyframes btMarkIn { from { opacity: 0; transform: scale(0.88) translateY(8px); } to { opacity: 1; transform: none; } }
+            @keyframes btRingIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+            @keyframes btHalo { 0%, 100% { opacity: 0.45; transform: scale(1); } 50% { opacity: 0.75; transform: scale(1.12); } }
+            @keyframes btDiamondIn { from { opacity: 0; transform: rotate(45deg) scale(0.55); } to { opacity: 1; transform: rotate(45deg) scale(1); } }
             @keyframes btRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-            @keyframes btTracking { from { opacity: 0; letter-spacing: 0.3em; transform: translateY(6px); } to { opacity: 1; letter-spacing: -0.01em; transform: none; } }
+            @keyframes btTracking { from { opacity: 0; letter-spacing: 0.32em; transform: translateY(6px); } to { opacity: 1; letter-spacing: -0.01em; transform: none; } }
             @keyframes btRule { from { opacity: 0; transform: scaleX(0.18); } to { opacity: 1; transform: scaleX(1); } }
-            @keyframes btSheen { from { background-position: 160% 50%; } to { background-position: -60% 50%; } }
+            @keyframes btSheen { from { background-position: 180% 50%; } to { background-position: -60% 50%; } }
             @keyframes bootSpin { to { transform: rotate(360deg); } }
-            @keyframes bootPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.82); } }
+            @keyframes bootPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.84); } }
             @keyframes bootBlink { 50% { opacity: 0; } }
+            @keyframes btAurora { from { transform: translate3d(-2%, -1%, 0) scale(1); } to { transform: translate3d(2%, 3%, 0) scale(1.06); } }
 
+            /* ---- responsive ---- */
             @media (max-height: 700px) {
-                .boot-mark { width: 72px; height: 72px; margin-bottom: 18px; }
-                .boot-tagline { margin-bottom: 22px; }
+                .boot-mark { width: 76px; height: 76px; margin-bottom: 16px; }
+                .boot-mark-img { width: 62px; height: 62px; }
+                .boot-tagline { margin-bottom: 20px; }
                 .boot-foot { display: none; }
             }
+            @media (max-width: 420px) {
+                .boot-brand-main, .boot-brand-accent { font-size: clamp(1.9rem, 8vw, 2.6rem); }
+                .boot-kicker { letter-spacing: 0.28em; }
+                .boot-progress-meta { gap: 8px; }
+            }
             @media (prefers-reduced-motion: reduce) {
-                .boot-mark,
-                .boot-mark-ring,
-                .boot-mark-ring--inner,
-                .boot-mark-diamond,
-                .boot-mark-core,
-                .boot-kicker,
-                .boot-brand,
-                .boot-rule,
-                .boot-tagline,
-                .boot-progress,
-                .boot-progress-meta,
-                .boot-progress-fill,
-                .boot-cursor,
-                .boot-foot { animation: none !important; }
+                .boot-mark, .boot-mark-ring, .boot-mark-ring--inner, .boot-mark-img, .boot-mark-core,
+                .boot-kicker, .boot-brand, .boot-rule, .boot-tagline, .boot-progress, .boot-progress-meta,
+                .boot-progress-fill, .boot-cursor, .boot-foot, .boot-halo, .boot-aura { animation: none !important; }
                 .boot-progress-fill { width: 100% !important; transition: none !important; }
-                #boot-splash.boot-leaving,
-                #boot-splash.boot-leaving .boot-shell { transition: none !important; }
+                .boot-mark:hover, .boot-shell:hover { transform: none; }
+                #boot-splash.boot-leaving, #boot-splash.boot-leaving .boot-shell { transition: none !important; }
             }
         </style>
 
@@ -418,24 +439,25 @@
             <div class="boot-sky" aria-hidden="true">
                 <span class="boot-glow--teal"></span>
                 <span class="boot-glow--gold"></span>
+                <span class="boot-aura"></span>
                 <span class="boot-grid"></span>
                 <span class="boot-grain"></span>
                 <span class="boot-vignette"></span>
             </div>
             <div class="boot-shell">
-                <div class="boot-mark" aria-hidden="true">
+                <div class="boot-mark" role="button" tabindex="0" aria-label="TradingHubs mark">
                     <span class="boot-mark-halo"></span>
                     <span class="boot-mark-ring"></span>
                     <span class="boot-mark-ring boot-mark-ring--inner"></span>
-                    <span class="boot-mark-diamond"></span>
+                    <div class="boot-mark-img"><img src="/assets/tradinghubs-mark.svg" alt="" aria-hidden="true"/></div>
                     <span class="boot-mark-core"></span>
                 </div>
                 <div class="boot-kicker">Precision Trading Workspace</div>
-                <div class="boot-brand" aria-label="TradingHubs">
+                <div class="boot-brand" role="button" tabindex="0" aria-label="TradingHubs">
                     <span class="boot-brand-main">TRADING</span><span class="boot-brand-accent">HUBS</span>
                 </div>
                 <div class="boot-rule" aria-hidden="true"><i></i></div>
-                <p class="boot-tagline">Build, automate and run trading strategies with clarity and confidence.</p>
+                <p class="boot-tagline">Build, automate, and run trading strategies with cinematic clarity.</p>
                 <div class="boot-progress">
                     <span class="boot-progress-track" aria-hidden="true">
                         <span class="boot-progress-fill" id="bt-fill"></span>

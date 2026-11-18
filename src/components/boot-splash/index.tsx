@@ -42,33 +42,40 @@ const BootSplash = ({ onDone }: { onDone?: () => void }) => {
 
     return (
         <div className={`bt-splash ${leaving ? 'bt-splash--leave' : ''}`} role='status' aria-label='Loading TradingHubs'>
-            <div className='bt-cinema-bg' aria-hidden='true'>
-                <div className='bt-cinema-aurora' />
-                <div className='bt-cinema-vignette' />
-                <div className='bt-cinema-grain' />
+            <div className='boot-sky' aria-hidden='true'>
+                <span className='boot-glow--teal' />
+                <span className='boot-glow--gold' />
+                <span className='boot-aura' />
+                <span className='boot-grid' />
+                <span className='boot-grain' />
+                <span className='boot-vignette' />
             </div>
-            <div className='bt-stage'>
-                <div className='bt-emblem'>
-                    <div className='bt-emblem-ring' />
-                    <div className='bt-emblem-ring bt-emblem-ring--inner' />
-                    <img className='bt-emblem-logo' src='/loader.jpg' alt='' />
+            <div className='boot-shell'>
+                <div className='boot-mark' role='button' tabIndex={0} aria-label='TradingHubs mark'>
+                    <span className='boot-mark-halo' />
+                    <span className='boot-mark-ring' />
+                    <span className='boot-mark-ring boot-mark-ring--inner' />
+                    <div className='boot-mark-img'><img src='/assets/tradinghubs-mark.svg' alt='' aria-hidden='true' /></div>
+                    <span className='boot-mark-core' />
                 </div>
-                <div className='bt-kicker'>Precision Trading Workspace</div>
-                <h1 className='bt-title' aria-label='TradingHubs'>
-                    <span className='bt-title-main'>TRADING</span>
-                    <span className='bt-title-accent'>HUBS</span>
-                </h1>
-                <p className='bt-tagline'>Build, automate, and run trading strategies with cinematic clarity.</p>
-                <div className='bt-progress' aria-label={`Loading ${progress}%`}>
-                    <div className='bt-progress-track'>
-                        <div className='bt-progress-fill' style={{ width: `${progress}%` }} />
-                    </div>
-                    <div className='bt-progress-meta'>
-                        <span>{STATUS_LINES[statusIdx]}</span>
-                        <span>{progress}%</span>
+                <div className='boot-kicker'>Precision Trading Workspace</div>
+                <div className='boot-brand' role='button' tabIndex={0} aria-label='TradingHubs'>
+                    <span className='boot-brand-main'>TRADING</span>
+                    <span className='boot-brand-accent'>HUBS</span>
+                </div>
+                <div className='boot-rule' aria-hidden='true'><i /></div>
+                <p className='boot-tagline'>Build, automate, and run trading strategies with cinematic clarity.</p>
+                <div className='boot-progress' aria-label={`Loading ${progress}%`}>
+                    <span className='boot-progress-track' aria-hidden='true'>
+                        <span className='boot-progress-fill' style={{ width: `${progress}%` }} />
+                    </span>
+                    <div className='boot-progress-meta'>
+                        <span className='boot-status'>Initializing <strong>{STATUS_LINES[statusIdx]}</strong><span className='boot-cursor' aria-hidden='true' /></span>
+                        <span className='boot-pct'>{progress}%</span>
                     </div>
                 </div>
             </div>
+            <div className='boot-foot' aria-hidden='true'>tradinghubs.site</div>
         </div>
     );
 };

@@ -5,6 +5,7 @@ import { localize } from '@deriv-com/translations';
 import './app-dialog.scss';
 
 type DialogVariant = 'confirm' | 'alert' | 'prompt';
+type DialogTone = 'success' | 'warning' | 'danger' | 'info';
 
 type DialogOptions = {
     title?: string;
@@ -13,6 +14,7 @@ type DialogOptions = {
     cancelText?: string;
     variant?: DialogVariant;
     danger?: boolean;
+    tone?: DialogTone;
     defaultValue?: string;
     placeholder?: string;
     inputType?: 'text' | 'number';
@@ -21,6 +23,7 @@ type DialogOptions = {
 type DialogState = DialogOptions & {
     isVisible: boolean;
     variant: DialogVariant;
+    tone: DialogTone;
 };
 
 type AppDialogContextValue = {
@@ -35,9 +38,74 @@ const defaultState: DialogState = {
     isVisible: false,
     message: '',
     variant: 'confirm',
+    tone: 'info',
     title: '',
     confirmText: '',
     cancelText: '',
+};
+
+const icons: Record<DialogTone, React.ReactNode> = {
+    success: (
+        <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
+            <circle cx='12' cy='12' r='9' fill='none' stroke='currentColor' strokeWidth='1.8' opacity='0.35' />
+            <path d='M7.5 12.5l3 3 6-7' fill='none' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' strokeLinejoin='round' />
+        </svg>
+    ),
+    warning: (
+        <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
+            <path d='M10.4 4.4L2.8 17.5A2 2 0 004.5 20.5h15a2 2 0 001.7-3L13.6 4.4a2 2 0 00-3.2 0z' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinejoin='round' />
+            <path d='M12 9v4.8' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' />
+            <circle cx='12' cy='16.8' r='1.2' fill='currentColor' />
+        </svg>
+    ),
+    danger: (
+        <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
+            <circle cx='12' cy='12' r='9' fill='none' stroke='currentColor' strokeWidth='1.8' />
+            <path d='M12 7.8v5' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' />
+            <circle cx='12' cy='16.4' r='1.2' fill='currentColor' />
+        </svg>
+    ),
+    info: (
+        <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
+            <circle cx='12' cy='12' r='9' fill='none' stroke='currentColor' strokeWidth='1.8' />
+            <path d='M12 10.5v5.5' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' />
+            <circle cx='12' cy='7.6' r='1.2' fill='currentColor' />
+        </svg>
+    ),
+};
+
+const toSearchText = (opts: DialogOptions) =>
+    `${opts.title ?? ''} ${typeof opts.message === 'string' ? opts.message : ''}`.toLowerCase();
+
+const resolveTone = (opts: DialogOptions, variant: DialogVariant): DialogTone => {
+    if (opts.tone) return opts.tone;
+    if (opts.danger) return 'danger';
+    const text = toSearchText(opts);
+    if (
+        /take\s*-?\s*profit|target\s*profit|profit\s*(reached|achieved|hit|target)|session\s*completed|congratulations|takeprofit\s*achieved|completed successfully|success|you'?ve won|win\b/.test(
+            text
+        )
+    ) {
+        return 'success';
+    }
+    if (
+        /stop\s*-?\s*loss|loss\s*(hit|reached|limit)|max\s*(loss|drawdown|trades reached)|suspended|emergency|failed|error|invalid|cannot|rejected|timed out|unauthori[sz]ed/.test(
+            text
+        )
+    ) {
+        return 'warning';
+    }
+    if (variant === 'prompt') return 'info';
+    return 'info';
+};
+
+const resolveTitle = (opts: DialogOptions, variant: DialogVariant, tone: DialogTone) => {
+    if (opts.title) return opts.title;
+    if (variant === 'prompt') return localize('Input required');
+    if (tone === 'success') return localize('Success');
+    if (tone === 'warning') return localize('Attention');
+    if (variant === 'confirm') return localize('Please confirm');
+    return localize('Notice');
 };
 
 export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -57,18 +125,14 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         return new Promise<boolean | string | null | void>(resolve => {
             resolverRef.current = resolve as (value: boolean | string | null | void) => void;
             setInputValue(opts.defaultValue ?? '');
+            const tone = resolveTone(opts, variant);
             setState({
                 ...defaultState,
                 ...opts,
                 variant,
+                tone,
                 isVisible: true,
-                title:
-                    opts.title ??
-                    (variant === 'alert'
-                        ? localize('Notice')
-                        : variant === 'prompt'
-                          ? localize('Input required')
-                          : localize('Please confirm')),
+                title: resolveTitle(opts, variant, tone),
                 confirmText: opts.confirmText ?? (variant === 'alert' ? localize('OK') : localize('Continue')),
                 cancelText: opts.cancelText ?? localize('Cancel'),
             });
@@ -112,6 +176,8 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         close(false);
     };
 
+    const isDangerAction = state.danger || state.tone === 'danger';
+
     return (
         <AppDialogContext.Provider value={{ confirm, alert: alertFn, prompt: promptFn }}>
             {children}
@@ -127,28 +193,35 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                           onClose={handleCancel}
                           has_close_icon
                           is_mobile_full_width={false}
-                          className={`app-dialog${state.danger ? ' app-dialog--danger' : ''}`}
+                          className={`app-dialog app-dialog--tone-${state.tone}${isDangerAction ? ' app-dialog--danger' : ''}`}
                           login={() => {}}
                       >
-                          <div className='app-dialog__body'>
-                              {typeof state.message === 'string' ? (
-                                  <p className='app-dialog__message'>{state.message}</p>
-                              ) : (
-                                  <div className='app-dialog__message'>{state.message}</div>
-                              )}
-                              {state.variant === 'prompt' && (
-                                  <input
-                                      autoFocus
-                                      className='app-dialog__input'
-                                      type={state.inputType ?? 'text'}
-                                      value={inputValue}
-                                      placeholder={state.placeholder}
-                                      onChange={e => setInputValue(e.target.value)}
-                                      onKeyDown={e => {
-                                          if (e.key === 'Enter') handleConfirm();
-                                      }}
-                                  />
-                              )}
+                          <div className='app-dialog__layout'>
+                              <div className={`app-dialog__icon-wrap app-dialog__icon-wrap--${state.tone}`} aria-hidden='true'>
+                                  <span className='app-dialog__icon-ring' />
+                                  <span className='app-dialog__icon'>{icons[state.tone]}</span>
+                              </div>
+                              <div className='app-dialog__copy'>
+                                  <h3 className='app-dialog__title'>{state.title}</h3>
+                                  {typeof state.message === 'string' ? (
+                                      <p className='app-dialog__message'>{state.message}</p>
+                                  ) : (
+                                      <div className='app-dialog__message'>{state.message}</div>
+                                  )}
+                                  {state.variant === 'prompt' && (
+                                      <input
+                                          autoFocus
+                                          className='app-dialog__input'
+                                          type={state.inputType ?? 'text'}
+                                          value={inputValue}
+                                          placeholder={state.placeholder}
+                                          onChange={e => setInputValue(e.target.value)}
+                                          onKeyDown={e => {
+                                              if (e.key === 'Enter') handleConfirm();
+                                          }}
+                                      />
+                                  )}
+                              </div>
                           </div>
                       </Dialog>,
                       document.body

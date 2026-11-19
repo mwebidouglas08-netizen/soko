@@ -143,6 +143,11 @@ class APIBase {
         if (activeAccountId) {
             setIsAuthorizing(true);
             await this.authorizeAndSubscribe();
+        } else {
+            // No stored account/session: not logged in, so authorization is not in progress.
+            // Without this the global authorizing flag stays stuck at its initial "true"
+            // value, which hides login controls and can delay or block the OAuth redirect.
+            setIsAuthorizing(false);
         }
     }
 

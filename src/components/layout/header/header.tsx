@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { generateOAuthURL } from '@/components/shared';
@@ -21,6 +21,8 @@ const AppHeader = observer(() => {
     const { isAuthorizing, activeLoginid, setIsAuthorizing, authData } = useApiBase();
     const { client } = useStore() ?? {};
     const [authTimeout, setAuthTimeout] = useState(false);
+    const [isRedirecting, setIsRedirecting] = useState(false);
+    const redirectingRef = useRef(false);
     const is_account_regenerating = client?.is_account_regenerating || false;
 
     // Detect OAuth callback on mount (before App.tsx cleans up the URL).
@@ -84,39 +86,41 @@ const AppHeader = observer(() => {
     }, [isAuthorizing, activeLoginid, setIsAuthorizing, authTimeout, isOAuthPending]);
 
     const handleSignup = useCallback(async () => {
+        if (redirectingRef.current) return;
+        redirectingRef.current = true;
+        setIsRedirecting(true);
+        setIsAuthorizing(true);
+
         try {
-            setIsAuthorizing(true);
             const oauthUrl = await generateOAuthURL('registration');
-            if (oauthUrl) {
-                window.location.replace(oauthUrl);
-            } else {
-                console.error('Failed to generate OAuth URL for signup');
-                setIsAuthorizing(false);
+            if (!oauthUrl) {
+                throw new Error('OAuth URL unavailable');
             }
+            window.location.assign(oauthUrl);
         } catch (error) {
             console.error('Signup redirection failed:', error);
+            redirectingRef.current = false;
+            setIsRedirecting(false);
             setIsAuthorizing(false);
         }
     }, [setIsAuthorizing]);
 
     const handleLogin = useCallback(async () => {
+        if (redirectingRef.current) return;
+        redirectingRef.current = true;
+        setIsRedirecting(true);
+        setIsAuthorizing(true);
+
         try {
-            // Set authorizing state immediately when login is clicked
-            setIsAuthorizing(true);
-
-            // Generate OAuth URL with CSRF token and PKCE parameters
             const oauthUrl = await generateOAuthURL();
-
-            if (oauthUrl) {
-                // Redirect to OAuth URL
-                window.location.replace(oauthUrl);
-            } else {
-                console.error('Failed to generate OAuth URL');
-                setIsAuthorizing(false);
+            if (!oauthUrl) {
+                throw new Error('OAuth URL unavailable');
             }
+            window.location.assign(oauthUrl);
         } catch (error) {
             console.error('Login redirection failed:', error);
-            // Reset authorizing state if redirection fails
+            redirectingRef.current = false;
+            setIsRedirecting(false);
             setIsAuthorizing(false);
         }
     }, [setIsAuthorizing]);
@@ -134,13 +138,6 @@ const AppHeader = observer(() => {
         (position: 'left' | 'right' = 'right') => {
             // Show account switcher and logout when user is fully authenticated
             if (activeLoginid && !is_account_regenerating) {
-                // The account switcher always renders in the right wrapper, on
-                // every screen size. That wrapper is a `flex: 0 0 auto` block
-                // that never clips its children, so on a phone the Real/Demo
-                // trigger stays fully visible and receives the tap. It used to
-                // be squeezed into the left wrapper (next to the hamburger and
-                // the logo), which overlapped the trigger with neighbouring
-                // content and clipped the panel it opens with `overflow: hidden`.
                 if (position === 'right') {
                     return (
                         <div className='auth-actions'>
@@ -158,29 +155,36 @@ const AppHeader = observer(() => {
                     );
                 }
             }
-            // Show login button only when fully settled (not during OAuth flow)
-            else if (
+
+            const hasStoredSession =
+                typeof window !== 'undefined' &&
+                Boolean(localStorage.getItem('active_loginid') || localStorage.getItem('auth_info'));
+            const canShowAuthButtons =
                 position === 'right' &&
+                !activeLoginid &&
                 !isOAuthPending &&
-                ((!is_account_regenerating && !isAuthorizing && !activeLoginid) || authTimeout)
-            ) {
-                // Disable auth buttons until the OAuth app id is configured, so the
-                // click handlers (which would otherwise log "Failed to generate OAuth
-                // URL") never fire. The env-not-set toast explains why.
+                !is_account_regenerating &&
+                !isRedirecting &&
+                (!isAuthorizing || authTimeout || !hasStoredSession);
+
+            // Show login/signup when fully settled, or immediately for logged-out visitors
+            // even if global auth initialization is still in progress.
+            if (canShowAuthButtons) {
                 const isAuthConfigured = Boolean(process.env.NEXT_PUBLIC_DERIV_APP_ID);
                 return (
                     <div className='auth-actions'>
-                        <Button tertiary disabled={!isAuthConfigured} onClick={handleLogin}>
+                        <Button tertiary disabled={!isAuthConfigured || isRedirecting} onClick={handleLogin}>
                             <Localize i18n_default_text='Log in' />
                         </Button>
-                        <Button primary_light disabled={!isAuthConfigured} onClick={handleSignup}>
+                        <Button primary_light disabled={!isAuthConfigured || isRedirecting} onClick={handleSignup}>
                             <Localize i18n_default_text='Sign up' />
                         </Button>
                     </div>
                 );
             }
-            // Default: Show spinner during loading states or when authorizing
-            else if (position === 'right') {
+
+            // Default: Show spinner during loading states, OAuth callback, or redirect
+            if (position === 'right') {
                 return (
                     <div className='auth-actions auth-actions--loading'>
                         <svg
@@ -215,6 +219,7 @@ const AppHeader = observer(() => {
             authTimeout,
             is_account_regenerating,
             isOAuthPending,
+            isRedirecting,
             authData,
             handleLogin,
             handleSignup,

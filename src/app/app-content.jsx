@@ -3,7 +3,6 @@ import { observer } from 'mobx-react-lite';
 import { Bounce, ToastContainer } from 'react-toastify';
 import { AppDialogBridge, AppDialogProvider } from '@/components/app-dialog';
 import { installNativeDialogOverrides } from '@/utils/native-dialog-override';
-import DbotRuntime from '@/components/dbot-runtime';
 import AuthLoadingWrapper from '@/components/auth-loading-wrapper';
 import { botNotification } from '@/components/bot-notification/bot-notification';
 import useLiveChat from '@/components/chat/useLiveChat';
@@ -233,7 +232,6 @@ const AppContent = observer(() => {
                     <ThemeProvider theme={is_dark_mode_on ? 'dark' : 'light'}>
                         <AppDialogProvider>
                             <AppDialogBridge />
-                            <DbotRuntime />
                             <BlocklyLoading />
                             <div className='bot-dashboard bot' data-testid='dt_bot_dashboard'>
                                 <Audio />

@@ -1,60 +1,67 @@
 .dc-dialog__wrapper.app-dialog {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
     background:
-        radial-gradient(1200px 500px at 20% -10%, rgba(20, 184, 166, 0.12), transparent 60%),
-        radial-gradient(900px 500px at 100% 110%, rgba(59, 130, 246, 0.1), transparent 60%),
-        rgba(8, 20, 38, 0.5);
+        radial-gradient(900px 400px at 15% 0%, rgba(20, 184, 166, 0.16), transparent 60%),
+        radial-gradient(700px 380px at 90% 100%, rgba(59, 130, 246, 0.14), transparent 60%),
+        linear-gradient(180deg, rgba(6, 16, 30, 0.55), rgba(6, 16, 30, 0.72));
 }
 
 .app-dialog {
     --app-dialog-accent: #14b8a6;
+    --app-dialog-accent-2: #0ea5e9;
     --app-dialog-accent-strong: #0f766e;
-    --app-dialog-accent-soft: rgba(20, 184, 166, 0.14);
+    --app-dialog-accent-soft: rgba(20, 184, 166, 0.16);
     --app-dialog-surface: #ffffff;
-    --app-dialog-surface-alt: #f4fbfa;
+    --app-dialog-surface-alt: #f3fbfa;
+    --app-dialog-ink: #0f2740;
+    --app-dialog-muted: #4b647a;
 
     &.app-dialog--tone-success {
         --app-dialog-accent: #10b981;
+        --app-dialog-accent-2: #22c55e;
         --app-dialog-accent-strong: #047857;
-        --app-dialog-accent-soft: rgba(16, 185, 129, 0.14);
-        --app-dialog-surface-alt: #f2fbf7;
+        --app-dialog-accent-soft: rgba(16, 185, 129, 0.16);
+        --app-dialog-surface-alt: #f1fbf6;
     }
 
     &.app-dialog--tone-warning {
         --app-dialog-accent: #f59e0b;
+        --app-dialog-accent-2: #fb7185;
         --app-dialog-accent-strong: #b45309;
-        --app-dialog-accent-soft: rgba(245, 158, 11, 0.16);
-        --app-dialog-surface-alt: #fffbf2;
+        --app-dialog-accent-soft: rgba(245, 158, 11, 0.18);
+        --app-dialog-surface-alt: #fffaf1;
     }
 
     &.app-dialog--tone-danger,
     &.app-dialog--danger {
         --app-dialog-accent: #ef4444;
+        --app-dialog-accent-2: #f97316;
         --app-dialog-accent-strong: #b91c1c;
-        --app-dialog-accent-soft: rgba(239, 68, 68, 0.14);
-        --app-dialog-surface-alt: #fff7f7;
+        --app-dialog-accent-soft: rgba(239, 68, 68, 0.16);
+        --app-dialog-surface-alt: #fff6f6;
     }
 
     .dc-dialog__dialog {
         position: relative;
         overflow: hidden;
         isolation: isolate;
-        width: min(460px, calc(100vw - 2.4rem));
-        max-width: 460px;
+        width: min(500px, calc(100vw - 2.4rem));
+        max-width: 500px;
         min-width: 0;
         min-height: 0;
         margin-top: 0;
-        padding: 2.8rem 2.4rem 2rem;
-        border-radius: 22px;
-        border: 1px solid rgba(255, 255, 255, 0.7);
+        padding: 2.8rem 2.6rem 2.2rem;
+        border-radius: 26px;
+        border: 1px solid rgba(255, 255, 255, 0.65);
         background:
-            linear-gradient(180deg, var(--app-dialog-surface) 0%, var(--app-dialog-surface-alt) 100%);
+            linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, var(--app-dialog-surface-alt) 100%);
         box-shadow:
-            0 32px 64px rgba(15, 23, 42, 0.22),
-            0 12px 28px rgba(15, 23, 42, 0.12),
-            0 0 0 1px rgba(15, 23, 42, 0.03);
-        animation: app-dialog-pop 0.32s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+            0 40px 80px rgba(2, 8, 23, 0.35),
+            0 18px 36px rgba(2, 8, 23, 0.18),
+            0 0 0 1px rgba(15, 23, 42, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        animation: app-dialog-pop 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
 
         &::before {
             content: '';
@@ -63,31 +70,38 @@
             left: 0;
             right: 0;
             height: 5px;
-            background: linear-gradient(90deg, var(--app-dialog-accent), var(--app-dialog-accent-strong));
-            z-index: 1;
+            background: linear-gradient(90deg, var(--app-dialog-accent), var(--app-dialog-accent-2), var(--app-dialog-accent));
+            background-size: 200% 100%;
+            animation: app-dialog-shimmer 4s linear infinite;
+            z-index: 2;
         }
 
         &::after {
             content: '';
             position: absolute;
-            inset: -40% auto auto 50%;
-            width: 320px;
-            height: 220px;
-            transform: translateX(-50%);
-            background: radial-gradient(closest-side, var(--app-dialog-accent-soft), transparent 70%);
+            inset: -30% -10% auto -10%;
+            height: 260px;
+            background:
+                radial-gradient(closest-side at 50% 30%, var(--app-dialog-accent-soft), transparent 70%),
+                radial-gradient(closest-side at 20% 20%, rgba(255, 255, 255, 0.35), transparent 60%);
             pointer-events: none;
             z-index: 0;
         }
     }
 
+    &.app-dialog--session .dc-dialog__dialog {
+        width: min(540px, calc(100vw - 2.4rem));
+        max-width: 540px;
+    }
+
     .dc-dialog__header-wrapper {
         position: absolute;
-        top: 1.1rem;
-        right: 1.1rem;
+        top: 1.2rem;
+        right: 1.2rem;
         width: auto;
         margin: 0;
         justify-content: flex-end;
-        z-index: 3;
+        z-index: 5;
     }
 
     .dc-dialog__header--title {
@@ -104,12 +118,14 @@
 
     .dc-dialog__header--close {
         border-radius: 999px;
-        background: rgba(15, 23, 42, 0.04);
+        background: rgba(15, 23, 42, 0.05);
         color: #5b7083;
+        backdrop-filter: blur(4px);
 
         &:hover {
-            background: rgba(15, 23, 42, 0.08);
+            background: rgba(15, 23, 42, 0.1);
             color: #102a43;
+            transform: rotate(90deg);
         }
     }
 
@@ -122,76 +138,244 @@
         align-self: stretch;
     }
 
-    &__layout {
+    &__cinema {
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
-        gap: 1.2rem;
+        gap: 1.1rem;
+    }
+
+    &__hero {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0.2rem;
+    }
+
+    &__hero-glow {
+        position: absolute;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--app-dialog-accent-soft), transparent 70%);
+        filter: blur(2px);
+        animation: app-dialog-breathe 3s ease-in-out infinite;
     }
 
     &__icon-wrap {
         position: relative;
-        width: 72px;
-        height: 72px;
+        width: 78px;
+        height: 78px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 20px;
+        border-radius: 22px;
         color: var(--app-dialog-accent-strong);
         background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.65)),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.7)),
             var(--app-dialog-accent-soft);
         box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.8),
-            0 10px 24px rgba(15, 23, 42, 0.08);
-        animation: app-dialog-icon-in 0.42s cubic-bezier(0.2, 0.9, 0.2, 1) 0.04s both;
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            0 14px 30px rgba(15, 23, 42, 0.12),
+            0 0 0 1px rgba(255, 255, 255, 0.4);
+        animation: app-dialog-icon-in 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) 0.05s both;
+        z-index: 1;
     }
 
     &__icon-ring {
         position: absolute;
-        inset: -6px;
-        border-radius: 24px;
-        border: 1px solid var(--app-dialog-accent-soft);
+        inset: -7px;
+        border-radius: 26px;
+        border: 1.5px solid var(--app-dialog-accent-soft);
         opacity: 0.9;
+        animation: app-dialog-ring 2.8s ease-out infinite;
+
+        &--outer {
+            inset: -14px;
+            border-radius: 30px;
+            opacity: 0.4;
+            animation-delay: 0.8s;
+        }
     }
 
     &__icon {
-        width: 34px;
-        height: 34px;
+        width: 38px;
+        height: 38px;
         display: inline-flex;
 
         svg {
             width: 100%;
             height: 100%;
             display: block;
+            filter: drop-shadow(0 4px 8px var(--app-dialog-accent-soft));
         }
+    }
+
+    &__sparkles {
+        position: absolute;
+        inset: -24px;
+        pointer-events: none;
+        background-image:
+            radial-gradient(circle, var(--app-dialog-accent) 0 2px, transparent 3px),
+            radial-gradient(circle, var(--app-dialog-accent-2) 0 1.5px, transparent 2.5px),
+            radial-gradient(circle, #fff 0 1px, transparent 2px),
+            radial-gradient(circle, var(--app-dialog-accent) 0 1.5px, transparent 2.5px),
+            radial-gradient(circle, var(--app-dialog-accent-2) 0 2px, transparent 3px);
+        background-size: 120px 120px, 90px 90px, 70px 70px, 100px 100px, 110px 110px;
+        background-position: 10% 20%, 80% 10%, 50% 0%, 20% 80%, 85% 75%;
+        opacity: 0.55;
+        animation: app-dialog-sparkle 4s ease-in-out infinite;
     }
 
     &__copy {
         width: 100%;
+        animation: app-dialog-fade-up 0.45s ease 0.08s both;
+    }
+
+    &__eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-bottom: 0.4rem;
+        padding: 0.25rem 0.7rem;
+        border-radius: 999px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--app-dialog-accent-strong);
+        background: var(--app-dialog-accent-soft);
     }
 
     &__title {
-        margin: 0 0 0.5rem;
-        font-size: 2rem;
-        line-height: 1.2;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        color: #0f2740;
+        margin: 0 0 0.45rem;
+        font-size: 2.2rem;
+        line-height: 1.15;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--app-dialog-ink);
     }
 
     &__message {
         margin: 0;
-        color: #45607a;
+        color: var(--app-dialog-muted);
         font-size: 1.45rem;
         line-height: 1.65;
         white-space: pre-wrap;
         word-break: break-word;
     }
 
+    &__results {
+        width: 100%;
+        margin-top: 0.2rem;
+        padding: 1.2rem 1.2rem 1rem;
+        border-radius: 18px;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        animation: app-dialog-fade-up 0.5s ease 0.14s both;
+    }
+
+    &__results-head {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 0.9rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    &__results-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.12), transparent);
+    }
+
+    &__stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
+    }
+
+    &__stat {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+        padding: 0.75rem 0.9rem;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(15, 23, 42, 0.05);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06);
+        }
+
+        &--wide {
+            grid-column: span 2;
+            align-items: center;
+            text-align: center;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)),
+                var(--app-dialog-accent-soft);
+            border-color: rgba(15, 23, 42, 0.04);
+        }
+
+        &--pos .app-dialog__stat-value { color: #047857; }
+        &--neg .app-dialog__stat-value { color: #b91c1c; }
+        &--neu .app-dialog__stat-value { color: var(--app-dialog-ink); }
+    }
+
+    &__stat-label {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #64748b;
+        letter-spacing: 0.02em;
+    }
+
+    &__stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__winbar {
+        margin-top: 0.8rem;
+    }
+
+    &__winbar-track {
+        position: relative;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    &__winbar-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--app-dialog-accent), var(--app-dialog-accent-2));
+        box-shadow: 0 0 12px var(--app-dialog-accent-soft);
+        transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    &__prompt-wrap {
+        width: 100%;
+        animation: app-dialog-fade-up 0.45s ease 0.12s both;
+    }
+
     &__input {
-        margin-top: 1.4rem;
+        margin-top: 0.2rem;
         width: 100%;
         padding: 1rem 1.2rem;
         border: 1.5px solid #d8e2ec;
@@ -199,18 +383,15 @@
         font-size: 1.45rem;
         font-family: inherit;
         color: #102a43;
-        background: #fff;
+        background: rgba(255, 255, 255, 0.9);
         outline: none;
         box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
         transition:
             border-color 0.18s ease,
-            box-shadow 0.18s ease,
-            transform 0.18s ease;
+            box-shadow 0.18s ease;
         box-sizing: border-box;
 
-        &:hover {
-            border-color: #c3d2e0;
-        }
+        &:hover { border-color: #c3d2e0; }
 
         &:focus {
             border-color: var(--app-dialog-accent);
@@ -226,6 +407,7 @@
         gap: 0.8rem;
         justify-content: center;
         flex-wrap: wrap;
+        animation: app-dialog-fade-up 0.5s ease 0.18s both;
 
         @media (max-width: 600px) {
             flex-direction: column-reverse;
@@ -235,24 +417,17 @@
     .dc-dialog__button,
     .dc-btn {
         border-radius: 14px;
-        min-width: 132px;
-        min-height: 44px;
+        min-width: 140px;
+        min-height: 46px;
         font-weight: 700;
         letter-spacing: 0.01em;
         transition:
             transform 0.14s ease,
             box-shadow 0.18s ease,
-            filter 0.18s ease,
-            background 0.18s ease;
+            filter 0.18s ease;
 
-        &:hover:not(:disabled) {
-            transform: translateY(-1px);
-        }
-
-        &:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
+        &:hover:not(:disabled) { transform: translateY(-1px); }
+        &:active:not(:disabled) { transform: translateY(0); }
         &:focus-visible {
             outline: none;
             box-shadow: 0 0 0 4px var(--app-dialog-accent-soft);
@@ -265,14 +440,14 @@
         color: #fff;
         background: linear-gradient(135deg, var(--app-dialog-accent) 0%, var(--app-dialog-accent-strong) 100%);
         box-shadow:
-            0 10px 20px rgba(15, 23, 42, 0.12),
+            0 12px 22px rgba(15, 23, 42, 0.14),
             0 4px 10px var(--app-dialog-accent-soft);
 
         &:hover:not(:disabled) {
-            filter: brightness(1.03);
+            filter: brightness(1.04);
             box-shadow:
-                0 14px 24px rgba(15, 23, 42, 0.14),
-                0 6px 14px var(--app-dialog-accent-soft);
+                0 16px 28px rgba(15, 23, 42, 0.16),
+                0 8px 16px var(--app-dialog-accent-soft);
         }
     }
 
@@ -280,30 +455,27 @@
     .dc-btn--secondary {
         border: 1.5px solid #d8e2ec;
         color: #334e68;
-        background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 
         &:hover:not(:disabled) {
             border-color: #c3d2e0;
             background: #fff;
-            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
         }
     }
 
     @media (max-width: 600px) {
         .dc-dialog__dialog {
-            width: calc(100vw - 2rem);
-            padding: 2.6rem 1.8rem 1.8rem;
-            border-radius: 20px;
+            width: calc(100vw - 1.8rem);
+            padding: 2.6rem 1.6rem 1.8rem;
+            border-radius: 22px;
         }
 
-        &__title {
-            font-size: 1.85rem;
-        }
-
-        &__message {
-            font-size: 1.4rem;
-        }
+        &__title { font-size: 1.95rem; }
+        &__message { font-size: 1.4rem; }
+        &__stats { grid-template-columns: 1fr 1fr; }
+        &__stat--wide { grid-column: span 2; }
 
         .dc-dialog__button,
         .dc-btn {
@@ -314,27 +486,38 @@
 }
 
 @keyframes app-dialog-pop {
-    0% {
-        opacity: 0;
-        transform: translateY(14px) scale(0.965);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    0% { opacity: 0; transform: translateY(18px) scale(0.96); filter: blur(4px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
 @keyframes app-dialog-icon-in {
-    0% {
-        opacity: 0;
-        transform: scale(0.7) translateY(6px);
-    }
-    60% {
-        opacity: 1;
-        transform: scale(1.04) translateY(0);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
+    0% { opacity: 0; transform: scale(0.6) translateY(8px); }
+    60% { opacity: 1; transform: scale(1.06) translateY(0); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes app-dialog-fade-up {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes app-dialog-shimmer {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+@keyframes app-dialog-breathe {
+    0%, 100% { transform: scale(0.95); opacity: 0.7; }
+    50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes app-dialog-ring {
+    0% { transform: scale(0.92); opacity: 0.7; }
+    70% { transform: scale(1.08); opacity: 0; }
+    100% { transform: scale(1.08); opacity: 0; }
+}
+
+@keyframes app-dialog-sparkle {
+    0%, 100% { opacity: 0.35; transform: scale(0.98) rotate(0deg); }
+    50% { opacity: 0.7; transform: scale(1.03) rotate(2deg); }
 }

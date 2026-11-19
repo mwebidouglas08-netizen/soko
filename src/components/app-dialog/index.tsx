@@ -1,7 +1,11 @@
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Dialog from '@/components/shared_ui/dialog';
 import { localize } from '@deriv-com/translations';
+import { rootStore } from '@/stores';
+import { aiBot } from '@/bot/engine/ai-bot';
+import { bulkTrader } from '@/bot/engine/bulk-trader';
+import { ouBotEngine } from '@/bot/engine/engine';
 import './app-dialog.scss';
 
 type DialogVariant = 'confirm' | 'alert' | 'prompt';
@@ -20,10 +24,23 @@ type DialogOptions = {
     inputType?: 'text' | 'number';
 };
 
+type SessionSnapshot = {
+    trades: number;
+    wins: number;
+    losses: number;
+    netProfit: number;
+    winRate: number;
+    totalStake?: number;
+    totalPayout?: number;
+    source: string;
+};
+
 type DialogState = DialogOptions & {
     isVisible: boolean;
     variant: DialogVariant;
     tone: DialogTone;
+    isSessionResult: boolean;
+    snapshot: SessionSnapshot | null;
 };
 
 type AppDialogContextValue = {
@@ -39,6 +56,8 @@ const defaultState: DialogState = {
     message: '',
     variant: 'confirm',
     tone: 'info',
+    isSessionResult: false,
+    snapshot: null,
     title: '',
     confirmText: '',
     cancelText: '',
@@ -47,29 +66,29 @@ const defaultState: DialogState = {
 const icons: Record<DialogTone, React.ReactNode> = {
     success: (
         <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
-            <circle cx='12' cy='12' r='9' fill='none' stroke='currentColor' strokeWidth='1.8' opacity='0.35' />
-            <path d='M7.5 12.5l3 3 6-7' fill='none' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' strokeLinejoin='round' />
+            <circle cx='12' cy='12' r='9.5' fill='none' stroke='currentColor' strokeWidth='1.6' opacity='0.35' />
+            <path d='M7.2 12.4l3.2 3.3 6.6-7.6' fill='none' stroke='currentColor' strokeWidth='2.6' strokeLinecap='round' strokeLinejoin='round' />
         </svg>
     ),
     warning: (
         <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
-            <path d='M10.4 4.4L2.8 17.5A2 2 0 004.5 20.5h15a2 2 0 001.7-3L13.6 4.4a2 2 0 00-3.2 0z' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinejoin='round' />
-            <path d='M12 9v4.8' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' />
-            <circle cx='12' cy='16.8' r='1.2' fill='currentColor' />
+            <path d='M10.4 4.2L2.7 17.4A2 2 0 004.4 20.5h15.2a2 2 0 001.7-3.1L13.6 4.2a2 2 0 00-3.2 0z' fill='none' stroke='currentColor' strokeWidth='1.7' strokeLinejoin='round' />
+            <path d='M12 9v4.9' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' />
+            <circle cx='12' cy='16.9' r='1.25' fill='currentColor' />
         </svg>
     ),
     danger: (
         <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
-            <circle cx='12' cy='12' r='9' fill='none' stroke='currentColor' strokeWidth='1.8' />
-            <path d='M12 7.8v5' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' />
-            <circle cx='12' cy='16.4' r='1.2' fill='currentColor' />
+            <circle cx='12' cy='12' r='9.5' fill='none' stroke='currentColor' strokeWidth='1.7' />
+            <path d='M12 7.6v5.3' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' />
+            <circle cx='12' cy='16.6' r='1.25' fill='currentColor' />
         </svg>
     ),
     info: (
         <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
-            <circle cx='12' cy='12' r='9' fill='none' stroke='currentColor' strokeWidth='1.8' />
-            <path d='M12 10.5v5.5' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' />
-            <circle cx='12' cy='7.6' r='1.2' fill='currentColor' />
+            <circle cx='12' cy='12' r='9.5' fill='none' stroke='currentColor' strokeWidth='1.7' />
+            <path d='M12 10.4v5.8' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' />
+            <circle cx='12' cy='7.4' r='1.25' fill='currentColor' />
         </svg>
     ),
 };
@@ -77,19 +96,24 @@ const icons: Record<DialogTone, React.ReactNode> = {
 const toSearchText = (opts: DialogOptions) =>
     `${opts.title ?? ''} ${typeof opts.message === 'string' ? opts.message : ''}`.toLowerCase();
 
+const isSessionResultText = (text: string) =>
+    /take\s*-?\s*profit|target\s*profit|profit\s*(reached|achieved|hit|target)|takeprofit\s*achieved|stop\s*-?\s*loss|loss\s*(hit|reached|limit)|session\s*(completed|complete|ended|stopped|summary)|max\s*trades\s*reached|trades\s*reached|trade\s*limit|daily\s*(loss|profit)|congratulations|sorry!!!/i.test(
+        text
+    );
+
 const resolveTone = (opts: DialogOptions, variant: DialogVariant): DialogTone => {
     if (opts.tone) return opts.tone;
     if (opts.danger) return 'danger';
     const text = toSearchText(opts);
     if (
-        /take\s*-?\s*profit|target\s*profit|profit\s*(reached|achieved|hit|target)|session\s*completed|congratulations|takeprofit\s*achieved|completed successfully|success|you'?ve won|win\b/.test(
+        /take\s*-?\s*profit|target\s*profit|profit\s*(reached|achieved|hit|target)|takeprofit\s*achieved|session\s*completed|congratulations|completed successfully|success|you'?ve won|\bwin\b/i.test(
             text
         )
     ) {
         return 'success';
     }
     if (
-        /stop\s*-?\s*loss|loss\s*(hit|reached|limit)|max\s*(loss|drawdown|trades reached)|suspended|emergency|failed|error|invalid|cannot|rejected|timed out|unauthori[sz]ed/.test(
+        /stop\s*-?\s*loss|loss\s*(hit|reached|limit)|max\s*(loss|drawdown|trades reached)|trades\s*reached|suspended|emergency|failed|error|invalid|cannot|rejected|timed out|unauthori[sz]ed|sorry!!!/i.test(
             text
         )
     ) {
@@ -102,11 +126,124 @@ const resolveTone = (opts: DialogOptions, variant: DialogVariant): DialogTone =>
 const resolveTitle = (opts: DialogOptions, variant: DialogVariant, tone: DialogTone) => {
     if (opts.title) return opts.title;
     if (variant === 'prompt') return localize('Input required');
+    const text = toSearchText(opts);
+    if (isSessionResultText(text)) {
+        if (tone === 'success') return localize('Session Summary');
+        if (tone === 'warning') return localize('Session Update');
+        return localize('Session Summary');
+    }
     if (tone === 'success') return localize('Success');
     if (tone === 'warning') return localize('Attention');
     if (variant === 'confirm') return localize('Please confirm');
     return localize('Notice');
 };
+
+const safeNum = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
+
+const collectSessionSnapshot = (): SessionSnapshot | null => {
+    const candidates: SessionSnapshot[] = [];
+    try {
+        const tx = rootStore?.transactions?.statistics as any;
+        if (tx) {
+            const trades = safeNum(tx.won_contracts) + safeNum(tx.lost_contracts);
+            const wins = safeNum(tx.won_contracts);
+            const losses = safeNum(tx.lost_contracts);
+            const netProfit = safeNum(tx.total_profit);
+            if (trades > 0 || netProfit !== 0 || safeNum(tx.number_of_runs) > 0) {
+                candidates.push({
+                    trades,
+                    wins,
+                    losses,
+                    netProfit,
+                    winRate: trades > 0 ? (wins / trades) * 100 : 0,
+                    totalStake: safeNum(tx.total_stake),
+                    totalPayout: safeNum(tx.total_payout),
+                    source: 'transactions',
+                });
+            }
+        }
+    } catch {
+        /* ignore */
+    }
+
+    try {
+        const st = aiBot?.getState?.();
+        if (st?.stats && (safeNum(st.stats.trades) > 0 || safeNum(st.stats.netPnl) !== 0)) {
+            const trades = safeNum(st.stats.trades);
+            const wins = safeNum(st.stats.wins);
+            const losses = safeNum(st.stats.losses);
+            candidates.push({
+                trades,
+                wins,
+                losses,
+                netProfit: safeNum(st.stats.netPnl),
+                winRate: trades > 0 ? (wins / trades) * 100 : 0,
+                source: 'ai',
+            });
+        }
+    } catch {
+        /* ignore */
+    }
+
+    try {
+        const st = bulkTrader?.getState?.();
+        const p = st?.progress;
+        if (p && (safeNum(p.settled) > 0 || safeNum(p.bought) > 0 || safeNum(p.requested) > 0)) {
+            const settled = safeNum(p.settled);
+            const wins = safeNum(p.won);
+            const losses = safeNum(p.lost);
+            const trades = settled || safeNum(p.bought);
+            const netProfit = (st?.trades || []).reduce((acc: number, t: any) => acc + safeNum(t?.profit), 0);
+            candidates.push({
+                trades,
+                wins,
+                losses,
+                netProfit,
+                winRate: settled > 0 ? (wins / settled) * 100 : 0,
+                source: 'bulk',
+            });
+        }
+    } catch {
+        /* ignore */
+    }
+
+    try {
+        const st = ouBotEngine?.getState?.();
+        const tradesArr = st?.trades || [];
+        const closed = tradesArr.filter((t: any) => t && (t.result === 'win' || t.result === 'loss'));
+        if (closed.length > 0 || safeNum(st?.risk?.tradesThisSession) > 0) {
+            const wins = closed.filter((t: any) => t.result === 'win').length;
+            const losses = closed.filter((t: any) => t.result === 'loss').length;
+            const trades = closed.length || safeNum(st?.risk?.tradesThisSession);
+            const netProfit = closed.reduce((acc: number, t: any) => acc + safeNum(t?.profit), 0);
+            candidates.push({
+                trades,
+                wins,
+                losses,
+                netProfit,
+                winRate: trades > 0 ? (wins / trades) * 100 : 0,
+                source: 'ou',
+            });
+        }
+    } catch {
+        /* ignore */
+    }
+
+    if (!candidates.length) return null;
+    candidates.sort((a, b) => {
+        const sa = a.trades + (Math.abs(a.netProfit) > 0 ? 0.5 : 0);
+        const sb = b.trades + (Math.abs(b.netProfit) > 0 ? 0.5 : 0);
+        return sb - sa;
+    });
+    return candidates[0];
+};
+
+const formatMoney = (v: number) => {
+    const sign = v > 0 ? '+' : v < 0 ? '−' : '';
+    return `${sign}${Math.abs(v).toFixed(2)}`;
+};
+
+const formatPct = (v: number) => `${(Number.isFinite(v) ? v : 0).toFixed(1)}%`;
 
 export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [state, setState] = useState<DialogState>(defaultState);
@@ -126,11 +263,16 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             resolverRef.current = resolve as (value: boolean | string | null | void) => void;
             setInputValue(opts.defaultValue ?? '');
             const tone = resolveTone(opts, variant);
+            const text = toSearchText(opts);
+            const sessionResult = isSessionResultText(text) && variant !== 'prompt';
+            const snapshot = sessionResult ? collectSessionSnapshot() : null;
             setState({
                 ...defaultState,
                 ...opts,
                 variant,
                 tone,
+                isSessionResult: sessionResult,
+                snapshot,
                 isVisible: true,
                 title: resolveTitle(opts, variant, tone),
                 confirmText: opts.confirmText ?? (variant === 'alert' ? localize('OK') : localize('Continue')),
@@ -177,6 +319,48 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     const isDangerAction = state.danger || state.tone === 'danger';
+    const showResults = state.isSessionResult && !!state.snapshot && state.snapshot.trades >= 0;
+
+    const statsView = useMemo(() => {
+        if (!showResults || !state.snapshot) return null;
+        const s = state.snapshot;
+        const pnlTone = s.netProfit > 0 ? 'pos' : s.netProfit < 0 ? 'neg' : 'neu';
+        const items = [
+            { label: localize('Total trades'), value: String(s.trades), tone: 'neu' as const },
+            { label: localize('Wins'), value: String(s.wins), tone: 'pos' as const },
+            { label: localize('Losses'), value: String(s.losses), tone: 'neg' as const },
+            { label: localize('Win rate'), value: formatPct(s.winRate), tone: s.winRate >= 50 ? ('pos' as const) : ('neu' as const) },
+            { label: localize('Net P/L'), value: formatMoney(s.netProfit), tone: pnlTone, wide: true },
+        ];
+        if (typeof s.totalStake === 'number' && s.totalStake > 0) {
+            items.push({ label: localize('Total stake'), value: s.totalStake.toFixed(2), tone: 'neu' as const });
+        }
+        if (typeof s.totalPayout === 'number' && s.totalPayout > 0) {
+            items.push({ label: localize('Total payout'), value: s.totalPayout.toFixed(2), tone: 'neu' as const });
+        }
+        return (
+            <div className='app-dialog__results' aria-label={localize('Session results')}>
+                <div className='app-dialog__results-head'>
+                    <span className='app-dialog__results-line' />
+                    <span>{localize('Session results')}</span>
+                    <span className='app-dialog__results-line' />
+                </div>
+                <div className='app-dialog__stats'>
+                    {items.map(it => (
+                        <div key={it.label} className={`app-dialog__stat ${it.wide ? 'app-dialog__stat--wide' : ''} app-dialog__stat--${it.tone}`}>
+                            <span className='app-dialog__stat-label'>{it.label}</span>
+                            <span className='app-dialog__stat-value'>{it.value}</span>
+                        </div>
+                    ))}
+                </div>
+                <div className='app-dialog__winbar' aria-hidden='true'>
+                    <div className='app-dialog__winbar-track'>
+                        <div className='app-dialog__winbar-fill' style={{ width: `${Math.max(0, Math.min(100, s.winRate))}%` }} />
+                    </div>
+                </div>
+            </div>
+        );
+    }, [showResults, state.snapshot]);
 
     return (
         <AppDialogContext.Provider value={{ confirm, alert: alertFn, prompt: promptFn }}>
@@ -193,22 +377,31 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                           onClose={handleCancel}
                           has_close_icon
                           is_mobile_full_width={false}
-                          className={`app-dialog app-dialog--tone-${state.tone}${isDangerAction ? ' app-dialog--danger' : ''}`}
+                          className={`app-dialog app-dialog--tone-${state.tone}${isDangerAction ? ' app-dialog--danger' : ''}${state.isSessionResult ? ' app-dialog--session' : ''}`}
                           login={() => {}}
                       >
-                          <div className='app-dialog__layout'>
-                              <div className={`app-dialog__icon-wrap app-dialog__icon-wrap--${state.tone}`} aria-hidden='true'>
-                                  <span className='app-dialog__icon-ring' />
-                                  <span className='app-dialog__icon'>{icons[state.tone]}</span>
+                          <div className='app-dialog__cinema'>
+                              <div className='app-dialog__hero'>
+                                  <div className='app-dialog__hero-glow' aria-hidden='true' />
+                                  <div className={`app-dialog__icon-wrap app-dialog__icon-wrap--${state.tone}`} aria-hidden='true'>
+                                      <span className='app-dialog__icon-ring' />
+                                      <span className='app-dialog__icon-ring app-dialog__icon-ring--outer' />
+                                      <span className='app-dialog__icon'>{icons[state.tone]}</span>
+                                  </div>
+                                  {state.tone === 'success' && <div className='app-dialog__sparkles' aria-hidden='true' />}
                               </div>
                               <div className='app-dialog__copy'>
+                                  {state.isSessionResult && <div className='app-dialog__eyebrow'>{localize('Live session update')}</div>}
                                   <h3 className='app-dialog__title'>{state.title}</h3>
                                   {typeof state.message === 'string' ? (
                                       <p className='app-dialog__message'>{state.message}</p>
                                   ) : (
                                       <div className='app-dialog__message'>{state.message}</div>
                                   )}
-                                  {state.variant === 'prompt' && (
+                              </div>
+                              {statsView}
+                              {state.variant === 'prompt' && (
+                                  <div className='app-dialog__prompt-wrap'>
                                       <input
                                           autoFocus
                                           className='app-dialog__input'
@@ -220,8 +413,8 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                                               if (e.key === 'Enter') handleConfirm();
                                           }}
                                       />
-                                  )}
-                              </div>
+                                  </div>
+                              )}
                           </div>
                       </Dialog>,
                       document.body

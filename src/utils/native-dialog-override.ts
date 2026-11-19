@@ -1,13 +1,7 @@
-import { getAppDialog } from '@/components/app-dialog';
-
-type NativeAlert = (message?: any) => void;
-type NativeConfirm = (message?: string) => boolean;
-type NativePrompt = (message?: string, _default?: string) => string | null;
-
-let installed = false;
-let nativeAlert: NativeAlert;
-let nativeConfirm: NativeConfirm;
-let nativePrompt: NativePrompt;
+import { rootStore } from '@/stores';
+import { aiBot } from '@/bot/engine/ai-bot';
+import { bulkTrader } from '@/bot/engine/bulk-trader';
+import { ouBotEngine } from '@/bot/engine/engine';
 
 type FallbackTone = 'success' | 'warning' | 'info';
 
@@ -16,29 +10,97 @@ const resolveFallbackTone = (message: string): FallbackTone => {
     if (/take\s*-?\s*profit|target\s*profit|profit\s*(reached|achieved|hit|target)|session\s*completed|congratulations|takeprofit\s*achieved|completed successfully|success|win\b/.test(text)) {
         return 'success';
     }
-    if (/stop\s*-?\s*loss|loss\s*(hit|reached|limit)|max\s*(loss|drawdown|trades reached)|suspended|emergency|failed|error|invalid|cannot|rejected/.test(text)) {
+    if (/stop\s*-?\s*loss|loss\s*(hit|reached|limit)|max\s*(loss|drawdown|trades reached)|suspended|emergency|failed|error|invalid|cannot|rejected|session\s*(ended|stopped)/.test(text)) {
         return 'warning';
     }
     return 'info';
 };
 
+const isSessionResultText = (text: string) =>
+    /take\s*-?\s*profit|target\s*profit|profit\s*(reached|achieved|hit|target)|takeprofit\s*achieved|stop\s*-?\s*loss|loss\s*(hit|reached|limit)|session\s*(completed|complete|ended|stopped|summary)|max\s*trades\s*reached|trades\s*reached|congratulations|sorry!!!/i.test(
+        text
+    );
+
+const safeNum = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
+
+const collectSnapshot = () => {
+    try {
+        const tx = (rootStore as any)?.transactions?.statistics;
+        if (tx) {
+            const trades = safeNum(tx.won_contracts) + safeNum(tx.lost_contracts);
+            if (trades > 0 || safeNum(tx.total_profit) !== 0) {
+                return { trades, wins: safeNum(tx.won_contracts), losses: safeNum(tx.lost_contracts), net: safeNum(tx.total_profit), wr: trades ? (safeNum(tx.won_contracts) / trades) * 100 : 0 };
+            }
+        }
+    } catch {}
+    try {
+        const st = aiBot?.getState?.();
+        if (st?.stats && (safeNum(st.stats.trades) > 0 || safeNum(st.stats.netPnl) !== 0)) {
+            const trades = safeNum(st.stats.trades);
+            return { trades, wins: safeNum(st.stats.wins), losses: safeNum(st.stats.losses), net: safeNum(st.stats.netPnl), wr: trades ? (safeNum(st.stats.wins) / trades) * 100 : 0 };
+        }
+    } catch {}
+    try {
+        const st = bulkTrader?.getState?.();
+        const p = st?.progress;
+        if (p && safeNum(p.settled) > 0) {
+            const trades = safeNum(p.settled);
+            const net = (st?.trades || []).reduce((a: number, t: any) => a + safeNum(t?.profit), 0);
+            return { trades, wins: safeNum(p.won), losses: safeNum(p.lost), net, wr: trades ? (safeNum(p.won) / trades) * 100 : 0 };
+        }
+    } catch {}
+    try {
+        const st = ouBotEngine?.getState?.();
+        const closed = (st?.trades || []).filter((t: any) => t?.result === 'win' || t?.result === 'loss');
+        if (closed.length > 0) {
+            const wins = closed.filter((t: any) => t.result === 'win').length;
+            const losses = closed.filter((t: any) => t.result === 'loss').length;
+            const net = closed.reduce((a: number, t: any) => a + safeNum(t?.profit), 0);
+            return { trades: closed.length, wins, losses, net, wr: (wins / closed.length) * 100 };
+        }
+    } catch {}
+    return null;
+};
+
+const fmtMoney = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(2)}`;
+
 const fallbackModal = (message: string, mode: 'alert' | 'confirm' | 'prompt', defaultValue = ''): Promise<string | boolean | void> => {
     return new Promise(resolve => {
         const tone = resolveFallbackTone(message);
-        const title = mode === 'prompt' ? 'Input required' : tone === 'success' ? 'Success' : tone === 'warning' ? 'Attention' : mode === 'confirm' ? 'Please confirm' : 'Notice';
+        const session = isSessionResultText(message) && mode !== 'prompt';
+        const snap = session ? collectSnapshot() : null;
+        const title = mode === 'prompt' ? 'Input required' : session ? 'Session Summary' : tone === 'success' ? 'Success' : tone === 'warning' ? 'Attention' : mode === 'confirm' ? 'Please confirm' : 'Notice';
         const overlay = document.createElement('div');
         overlay.className = 'app-native-dialog-overlay';
+        const statsHtml = snap
+            ? `<div class="app-native-dialog__results">
+                <div class="app-native-dialog__results-head"><span></span><em>Session results</em><span></span></div>
+                <div class="app-native-dialog__stats">
+                    <div class="app-native-dialog__stat"><span>Trades</span><strong>${snap.trades}</strong></div>
+                    <div class="app-native-dialog__stat app-native-dialog__stat--pos"><span>Wins</span><strong>${snap.wins}</strong></div>
+                    <div class="app-native-dialog__stat app-native-dialog__stat--neg"><span>Losses</span><strong>${snap.losses}</strong></div>
+                    <div class="app-native-dialog__stat"><span>Win rate</span><strong>${snap.wr.toFixed(1)}%</strong></div>
+                    <div class="app-native-dialog__stat app-native-dialog__stat--wide ${snap.net > 0 ? 'app-native-dialog__stat--pos' : snap.net < 0 ? 'app-native-dialog__stat--neg' : ''}"><span>Net P/L</span><strong>${fmtMoney(snap.net)}</strong></div>
+                </div>
+                <div class="app-native-dialog__winbar"><div class="app-native-dialog__winbar-fill" style="width:${Math.max(0, Math.min(100, snap.wr))}%"></div></div>
+               </div>`
+            : '';
         overlay.innerHTML = `
-            <div class="app-native-dialog app-native-dialog--${tone}" role="dialog" aria-modal="true" aria-label="${title}">
+            <div class="app-native-dialog app-native-dialog--${tone}${session ? ' app-native-dialog--session' : ''}" role="dialog" aria-modal="true" aria-label="${title}">
                 <div class="app-native-dialog__accent"></div>
                 <button type="button" class="app-native-dialog__close" data-action="close" aria-label="Close">×</button>
-                <div class="app-native-dialog__icon app-native-dialog__icon--${tone}" aria-hidden="true">
-                    ${tone === 'success' ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.35"/><path d="M7.5 12.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' : tone === 'warning' ? '<svg viewBox="0 0 24 24"><path d="M10.4 4.4L2.8 17.5A2 2 0 004.5 20.5h15a2 2 0 001.7-3L13.6 4.4a2 2 0 00-3.2 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v4.8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="16.8" r="1.2" fill="currentColor"/></svg>' : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 10.5v5.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.2" fill="currentColor"/></svg>'}
+                <div class="app-native-dialog__hero">
+                    <div class="app-native-dialog__hero-glow"></div>
+                    <div class="app-native-dialog__icon app-native-dialog__icon--${tone}" aria-hidden="true">
+                        ${tone === 'success' ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.7" opacity="0.35"/><path d="M7.2 12.4l3.2 3.3 6.6-7.6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' : tone === 'warning' ? '<svg viewBox="0 0 24 24"><path d="M10.4 4.2L2.7 17.4A2 2 0 004.4 20.5h15.2a2 2 0 001.7-3.1L13.6 4.2a2 2 0 00-3.2 0z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 9v4.9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="16.9" r="1.25" fill="currentColor"/></svg>' : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.4v5.8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="7.4" r="1.25" fill="currentColor"/></svg>'}
+                    </div>
                 </div>
                 <div class="app-native-dialog__body">
+                    ${session ? '<div class="app-native-dialog__eyebrow">Live session update</div>' : ''}
                     <h3 class="app-native-dialog__title"></h3>
                     <p class="app-native-dialog__message"></p>
                     ${mode === 'prompt' ? '<input class="app-native-dialog__input" />' : ''}
+                    ${statsHtml}
                 </div>
                 <div class="app-native-dialog__actions">
                     ${mode !== 'alert' ? '<button type="button" class="app-native-dialog__btn app-native-dialog__btn--ghost" data-action="cancel">Cancel</button>' : ''}

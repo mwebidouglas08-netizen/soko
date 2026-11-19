@@ -1,7 +1,17 @@
+import { getAppDialog } from '@/components/app-dialog';
 import { rootStore } from '@/stores';
 import { aiBot } from '@/bot/engine/ai-bot';
 import { bulkTrader } from '@/bot/engine/bulk-trader';
 import { ouBotEngine } from '@/bot/engine/engine';
+
+type NativeAlert = (message?: any) => void;
+type NativeConfirm = (message?: string) => boolean;
+type NativePrompt = (message?: string, _default?: string) => string | null;
+
+let installed = false;
+let nativeAlert: NativeAlert;
+let nativeConfirm: NativeConfirm;
+let nativePrompt: NativePrompt;
 
 type FallbackTone = 'success' | 'warning' | 'info';
 

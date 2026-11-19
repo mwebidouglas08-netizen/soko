@@ -48,6 +48,8 @@ window.Blockly.JavaScript.javascriptGenerator.forBlock.text_print = block => {
             'TEXT',
             window.Blockly.JavaScript.javascriptGenerator.ORDER_NONE
         ) || "''";
-    const code = `Bot.console.log(${msg});\n`;
+    // Use alert so end-of-session / TP / SL messages surface as a visible popup
+    // (interpreter binds alert to the app dialog when available).
+    const code = `alert(${msg});\n`;
     return code;
 };

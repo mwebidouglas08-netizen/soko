@@ -99,9 +99,24 @@ const Interpreter = () => {
         const { getTicksInterface, alert, prompt, sleep, console: custom_console } = bot_interface;
         const ticks_interface = getTicksInterface;
 
+        const asyncAlert = async msg => {
+            const text = msg == null ? '' : String(msg);
+            const fn = globalThis.__appAlert;
+            if (typeof fn === 'function') return fn(text);
+            alert(text);
+            return undefined;
+        };
+        const asyncPrompt = async (msg, def = '') => {
+            const text = msg == null ? '' : String(msg);
+            const fallback = def == null ? '' : String(def);
+            const fn = globalThis.__appPrompt;
+            if (typeof fn === 'function') return fn(text, fallback);
+            return prompt(text, fallback);
+        };
+
         js_interpreter.setProperty(scope, 'console', js_interpreter.nativeToPseudo(custom_console));
-        js_interpreter.setProperty(scope, 'alert', js_interpreter.nativeToPseudo(alert));
-        js_interpreter.setProperty(scope, 'prompt', js_interpreter.nativeToPseudo(prompt));
+        js_interpreter.setProperty(scope, 'alert', createAsync(js_interpreter, asyncAlert));
+        js_interpreter.setProperty(scope, 'prompt', createAsync(js_interpreter, asyncPrompt));
         js_interpreter.setProperty(
             scope,
             'getPurchaseReference',

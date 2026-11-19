@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+﻿import { useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { HubContractType, HubTradeRow } from '@/bot/engine/hub-session';
 import { useHubSession } from '@/bot/use-hub-session';
@@ -48,7 +48,7 @@ const VERTEX_DIGITS: QuickPreset = {
 };
 
 const QUANTUM_EDGE: QuickPreset = {
-    name: 'Quantum Edge AI',
+    name: 'Quantum Edge',
     stake: 0.8,
     takeProfit: 10,
     stopLoss: 30,
@@ -205,8 +205,8 @@ const QuickBotPage = observer(() => {
                 <div>
                     <h1 className='hub-page__title'>Quick Bot</h1>
                     <p className='hub-page__subtitle'>
-                        Deriv-style quick strategy. Pick a market and contract, tune the trade &amp; bot parameters,
-                        and let Pattern or Percentage analysis trigger purchases automatically.
+                        Quick strategy controls. Pick a market and contract, tune trade and bot parameters,
+                        and let pattern or percentage analysis trigger purchases automatically.
                     </p>
                 </div>
                 <div className='hub-page__actions'>
@@ -217,7 +217,7 @@ const QuickBotPage = observer(() => {
                         </button>
                     ) : (
                         <button type='button' className='hub-btn' onClick={() => session.start()}>
-                            ▶ Start bot
+                            Start bot
                         </button>
                     )}
                 </div>
@@ -237,7 +237,7 @@ const QuickBotPage = observer(() => {
                 <article className={`quick-bot__preset ${preset.name === QUANTUM_EDGE.name ? 'is-active' : ''}`}>
                     <header>
                         <span className='hub-pill'>Quick</span>
-                        <h3>Quantum Edge AI</h3>
+                        <h3>Quantum Edge</h3>
                     </header>
                     <p>Extreme-digit Over/Under on every trade, percentage reversal after every 3 trades.</p>
                     <button type='button' className='hub-btn hub-btn--ghost' onClick={() => applyPreset(QUANTUM_EDGE)}>
@@ -290,7 +290,7 @@ const QuickBotPage = observer(() => {
                         <div className='quick-bot__price'>
                             <span>Last digits</span>
                             <span className='hub-digits'>
-                                {seriesDigits.length ? seriesDigits.slice(-8).map((d, i) => <i key={`${symbol}-${i}`}>{d}</i>) : '—'}
+                                {seriesDigits.length ? seriesDigits.slice(-8).map((d, i) => <i key={`${symbol}-${i}`}>{d}</i>) : 'â€”'}
                             </span>
                         </div>
                     </div>

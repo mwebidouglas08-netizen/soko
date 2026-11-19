@@ -82,9 +82,9 @@ window.Blockly.JavaScript.javascriptGenerator.forBlock.text_prompt_ext = block =
     }
 
     if (block.getFieldValue('TYPE') === 'NUMBER') {
-        code = `parseFloat(window.prompt(${msg}))`;
+        code = `parseFloat(prompt(${msg}))`;
     } else {
-        code = `window.prompt(${msg})`;
+        code = `prompt(${msg})`;
     }
 
     return [code, window.Blockly.JavaScript.javascriptGenerator.ORDER_FUNCTION_CALL];

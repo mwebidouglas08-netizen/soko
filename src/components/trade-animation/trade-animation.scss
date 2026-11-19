@@ -85,8 +85,7 @@
         border-start-end-radius: 0 !important;
         border-end-end-radius: 0 !important;
         color: #fff;
-        /* Reference rest/disabled run button: light lavender with white content. */
-        background: linear-gradient(90deg, #b5bddf, #b9c1e0) !important;
+        background: linear-gradient(135deg, #8fa3b8 0%, #7a90a8 100%) !important;
 
         .dc-btn__text {
             font-size: 1.4rem;
@@ -95,15 +94,16 @@
         }
 
         &:not(:disabled) {
-            background: var(--purchase-main-1, #4bb4b3) !important;
+            background: linear-gradient(135deg, #27b8c3 0%, #1b9aa4 100%) !important;
+            box-shadow: 0 4px 12px rgba(39, 184, 195, 0.25);
         }
 
         &:hover {
-            background: linear-gradient(90deg, #aab3d9, #aeb6da) !important;
+            background: linear-gradient(135deg, #8297ad 0%, #6f869e 100%) !important;
         }
 
         &:not(:disabled):hover {
-            background: var(--purchase-main-1, #4bb4b3) !important;
+            background: linear-gradient(135deg, #22aab5 0%, #188f99 100%) !important;
         }
     }
 

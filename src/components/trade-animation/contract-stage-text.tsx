@@ -7,13 +7,13 @@ type TContractStageText = {
 };
 
 export const text_contract_stages = Object.freeze({
-    NOT_RUNNING: 'Bot is not running',
-    STARTING: 'Bot is starting',
-    RUNNING: 'Bot running',
-    PURCHASE_SENT: 'Buying contract',
-    PURCHASE_RECEIVED: 'Contract bought',
-    IS_STOPPING: 'Bot is stopping',
-    CONTRACT_CLOSED: 'Contract closed',
+    NOT_RUNNING: 'Ready to run',
+    STARTING: 'Starting…',
+    RUNNING: 'Running',
+    PURCHASE_SENT: 'Placing order…',
+    PURCHASE_RECEIVED: 'Order placed',
+    IS_STOPPING: 'Stopping…',
+    CONTRACT_CLOSED: 'Trade closed',
 });
 
 const ContractStageText: React.FC<TContractStageText> = ({ contract_stage }) => {

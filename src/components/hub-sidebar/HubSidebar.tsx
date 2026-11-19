@@ -35,7 +35,7 @@ export const HUB_VIEW_LABELS: Record<HubViewId, string> = {
     dashboard: 'Dashboard',
     'bot-builder': 'Bot Builder',
     'bot-monitor': 'Bot Monitor',
-    'volt-ai': 'Smart AI',
+    'volt-ai': 'Volt',
     'free-bots': 'Free Bots',
     'premium-ai': 'Premium Bots',
     'quick-bot': 'Quick Bot',

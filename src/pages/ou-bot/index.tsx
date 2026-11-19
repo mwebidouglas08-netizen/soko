@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 import { isDemoAccount } from '@/utils/account-helpers';
@@ -6,6 +6,7 @@ import { ouBotEngine } from '@/bot/engine/engine';
 import { useOUBotEngine, useOUPerformance } from '@/bot/use-engine';
 import { DEFAULT_RISK_LIMITS } from '@/bot/core/risk';
 import type { BotMode, EventType } from '@/bot/core/types';
+import { useAppDialog } from '@/components/app-dialog';
 import './ou-bot.scss';
 
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
@@ -51,6 +52,7 @@ const OUBotPage = observer(() => {
     const state = useOUBotEngine();
     const perf = useOUPerformance();
     const { client, run_panel } = useStore() ?? {};
+    const dialog = useAppDialog();
 
     const [stake, setStake] = useState(state.config.stake);
     const [maxStake, setMaxStake] = useState(state.config.limits.maxStake);
@@ -88,11 +90,15 @@ const OUBotPage = observer(() => {
         });
     };
 
-    const onModeChange = (m: BotMode) => {
+    const onModeChange = async (m: BotMode) => {
         if (m === 'active' && !isDemo) {
-            const ok = window.confirm(
-                'Active mode places trades on a cadence regardless of edge. On a REAL account this means real money is used. Continue?'
-            );
+            const ok = await dialog.confirm({
+                title: 'Switch to active mode?',
+                message:
+                    'Active mode places trades on a cadence regardless of edge. On a real-money account this uses real funds. Continue?',
+                confirmText: 'Switch to active mode',
+                danger: true,
+            });
             if (!ok) return;
         }
         setMode(m);
@@ -105,11 +111,15 @@ const OUBotPage = observer(() => {
         await ouBotEngine.start();
     };
 
-    const onToggleLive = (enabled: boolean) => {
+    const onToggleLive = async (enabled: boolean) => {
         if (enabled && !isDemo) {
-            const ok = window.confirm(
-                'Enable LIVE trading on a real-money account? Orders will use real funds. Continue?'
-            );
+            const ok = await dialog.confirm({
+                title: 'Enable live trading?',
+                message:
+                    'This will place live orders on a real-money account. Real funds will be used for each trade. Continue?',
+                confirmText: 'Enable live trading',
+                danger: true,
+            });
             if (!ok) return;
         }
         ouBotEngine.setLiveTrading(enabled);
@@ -120,12 +130,12 @@ const OUBotPage = observer(() => {
 
     // Analysis, digit statistics and quotes run on Deriv public data, so the bot is
     // usable before login. Order placement requires an authorized session, which the
-    // engine enforces — surfaced here as a notice rather than blocking the page.
+    // engine enforces â€” surfaced here as a notice rather than blocking the page.
     return (
         <div className='ou-bot'>
             {!isLoggedIn && (
                 <div className='ou-bot__notice ou-bot__notice--login' role='note'>
-                    Not logged in — running analysis on Deriv&apos;s public markets. Orders are disabled until you log in.{' '}
+                    Not logged in â€” running analysis on Deriv&apos;s public markets. Orders are disabled until you log in.{' '}
                     <button type='button' className='ou-bot__btn' onClick={() => run_panel?.showLoginDialog?.()}>
                         Log in to enable trading
                     </button>
@@ -224,7 +234,7 @@ const OUBotPage = observer(() => {
                     Live activity <em>({state.events.length} events)</em>
                 </h3>
                 {state.events.length === 0 ? (
-                    <p className='ou-bot__empty-row'>No activity yet — start the engine to see quotes, purchases, and settlements stream in.</p>
+                    <p className='ou-bot__empty-row'>No activity yet â€” start the engine to see quotes, purchases, and settlements stream in.</p>
                 ) : (
                     <div className='ou-bot__feed'>
                         {state.events.map(ev => (
@@ -265,7 +275,7 @@ const OUBotPage = observer(() => {
             </div>
 
             <section className='ou-bot__section'>
-                <h3>Ranked opportunities {state.dryRun && <em>(analysis only — no orders)</em>}</h3>
+                <h3>Ranked opportunities {state.dryRun && <em>(analysis only â€” no orders)</em>}</h3>
                 {state.opportunities.length === 0 ? (
                     <p className='ou-bot__empty-row'>No opportunity currently clears the EV + confidence thresholds.</p>
                 ) : (
@@ -321,8 +331,8 @@ const OUBotPage = observer(() => {
                                         <td>{t.expectedValue.toFixed(3)}</td>
                                         <td>{pct(t.confidence)}</td>
                                         <td><span className={`ou-bot__stage ou-bot__stage--${t.stage}`}>{STAGE_LABEL[t.stage] || t.stage}</span></td>
-                                        <td className={t.result === 'win' ? 'pos' : t.result === 'loss' ? 'neg' : ''}>{t.result || '—'}</td>
-                                        <td className={(t.profit ?? 0) >= 0 ? 'pos' : 'neg'}>{t.profit !== undefined ? money(t.profit) : '—'}</td>
+                                        <td className={t.result === 'win' ? 'pos' : t.result === 'loss' ? 'neg' : ''}>{t.result || 'â€”'}</td>
+                                        <td className={(t.profit ?? 0) >= 0 ? 'pos' : 'neg'}>{t.profit !== undefined ? money(t.profit) : 'â€”'}</td>
                                         <td>{t.simulated ? 'simulated' : 'live'}</td>
                                     </tr>
                                 ))}
@@ -347,7 +357,7 @@ const OUBotPage = observer(() => {
                                 <tr key={m.symbol.symbol}>
                                     <td>{m.symbol.displayName}</td>
                                     <td>{m.symbol.category}</td>
-                                    <td>{m.quote || '—'}</td>
+                                    <td>{m.quote || 'â€”'}</td>
                                     <td>{m.stats.sampleSize}</td>
                                     <td>{m.stats.pValue.toFixed(3)}</td>
                                     <td>{m.stats.isUniform ? 'yes' : <strong className='neg'>skewed</strong>}</td>

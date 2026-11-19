@@ -1,0 +1,108 @@
+.app-dialog {
+    .dc-dialog__dialog {
+        min-width: min(420px, 100%);
+        max-width: 480px;
+        border-radius: 16px;
+        border: 1px solid rgba(39, 184, 195, 0.18);
+        background:
+            radial-gradient(120% 120% at 0% 0%, rgba(39, 184, 195, 0.08), transparent 50%),
+            var(--general-main-2, #fff);
+        box-shadow:
+            0 24px 48px rgba(11, 26, 42, 0.18),
+            0 2px 8px rgba(11, 26, 42, 0.08);
+        padding: 2rem 2rem 1.8rem;
+    }
+
+    .dc-dialog__header-wrapper {
+        margin-bottom: 0.6rem;
+    }
+
+    .dc-dialog__header--title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: var(--text-prominent, #0f2a3d);
+        letter-spacing: -0.01em;
+    }
+
+    .dc-dialog__content {
+        max-width: none;
+        margin-bottom: 1.6rem;
+        align-self: stretch;
+    }
+
+    &__body {
+        width: 100%;
+        text-align: left;
+    }
+
+    &__message {
+        margin: 0;
+        color: var(--text-general, #33506a);
+        font-size: 1.35rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    &__input {
+        margin-top: 1.2rem;
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1.5px solid #d7dee7;
+        border-radius: 10px;
+        font-size: 1.4rem;
+        font-family: inherit;
+        color: var(--text-prominent, #12263a);
+        background: var(--general-main-1, #fff);
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        box-sizing: border-box;
+
+        &:focus {
+            border-color: #27b8c3;
+            box-shadow: 0 0 0 3px rgba(39, 184, 195, 0.15);
+        }
+    }
+
+    .dc-dialog__footer {
+        gap: 0.8rem;
+    }
+
+    .dc-dialog__button {
+        border-radius: 10px;
+        min-width: 110px;
+        font-weight: 600;
+        transition: transform 0.12s ease, filter 0.12s ease;
+
+        &:hover:not(:disabled) {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+        }
+    }
+
+    .dc-dialog__button--primary,
+    .dc-btn--primary {
+        background: linear-gradient(135deg, #27b8c3 0%, #1b9aa4 100%);
+        border: none;
+    }
+
+    .dc-dialog__button--secondary,
+    .dc-btn--secondary {
+        border: 1.5px solid #d7dee7;
+        color: #33506a;
+        background: #fff;
+    }
+
+    &--danger {
+        .dc-dialog__dialog {
+            border-color: rgba(239, 95, 95, 0.25);
+            background:
+                radial-gradient(120% 120% at 0% 0%, rgba(239, 95, 95, 0.08), transparent 50%),
+                var(--general-main-2, #fff);
+        }
+
+        .dc-dialog__button--primary,
+        .dc-btn--primary {
+            background: linear-gradient(135deg, #ef5f5f 0%, #d84646 100%);
+        }
+    }
+}

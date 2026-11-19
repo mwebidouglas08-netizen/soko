@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 import { isDemoAccount } from '@/utils/account-helpers';
 import { useCopyTrading } from '@/bot/use-engine';
 import { copyTrading } from '@/bot/engine/copy-trading';
 import { HubNote, HubPage, HubPageHeader } from '@/components/hub-page';
+import { useAppDialog } from '@/components/app-dialog';
 import './copy-trading.scss';
 
 const timeAt = (ms: number) =>
@@ -43,6 +44,7 @@ const STATUS_TONE: Record<string, string> = {
 const CopyTradingPage = observer(() => {
     const state = useCopyTrading();
     const { client, run_panel } = useStore() ?? {};
+    const dialog = useAppDialog();
 
     const [masterToken, setMasterToken] = useState('');
     const [copierToken, setCopierToken] = useState('');
@@ -92,8 +94,13 @@ const CopyTradingPage = observer(() => {
         setCopierLabel('');
     };
 
-    const removeCopier = (id: string, label: string) => {
-        const ok = window.confirm(`Remove copier "${label}"? Its copied trades stop here immediately.`);
+    const removeCopier = async (id: string, label: string) => {
+        const ok = await dialog.confirm({
+            title: 'Remove copier?',
+            message: `Remove "${label}"? Copied trades for this account will stop immediately.`,
+            confirmText: 'Remove',
+            danger: true,
+        });
         if (!ok) return;
         copyTrading.removeCopier(id);
     };
@@ -182,7 +189,7 @@ const CopyTradingPage = observer(() => {
                         disabled={state.status === 'connecting' || state.status === 'stopping' || (isLoggedIn && !masterToken.trim())}
                         onClick={connect}
                     >
-                        {state.status === 'connecting' ? 'Connecting…' : state.master.connected ? 'Reconnect' : 'Connect Master'}
+                        {state.status === 'connecting' ? 'Connectingâ€¦' : state.master.connected ? 'Reconnect' : 'Connect Master'}
                     </button>
                     <button
                         type='button'
@@ -303,11 +310,15 @@ const CopyTradingPage = observer(() => {
                         <input
                             type='checkbox'
                             checked={state.settings.allowRealCopiers}
-                            onChange={e => {
+                            onChange={async e => {
                                 if (e.target.checked) {
-                                    const ok = window.confirm(
-                                        'Allow copiers to trade with real money? This uses real funds. Continue?'
-                                    );
+                                    const ok = await dialog.confirm({
+                                        title: 'Allow real-money copiers?',
+                                        message:
+                                            'This allows copier accounts to place trades with real funds. Only continue if you understand the risk.',
+                                        confirmText: 'Allow real-money copiers',
+                                        danger: true,
+                                    });
                                     if (!ok) return;
                                 }
                                 copyTrading.setSettings({ allowRealCopiers: e.target.checked });
@@ -402,7 +413,7 @@ const CopyTradingPage = observer(() => {
             </section>
 
             <HubNote tone='info'>
-                Copy trading follows the master account’s trades automatically. Start with multiplier 1, a tight stake cap, and demo accounts.
+                Copy trading follows the master accountâ€™s trades automatically. Start with multiplier 1, a tight stake cap, and demo accounts.
             </HubNote>
         </HubPage>
     );

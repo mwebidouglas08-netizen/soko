@@ -6,6 +6,7 @@ import { useBulkTrader } from '@/bot/use-engine';
 import { bulkTrader, DEFAULT_BULK_CONFIG, type BulkTradeConfig } from '@/bot/engine/bulk-trader';
 import type { TradeRecord } from '@/bot/core/types';
 import { HubNote, HubPage, HubPageHeader } from '@/components/hub-page';
+import { useAppDialog } from '@/components/app-dialog';
 import './bulk-trader.scss';
 
 const SYMBOLS = [
@@ -86,6 +87,7 @@ const TradeRow = ({ trade }: { trade: TradeRecord }) => (
 const BulkTraderPage = observer(() => {
     const state = useBulkTrader();
     const { client, run_panel } = useStore() ?? {};
+    const dialog = useAppDialog();
 
     const [form, setForm] = useState<BulkTradeConfig>(() => ({ ...DEFAULT_BULK_CONFIG }));
     const [formError, setFormError] = useState<string | null>(null);
@@ -117,7 +119,7 @@ const BulkTraderPage = observer(() => {
         return null;
     };
 
-    const onStart = () => {
+    const onStart = async () => {
         const problem = validate();
         if (problem) {
             setFormError(problem);
@@ -131,27 +133,39 @@ const BulkTraderPage = observer(() => {
             allowLiveTrading: paperLocked ? false : form.allowLiveTrading,
         };
         if (!config.paperTrading && !isDemo) {
-            const ok = window.confirm(
-                'Paper trading is off and this is a REAL-money account. Every buy spends real funds. Continue?'
-            );
+            const ok = await dialog.confirm({
+                title: 'Start live trading?',
+                message:
+                    'Paper trading is off and this is a real-money account. Each order will use real funds. Do you want to continue?',
+                confirmText: 'Start now',
+                danger: true,
+            });
             if (!ok) return;
         }
         bulkTrader.start(config);
     };
 
-    const onEmergencyStop = () => {
-        const ok = window.confirm(
-            'Emergency stop cancels the run immediately. Open positions still settle at the broker. Continue?'
-        );
+    const onEmergencyStop = async () => {
+        const ok = await dialog.confirm({
+            title: 'Emergency stop',
+            message:
+                'This will stop the current run immediately. Any open positions will still settle with the broker. Continue?',
+            confirmText: 'Stop run',
+            danger: true,
+        });
         if (!ok) return;
         bulkTrader.emergencyStop();
     };
 
-    const onToggleLive = (enabled: boolean) => {
+    const onToggleLive = async (enabled: boolean) => {
         if (enabled) {
-            const ok = window.confirm(
-                'Allow LIVE orders on this account? Buys will spend real money unless paper trading stays on. Continue?'
-            );
+            const ok = await dialog.confirm({
+                title: 'Enable live orders?',
+                message:
+                    'Live orders will spend real money unless paper trading stays on. Only enable this if you are ready to trade with real funds.',
+                confirmText: 'Enable live orders',
+                danger: true,
+            });
             if (!ok) return;
         }
         patch('allowLiveTrading', enabled);

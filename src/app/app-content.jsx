@@ -1,6 +1,8 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Bounce, ToastContainer } from 'react-toastify';
+import { AppDialogBridge, AppDialogProvider } from '@/components/app-dialog';
+import { installNativeDialogOverrides } from '@/utils/native-dialog-override';
 import AuthLoadingWrapper from '@/components/auth-loading-wrapper';
 import { botNotification } from '@/components/bot-notification/bot-notification';
 import useLiveChat from '@/components/chat/useLiveChat';
@@ -107,7 +109,11 @@ const AppContent = observer(() => {
         [recovered_transactions, recoverPendingContracts]
     );
 
-    React.useEffect(() => {
+    useEffect(() => {
+        installNativeDialogOverrides();
+    }, []);
+
+    useEffect(() => {
         setSmartChartsPublicPath(getUrlBase('/js/smartcharts/'));
     }, []);
 
@@ -220,30 +226,34 @@ const AppContent = observer(() => {
                 </Suspense>
             )}
             {is_loading ? (
-                <ChunkLoader message={localize('Initializing Deriv Bot account...')} />
+                <ChunkLoader message={localize('Loading your workspace...')} />
             ) : (
                 <AuthLoadingWrapper>
                     <ThemeProvider theme={is_dark_mode_on ? 'dark' : 'light'}>
-                        <BlocklyLoading />
-                        <div className='bot-dashboard bot' data-testid='dt_bot_dashboard'>
-                            <Audio />
-                            <Main />
-                            <BotBuilder />
-                            <BotStopped />
-                            <TransactionDetailsModal />
-                            <ToastContainer
-                                limit={3}
-                                draggable={false}
-                                transition={Bounce}
-                                position='top-right'
-                                autoClose={5000}
-                                pauseOnHover
-                                pauseOnFocusLoss
-                                closeOnClick
-                                role='alert'
-                                theme='light'
-                            />
-                        </div>
+                        <AppDialogProvider>
+                            <AppDialogBridge />
+                            <BlocklyLoading />
+                            <div className='bot-dashboard bot' data-testid='dt_bot_dashboard'>
+                                <Audio />
+                                <Main />
+                                <BotBuilder />
+                                <BotStopped />
+                                <TransactionDetailsModal />
+                                <ToastContainer
+                                    limit={3}
+                                    draggable={false}
+                                    transition={Bounce}
+                                    position='top-right'
+                                    autoClose={4000}
+                                    pauseOnHover
+                                    pauseOnFocusLoss
+                                    closeOnClick
+                                    role='status'
+                                    aria-live='polite'
+                                    theme={is_dark_mode_on ? 'dark' : 'light'}
+                                />
+                            </div>
+                        </AppDialogProvider>
                     </ThemeProvider>
                 </AuthLoadingWrapper>
             )}

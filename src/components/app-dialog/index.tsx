@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Dialog from '@/components/shared_ui/dialog';
 import { localize } from '@deriv-com/translations';
 import './app-dialog.scss';
@@ -114,41 +115,45 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return (
         <AppDialogContext.Provider value={{ confirm, alert: alertFn, prompt: promptFn }}>
             {children}
-            <Dialog
-                is_visible={state.isVisible}
-                title={state.title}
-                confirm_button_text={state.confirmText}
-                cancel_button_text={state.variant === 'alert' ? undefined : state.cancelText}
-                onConfirm={handleConfirm}
-                onCancel={handleCancel}
-                onClose={handleCancel}
-                has_close_icon
-                is_mobile_full_width={false}
-                className={`app-dialog${state.danger ? ' app-dialog--danger' : ''}`}
-                portal_element_id='modal_root'
-                login={() => {}}
-            >
-                <div className='app-dialog__body'>
-                    {typeof state.message === 'string' ? (
-                        <p className='app-dialog__message'>{state.message}</p>
-                    ) : (
-                        <div className='app-dialog__message'>{state.message}</div>
-                    )}
-                    {state.variant === 'prompt' && (
-                        <input
-                            autoFocus
-                            className='app-dialog__input'
-                            type={state.inputType ?? 'text'}
-                            value={inputValue}
-                            placeholder={state.placeholder}
-                            onChange={e => setInputValue(e.target.value)}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter') handleConfirm();
-                            }}
-                        />
-                    )}
-                </div>
-            </Dialog>
+            {typeof document !== 'undefined'
+                ? createPortal(
+                      <Dialog
+                          is_visible={state.isVisible}
+                          title={state.title}
+                          confirm_button_text={state.confirmText}
+                          cancel_button_text={state.variant === 'alert' ? undefined : state.cancelText}
+                          onConfirm={handleConfirm}
+                          onCancel={handleCancel}
+                          onClose={handleCancel}
+                          has_close_icon
+                          is_mobile_full_width={false}
+                          className={`app-dialog${state.danger ? ' app-dialog--danger' : ''}`}
+                          login={() => {}}
+                      >
+                          <div className='app-dialog__body'>
+                              {typeof state.message === 'string' ? (
+                                  <p className='app-dialog__message'>{state.message}</p>
+                              ) : (
+                                  <div className='app-dialog__message'>{state.message}</div>
+                              )}
+                              {state.variant === 'prompt' && (
+                                  <input
+                                      autoFocus
+                                      className='app-dialog__input'
+                                      type={state.inputType ?? 'text'}
+                                      value={inputValue}
+                                      placeholder={state.placeholder}
+                                      onChange={e => setInputValue(e.target.value)}
+                                      onKeyDown={e => {
+                                          if (e.key === 'Enter') handleConfirm();
+                                      }}
+                                  />
+                              )}
+                          </div>
+                      </Dialog>,
+                      document.body
+                  )
+                : null}
         </AppDialogContext.Provider>
     );
 };

@@ -122,7 +122,7 @@ const Dialog = ({
         <CSSTransition
             appear
             in={is_visible && !is_loading}
-            timeout={50}
+            timeout={250}
             classNames={{
                 appear: 'dc-dialog__wrapper--enter',
                 enter: 'dc-dialog__wrapper--enter',
@@ -143,6 +143,8 @@ const Dialog = ({
                         'dc-dialog__dialog--has-margin': !is_mobile_full_width,
                     })}
                     role='dialog'
+                    aria-modal='true'
+                    aria-label={typeof title === 'string' ? title : undefined}
                     ref={wrapper_ref}
                 >
                     {(title || has_close_icon) && (
@@ -157,14 +159,19 @@ const Dialog = ({
                                 </Text>
                             )}
                             {has_close_icon && (
-                                <div onClick={handleClose} className='dc-dialog__header--close'>
+                                <button
+                                    type='button'
+                                    onClick={handleClose}
+                                    className='dc-dialog__header--close'
+                                    aria-label={localize('Close')}
+                                >
                                     <LegacyClose1pxIcon
                                         height='20px'
                                         width='20px'
                                         fill='var(--text-general)'
                                         className='icon-general-fill-path'
                                     />
-                                </div>
+                                </button>
                             )}
                         </div>
                     )}
@@ -202,9 +209,17 @@ const Dialog = ({
         </CSSTransition>
     );
 
-    if (portal_element_id) {
-        const target_element = document.getElementById(portal_element_id);
-        if (target_element) return ReactDOM.createPortal(dialog, target_element);
+    if (portal_element_id && typeof document !== 'undefined') {
+        const target_element =
+            document.getElementById(portal_element_id) ||
+            (() => {
+                const el = document.createElement('div');
+                el.id = portal_element_id;
+                el.className = portal_element_id === 'modal_root' ? 'modal-root' : '';
+                document.body.appendChild(el);
+                return el;
+            })();
+        return ReactDOM.createPortal(dialog, target_element);
     }
 
     return dialog;

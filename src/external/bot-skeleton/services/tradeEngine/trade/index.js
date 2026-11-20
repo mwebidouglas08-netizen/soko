@@ -190,27 +190,35 @@ export default class TradeEngine extends Balance(Purchase(Sell(OpenContract(Prop
     }
 
     async getVolatilitySymbols() {
-        const pick = arr => {
+        const toList = arr => {
             const list = [...new Set((arr || []).filter(Boolean))];
+            if (!list.length) return null;
             const open = list.filter(sym => {
                 try {
                     const active = require('../../api/api-helpers').default?.instance?.active_symbols;
                     return active && typeof active.isSymbolClosed === 'function' ? !active.isSymbolClosed(sym) : true;
-                } catch (e) { return true; }
+                } catch (e) {
+                    return true;
+                }
             });
             const out = open.length ? open : list;
             return out.length ? out : null;
         };
+        // 1D/1HZ volatility indices (broad scan set for Over/Under opportunities)
         try {
             const ApiHelpers = require('../../api/api-helpers').default;
-            const helpers = ApiHelpers?.instance;
-            const active = helpers?.active_symbols;
+            const active = ApiHelpers?.instance?.active_symbols;
             if (active && typeof active.getAllSymbols === 'function') {
                 const all = active.getAllSymbols(false) || [];
                 const list = all
-                    .filter(s => s && s.market === 'synthetic_index' && (s.submarket === 'random_index' || s.submarket === 'continuous_indices' || /^(R_|1HZ|RDBEAR|RDBULL)/.test(s.symbol || '')))
+                    .filter(
+                        s =>
+                            s &&
+                            s.market === 'synthetic_index' &&
+                            /^(R_|1HZ|RDBEAR|RDBULL)/.test(s.symbol || '')
+                    )
                     .map(s => s.symbol);
-                const picked = pick(list);
+                const picked = toList(list);
                 if (picked) return picked;
             }
         } catch (e) {}
@@ -221,9 +229,9 @@ export default class TradeEngine extends Balance(Purchase(Sell(OpenContract(Prop
                 .filter(s => s && (s.market === 'synthetic_index' || /synthetic|random|volatility/i.test(s.submarket_display_name || '')))
                 .map(s => s.symbol || s.underlying_symbol)
                 .filter(sym => /^(R_|1HZ|RDBEAR|RDBULL)/.test(sym || ''));
-            const picked = pick(list);
+            const picked = toList(list);
             if (picked) return picked;
         } catch (e) {}
-        return ['R_10','R_25','R_50','R_75','R_100','1HZ10V','1HZ25V','1HZ50V','1HZ75V','1HZ100V','RDBEAR','RDBULL'];
+        return ['R_10','R_25','R_50','R_75','R_100','1HZ10V','1HZ15V','1HZ25V','1HZ30V','1HZ50V','1HZ75V','1HZ90V','1HZ100V','RDBEAR','RDBULL'];
     }
 }

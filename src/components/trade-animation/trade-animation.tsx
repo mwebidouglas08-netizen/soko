@@ -140,9 +140,10 @@ const TradeAnimation = observer(
     }, [is_stop_button_visible, is_stop_button_disabled]);
     const show_overlay = should_show_overlay && is_contract_completed;
     // Reference footer variants: status views drop the control (unless running),
-    // and idle run views swap the stage text for the Execution FAST toggle.
+    // and idle run views surface the Execution FAST toggle so it stays visible
+    // and usable on all devices (desktop footer + mobile run panel).
     const hide_control = Boolean(hide_run_control) && !is_stop_button_visible;
-    const show_fast_toggle = Boolean(show_execution_toggle) && contract_stage === 0;
+    const show_fast_toggle = contract_stage === 0 && !hide_control;
 
     // Fix TypeScript error by ensuring active_tab is a number
     // Use a fallback to dashboard if active_tab is undefined

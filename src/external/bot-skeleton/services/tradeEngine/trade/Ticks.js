@@ -352,19 +352,23 @@ export default Engine =>
         }
 
         async scanBestVolatilitySignal(opts = {}) {
-            const windowSize = Math.max(12, Math.min(80, Number(opts.windowSize) || 20));
-            const minHistory = Math.max(12, Math.min(windowSize, Number(opts.minHistory) || 15));
-            const baseMinConfidence = Number.isFinite(Number(opts.minConfidence)) ? Number(opts.minConfidence) : 75;
+            const windowSize = Math.max(20, Math.min(120, Number(opts.windowSize) || 40));
+            const minHistory = Math.max(20, Math.min(windowSize, Number(opts.minHistory) || 30));
+            const baseMinConfidence = Number.isFinite(Number(opts.minConfidence))
+                ? Math.min(99, Math.max(75, Number(opts.minConfidence)))
+                : 88;
             const maxSymbols = Math.max(1, Math.min(80, Number(opts.maxSymbols) || 60));
             const lossStreak = Math.max(0, Number(opts.lossStreak) || 0);
             const totalProfit = Number.isFinite(Number(opts.totalProfit)) ? Number(opts.totalProfit) : 0;
             const recoverAmount = Math.max(0, Number(opts.recoverAmount) || 0);
             const inRecovery = recoverAmount > 0 || lossStreak > 0 || totalProfit < 0;
-            // Aggressive but controlled: faster scanning, more markets, tighter confidence under recovery.
+
+            // High-selectivity defaults: scan broadly, but only trade clear, real opportunities.
             let minConfidence = baseMinConfidence;
-            if (inRecovery) minConfidence += Math.min(8, 2 + lossStreak * 1 + (recoverAmount > 0 ? 1 : 0));
-            if (totalProfit < 0) minConfidence += Math.min(3, Math.ceil(Math.abs(totalProfit) / 20));
-            minConfidence = Math.min(95, minConfidence);
+            if (inRecovery) minConfidence += Math.min(6, 2 + Math.min(lossStreak, 4));
+            if (recoverAmount > 0) minConfidence += Math.min(3, Math.ceil(recoverAmount / 5));
+            if (totalProfit < 0) minConfidence += Math.min(2, Math.ceil(Math.abs(totalProfit) / 30));
+            minConfidence = Math.min(98, minConfidence);
 
             let candidates = Array.isArray(opts.symbols) && opts.symbols.length ? opts.symbols : null;
             if (!candidates) {
@@ -400,9 +404,10 @@ export default Engine =>
 
                 const freq = Array(10).fill(0);
                 const recentFreq = Array(10).fill(0);
-                const wRecent = Math.min(12, n);
+                const wRecent = Math.min(14, n);
                 for (let i = 0; i < n; i++) {
-                    const w = 0.3 + 0.7 * ((i + 1) / n);
+                    // Strong recency weighting for faster adaptation to live ticks.
+                    const w = 0.15 + 0.85 * Math.pow((i + 1) / n, 1.35);
                     freq[recent[i]] += w;
                 }
                 for (let i = n - wRecent; i < n; i++) {
@@ -410,8 +415,8 @@ export default Engine =>
                 }
                 const freqSum = freq.reduce((a, b) => a + b, 0) || 1;
 
-                const trans = Array.from({ length: 10 }, () => Array(10).fill(0));
-                const transRow = Array(10).fill(0);
+                const trans = Array.from({ length: 10 }, () => Array(10).fill(0.35)); // Laplace smoothing
+                const transRow = Array(10).fill(3.5);
                 for (let i = 1; i < n; i++) {
                     const a = recent[i - 1];
                     const b = recent[i];
@@ -423,9 +428,10 @@ export default Engine =>
 
                 const probDigit = d => freq[d] / freqSum;
                 const probNextGivenLast = d => {
-                    if (last1 == null || transRow[last1] < 3) return probDigit(d);
-                    const pCond = trans[last1][d] / transRow[last1];
-                    return 0.65 * pCond + 0.35 * probDigit(d);
+                    if (last1 == null) return probDigit(d);
+                    const pCond = trans[last1][d] / (transRow[last1] || 1);
+                    const confidenceMix = transRow[last1] >= 8 ? 0.72 : transRow[last1] >= 4 ? 0.58 : 0.45;
+                    return confidenceMix * pCond + (1 - confidenceMix) * probDigit(d);
                 };
 
                 const candidatesDefs = [];
@@ -443,6 +449,9 @@ export default Engine =>
                     if (winDigits.length === 0 || winDigits.length === 10) continue;
 
                     const theoretical = winDigits.length / 10;
+                    // Avoid tiny-payout setups except in controlled recovery (where EV still must be strong).
+                    if (!inRecovery && theoretical > 0.82) continue;
+                    // Never take blind/random entries: require recent confirmation.
                     if (!isWin(last1) || last2 == null || !isWin(last2)) continue;
 
                     let wins = 0;
@@ -466,58 +475,63 @@ export default Engine =>
                     const edge = winRate - theoretical;
                     const modelEdge = pNext - theoretical;
 
-                    // trend/momentum (P&L-graph proxy): recent segment should not oppose candidate direction
-                    const seg = Math.max(5, Math.floor(n / 2));
+                    // Trend/momentum: recent segment should support, not oppose, the direction.
+                    const seg = Math.max(6, Math.floor(n / 2));
                     const older = recent.slice(0, seg);
                     const newer = recent.slice(seg);
                     const rate = arr => (arr.length ? arr.filter(isWin).length / arr.length : 0);
                     const olderRate = rate(older);
                     const newerRate = rate(newer);
                     const trendDelta = newerRate - olderRate;
-                    const trendOk = newerRate + 0.02 >= olderRate && newerRate >= theoretical - 0.02;
+                    const trendOk = newerRate + 0.01 >= olderRate && newerRate >= theoretical;
 
-                    // controlled safe-entry gates: balanced for speed + accuracy
+                    // High-assurance gates (real data, no blind trades).
                     if (safeStreak < 2) continue;
-                    if (lossClusterRecent >= 3) continue;
+                    if (lossClusterRecent >= 2) continue;
                     if (!trendOk) continue;
-                    if (trendDelta < -0.02) continue;
-                    if (edge < 0.01) continue;
-                    if (modelEdge < 0.03) continue;
-                    if (pNext < theoretical + 0.03) continue;
-                    if (winRate < theoretical + 0.01) continue;
-                    if (shortWin < theoretical) continue;
-                    if (last3 != null && isLoss(last3) && safeStreak < 2) continue;
+                    if (trendDelta < -0.01) continue;
+                    if (edge < 0.03) continue;
+                    if (modelEdge < 0.05) continue;
+                    if (pNext < theoretical + 0.06) continue;
+                    if (winRate < theoretical + 0.03) continue;
+                    if (shortWin < theoretical + 0.02) continue;
+                    if (last3 != null && isLoss(last3)) continue; // no chop right before entry
 
-                    // payout/EV-conscious: theoretical = payout proxy; require positive expected value
+                    // Payout/EV-conscious: prefer stronger expected value, not just "safer" low payout.
                     const payoutFactor = 1 / Math.max(0.1, theoretical);
                     const ev = pNext * payoutFactor - 1;
-                    if (ev < 0.04) continue;
+                    const breakEven = 1 / payoutFactor;
+                    if (ev < 0.08) continue;
+                    if (pNext < breakEven + 0.05) continue;
 
-                    if (theoretical <= 0.5 && (modelEdge < 0.04 || pNext < theoretical + 0.04 || ev < 0.06)) continue;
-                    if (theoretical <= 0.4 && (modelEdge < 0.05 || safeStreak < 2 || ev < 0.08)) continue;
-                    if (theoretical <= 0.3 && (modelEdge < 0.06 || safeStreak < 3 || ev < 0.1)) continue;
+                    if (theoretical <= 0.6 && (ev < 0.1 || modelEdge < 0.06)) continue;
+                    if (theoretical <= 0.5 && (ev < 0.12 || safeStreak < 3 || modelEdge < 0.07)) continue;
+                    if (theoretical <= 0.4 && (ev < 0.15 || safeStreak < 3 || modelEdge < 0.08)) continue;
 
-                    // recovery after loss: increase assurance, prefer safer payout setups, never force trades
+                    // Recovery after loss: stronger assurance and firm EV, but still only on real opportunity.
                     if (inRecovery) {
-                        if (safeStreak < 2) continue;
-                        if (ev < 0.06) continue;
-                        if (modelEdge < 0.04) continue;
-                        if (lossStreak >= 3 && (safeStreak < 3 || ev < 0.08 || modelEdge < 0.05)) continue;
+                        if (safeStreak < 3) continue;
+                        if (ev < 0.12) continue;
+                        if (modelEdge < 0.07) continue;
+                        if (pNext < theoretical + 0.08) continue;
+                        if (lossStreak >= 2 && (ev < 0.15 || safeStreak < 3)) continue;
+                        if (lossStreak >= 3 && safeStreak < 4) continue;
                     }
 
                     let score = 0;
-                    score += Math.min(25, safeStreak * 5);
+                    score += Math.min(28, safeStreak * 6);
                     if (last3 != null && isWin(last3)) score += 8;
-                    score += Math.max(0, Math.min(30, modelEdge * 100));
-                    score += Math.max(0, Math.min(20, edge * 90));
-                    score += Math.max(0, Math.min(15, (shortWin - theoretical) * 80));
-                    score += Math.max(0, Math.min(20, ev * 35));
-                    score += Math.max(-4, Math.min(8, trendDelta * 40));
+                    score += Math.max(0, Math.min(34, modelEdge * 110));
+                    score += Math.max(0, Math.min(22, edge * 95));
+                    score += Math.max(0, Math.min(18, (shortWin - theoretical) * 90));
+                    score += Math.max(0, Math.min(26, ev * 45));
+                    score += Math.max(-3, Math.min(10, trendDelta * 45));
 
-                    const payoutBias = Math.max(0, (0.75 - theoretical)) * 14;
-                    score += payoutBias * clamp01(0.4 + modelEdge * 3 + ev * 1.2);
+                    // Balance safety and payout: reward higher payout only when probability edge is real.
+                    const payoutBias = Math.max(0, (0.75 - theoretical)) * 12;
+                    score += payoutBias * clamp01(0.35 + modelEdge * 3.2 + ev * 1.4);
 
-                    const confidence = Math.max(0, Math.min(99, Math.round(46 + score)));
+                    const confidence = Math.max(0, Math.min(99, Math.round(44 + score)));
                     if (confidence < minConfidence) continue;
 
                     const candidate = {
@@ -561,6 +575,7 @@ export default Engine =>
                 }
             };
 
+            // Parallel scan across the batch for speed (real-time tick data per symbol).
             const settled = await Promise.all(
                 batch.map(async sym => {
                     try {

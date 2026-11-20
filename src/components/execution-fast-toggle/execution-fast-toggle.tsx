@@ -20,6 +20,9 @@ const ExecutionFastToggle = observer(() => {
     return (
         <button
             type='button'
+            role='switch'
+            aria-checked={fast}
+            aria-label={fast ? 'Fast execution enabled. Tap to switch to normal.' : 'Fast execution disabled. Tap to enable fast execution.'}
             className={classNames('execution-mode-toggle animation__execution-mode', {
                 'execution-mode-toggle--fast': fast,
                 'execution-mode-toggle--slow': !fast,

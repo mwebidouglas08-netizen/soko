@@ -139,6 +139,19 @@
         border-end-end-radius: $BORDER_RADIUS;
         border: solid 1px var(--border-normal);
         position: relative;
+        min-width: 0;
+        flex: 1 1 auto;
+
+        &--execution-mode {
+            justify-content: center;
+            padding: 4px 8px;
+            overflow: visible;
+        }
+
+        .execution-mode-toggle {
+            width: 100%;
+            min-width: 0;
+        }
     }
 
     &__text {

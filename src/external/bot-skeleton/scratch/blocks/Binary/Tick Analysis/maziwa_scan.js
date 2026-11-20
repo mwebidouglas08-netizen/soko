@@ -52,7 +52,7 @@ window.Blockly.Blocks.maziwa_scan_signal = {
             colourSecondary: window.Blockly.Colours.Base.colourSecondary,
             colourTertiary: window.Blockly.Colours.Base.colourTertiary,
             tooltip: localize(
-                'Scans open live volatility markets using digit frequency/transition matrix, trend, and edge/payout scoring, switches to the best market, and returns [symbol, direction(4=Over,5=Under), prediction, confidence, theoretical, ev]. Tightens selectivity during loss streak/recovery/drawdown. Returns empty list when no strong, conscious signal is found.'
+                'Scans live volatility markets in real time (digit frequency, transition model, trend, edge and payout/EV), switches to the strongest Over/Under opportunity, and returns [symbol, direction(4=Over,5=Under), prediction, confidence, theoretical, ev]. It tightens selectivity during recovery/drawdown and returns an empty list when no high-assurance signal is found (no blind trades).'
             ),
             category: window.Blockly.Categories.Tick_Analysis,
         };

@@ -1,4 +1,4 @@
-.dc-dialog__wrapper.app-dialog {
+﻿.dc-dialog__wrapper.app-dialog {
     backdrop-filter: blur(10px) saturate(120%);
     -webkit-backdrop-filter: blur(10px) saturate(120%);
     background:
@@ -40,6 +40,30 @@
         --app-dialog-accent-strong: #b91c1c;
         --app-dialog-accent-soft: rgba(239, 68, 68, 0.16);
         --app-dialog-surface-alt: #fff6f6;
+    }
+
+    &.app-dialog--celebration {
+        --app-dialog-accent: #10b981;
+        --app-dialog-accent-2: #f59e0b;
+        --app-dialog-accent-strong: #047857;
+        --app-dialog-accent-soft: rgba(16, 185, 129, 0.18);
+        --app-dialog-surface-alt: #f4fff9;
+
+        .dc-dialog__dialog {
+            animation: app-dialog-celebrate-pop 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+            box-shadow:
+                0 50px 100px rgba(2, 8, 23, 0.35),
+                0 20px 40px rgba(16, 185, 129, 0.18),
+                0 0 0 1px rgba(255, 255, 255, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+            &::before {
+                height: 6px;
+                background: linear-gradient(90deg, #10b981, #f59e0b, #22c55e, #38bdf8, #10b981);
+                background-size: 300% 100%;
+                animation: app-dialog-shimmer 3s linear infinite;
+            }
+        }
     }
 
     .dc-dialog__dialog {
@@ -152,6 +176,7 @@
         align-items: center;
         justify-content: center;
         margin-top: 0.2rem;
+        width: 100%;
     }
 
     &__hero-glow {
@@ -181,7 +206,7 @@
             0 14px 30px rgba(15, 23, 42, 0.12),
             0 0 0 1px rgba(255, 255, 255, 0.4);
         animation: app-dialog-icon-in 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) 0.05s both;
-        z-index: 1;
+        z-index: 2;
     }
 
     &__icon-ring {
@@ -227,6 +252,27 @@
         background-position: 10% 20%, 80% 10%, 50% 0%, 20% 80%, 85% 75%;
         opacity: 0.55;
         animation: app-dialog-sparkle 4s ease-in-out infinite;
+        z-index: 1;
+    }
+
+    &__confetti {
+        position: absolute;
+        inset: -30px -20px -10px;
+        pointer-events: none;
+        overflow: visible;
+        z-index: 3;
+    }
+
+    &__confetti-piece {
+        position: absolute;
+        top: -10px;
+        width: 8px;
+        height: 14px;
+        border-radius: 3px;
+        opacity: 0;
+        --drift: 0px;
+        animation: app-dialog-confetti-fall linear infinite;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     }
 
     &__copy {
@@ -256,6 +302,41 @@
         font-weight: 800;
         letter-spacing: -0.03em;
         color: var(--app-dialog-ink);
+    }
+
+    &__payout-hero {
+        margin: 0.2rem auto 0.6rem;
+        padding: 0.9rem 1.2rem;
+        border-radius: 18px;
+        background:
+            linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(245, 158, 11, 0.12)),
+            rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(16, 185, 129, 0.18);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 10px 24px rgba(16, 185, 129, 0.12);
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 220px;
+        animation: app-dialog-payout-pop 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+    }
+
+    &__payout-label {
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #047857;
+        margin-bottom: 0.2rem;
+    }
+
+    &__payout-value {
+        font-size: 3.2rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        color: #065f46;
+        font-variant-numeric: tabular-nums;
+        text-shadow: 0 6px 18px rgba(16, 185, 129, 0.2);
     }
 
     &__message {
@@ -327,6 +408,11 @@
                 linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)),
                 var(--app-dialog-accent-soft);
             border-color: rgba(15, 23, 42, 0.04);
+        }
+
+        &--hero .app-dialog__stat-value {
+            font-size: 2.2rem;
+            color: #047857;
         }
 
         &--pos .app-dialog__stat-value { color: #047857; }
@@ -451,6 +537,12 @@
         }
     }
 
+    &.app-dialog--celebration .dc-dialog__button--primary,
+    &.app-dialog--celebration .dc-btn--primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 45%, #0ea5e9 100%);
+        box-shadow: 0 14px 26px rgba(16, 185, 129, 0.28), 0 6px 12px rgba(14, 165, 233, 0.18);
+    }
+
     .dc-dialog__button--secondary,
     .dc-btn--secondary {
         border: 1.5px solid #d8e2ec;
@@ -476,6 +568,7 @@
         &__message { font-size: 1.4rem; }
         &__stats { grid-template-columns: 1fr 1fr; }
         &__stat--wide { grid-column: span 2; }
+        &__payout-value { font-size: 2.8rem; }
 
         .dc-dialog__button,
         .dc-btn {
@@ -488,6 +581,12 @@
 @keyframes app-dialog-pop {
     0% { opacity: 0; transform: translateY(18px) scale(0.96); filter: blur(4px); }
     100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes app-dialog-celebrate-pop {
+    0% { opacity: 0; transform: translateY(24px) scale(0.9) rotate(-0.6deg); filter: blur(6px); }
+    55% { opacity: 1; transform: translateY(-4px) scale(1.02) rotate(0.2deg); filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); filter: blur(0); }
 }
 
 @keyframes app-dialog-icon-in {
@@ -520,4 +619,16 @@
 @keyframes app-dialog-sparkle {
     0%, 100% { opacity: 0.35; transform: scale(0.98) rotate(0deg); }
     50% { opacity: 0.7; transform: scale(1.03) rotate(2deg); }
+}
+
+@keyframes app-dialog-confetti-fall {
+    0% { opacity: 0; transform: translate3d(0, -10px, 0) rotate(0deg); }
+    10% { opacity: 1; }
+    100% { opacity: 0; transform: translate3d(var(--drift), 180px, 0) rotate(360deg); }
+}
+
+@keyframes app-dialog-payout-pop {
+    0% { opacity: 0; transform: scale(0.85) translateY(8px); }
+    60% { opacity: 1; transform: scale(1.04) translateY(0); }
+    100% { opacity: 1; transform: scale(1); }
 }

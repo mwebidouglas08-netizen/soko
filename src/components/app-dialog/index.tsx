@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+﻿import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Dialog from '@/components/shared_ui/dialog';
 import { localize } from '@deriv-com/translations';
@@ -40,6 +40,7 @@ type DialogState = DialogOptions & {
     variant: DialogVariant;
     tone: DialogTone;
     isSessionResult: boolean;
+    isCelebration: boolean;
     snapshot: SessionSnapshot | null;
 };
 
@@ -57,6 +58,7 @@ const defaultState: DialogState = {
     variant: 'confirm',
     tone: 'info',
     isSessionResult: false,
+    isCelebration: false,
     snapshot: null,
     title: '',
     confirmText: '',
@@ -101,32 +103,37 @@ const isSessionResultText = (text: string) =>
         text
     );
 
+const isNegativeSessionText = (text: string) =>
+    /stop\s*-?\s*loss|loss\s*(hit|reached|limit)|max\s*(loss|drawdown)|daily\s*loss|suspended|emergency|failed|error|invalid|cannot|rejected|timed out|unauthori[sz]ed|sorry!!!|blew|bust|no\s+profit/i.test(
+        text
+    );
+
+const isCompletionEventText = (text: string) =>
+    /take\s*-?\s*profit|target\s*profit|profit\s*(reached|achieved|hit|target)|takeprofit\s*achieved|session\s*(completed|complete|ended)|max\s*trades\s*reached|trades\s*reached|trade\s*limit\s*reached|completed successfully|congratulations/i.test(
+        text
+    );
+
 const resolveTone = (opts: DialogOptions, variant: DialogVariant): DialogTone => {
     if (opts.tone) return opts.tone;
     if (opts.danger) return 'danger';
     const text = toSearchText(opts);
+    if (isNegativeSessionText(text)) return 'warning';
     if (
-        /take\s*-?\s*profit|target\s*profit|profit\s*(reached|achieved|hit|target)|takeprofit\s*achieved|session\s*completed|congratulations|completed successfully|success|you'?ve won|\bwin\b/i.test(
+        /take\s*-?\s*profit|target\s*profit|profit\s*(reached|achieved|hit|target)|takeprofit\s*achieved|session\s*(completed|complete)|congratulations|completed successfully|success|you'?ve won|\bwin\b/i.test(
             text
         )
     ) {
         return 'success';
     }
-    if (
-        /stop\s*-?\s*loss|loss\s*(hit|reached|limit)|max\s*(loss|drawdown|trades reached)|trades\s*reached|suspended|emergency|failed|error|invalid|cannot|rejected|timed out|unauthori[sz]ed|sorry!!!/i.test(
-            text
-        )
-    ) {
-        return 'warning';
-    }
     if (variant === 'prompt') return 'info';
     return 'info';
 };
 
-const resolveTitle = (opts: DialogOptions, variant: DialogVariant, tone: DialogTone) => {
+const resolveTitle = (opts: DialogOptions, variant: DialogVariant, tone: DialogTone, isCelebration = false) => {
     if (opts.title) return opts.title;
     if (variant === 'prompt') return localize('Input required');
     const text = toSearchText(opts);
+    if (isCelebration) return localize('Congratulations!');
     if (isSessionResultText(text)) {
         if (tone === 'success') return localize('Session Summary');
         if (tone === 'warning') return localize('Session Update');
@@ -239,11 +246,46 @@ const collectSessionSnapshot = (): SessionSnapshot | null => {
 };
 
 const formatMoney = (v: number) => {
-    const sign = v > 0 ? '+' : v < 0 ? '−' : '';
+    const sign = v > 0 ? '+' : v < 0 ? '\u2212' : '';
     return `${sign}${Math.abs(v).toFixed(2)}`;
 };
 
 const formatPct = (v: number) => `${(Number.isFinite(v) ? v : 0).toFixed(1)}%`;
+
+const getSessionPayoutDisplay = (snapshot: SessionSnapshot | null): number | null => {
+    if (!snapshot) return null;
+    if (typeof snapshot.totalPayout === 'number' && snapshot.totalPayout > 0) return snapshot.totalPayout;
+    if (snapshot.netProfit > 0) {
+        if (typeof snapshot.totalStake === 'number' && snapshot.totalStake > 0) {
+            return snapshot.totalStake + snapshot.netProfit;
+        }
+        return snapshot.netProfit;
+    }
+    return null;
+};
+
+const AnimatedAmount: React.FC<{ value: number; prefix?: string; className?: string }> = ({ value, prefix = '', className }) => {
+    const [display, setDisplay] = useState(0);
+
+    useEffect(() => {
+        let raf = 0;
+        const start = performance.now();
+        const duration = 900;
+        const from = 0;
+        const to = value;
+        const tick = (now: number) => {
+            const t = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - t, 3);
+            setDisplay(from + (to - from) * eased);
+            if (t < 1) raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(raf);
+    }, [value]);
+
+    const shown = Math.abs(display).toFixed(2);
+    return <span className={className}>{`${prefix}${shown}`}</span>;
+};
 
 export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [state, setState] = useState<DialogState>(defaultState);
@@ -262,37 +304,45 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         return new Promise<boolean | string | null | void>(resolve => {
             resolverRef.current = resolve as (value: boolean | string | null | void) => void;
             setInputValue(opts.defaultValue ?? '');
-            const tone = resolveTone(opts, variant);
+            let tone = resolveTone(opts, variant);
             const text = toSearchText(opts);
             const sessionResult = isSessionResultText(text) && variant !== 'prompt';
             const snapshot = sessionResult ? collectSessionSnapshot() : null;
+            const completionEvent = isCompletionEventText(text);
+            const profitable = (snapshot?.netProfit ?? 0) > 0 || (snapshot?.totalPayout ?? 0) > 0;
+            const explicitSuccess = /take\s*-?\s*profit|target\s*profit|profit\s*(reached|achieved|hit|target)|takeprofit\s*achieved|congratulations|completed successfully/i.test(text);
+            const isCelebration = sessionResult && completionEvent && !isNegativeSessionText(text) && (profitable || explicitSuccess);
+            if (isCelebration) tone = 'success';
+
+            const payoutDisplay = isCelebration ? getSessionPayoutDisplay(snapshot) : null;
+            let message: React.ReactNode = opts.message;
+            if (isCelebration) {
+                const payoutLine = payoutDisplay != null ? ` ${localize('Session payout')}: ${formatMoney(payoutDisplay)}.` : '';
+                message = `${localize('Outstanding work! Your session completed successfully.')}${payoutLine} ${localize('Stay focused and keep the momentum going!')}`;
+            }
+
             setState({
                 ...defaultState,
                 ...opts,
+                message,
                 variant,
                 tone,
                 isSessionResult: sessionResult,
+                isCelebration,
                 snapshot,
                 isVisible: true,
-                title: resolveTitle(opts, variant, tone),
-                confirmText: opts.confirmText ?? (variant === 'alert' ? localize('OK') : localize('Continue')),
+                title: resolveTitle(opts, variant, tone, isCelebration),
+                confirmText:
+                    opts.confirmText ??
+                    (variant === 'alert' ? localize(isCelebration ? 'Keep winning' : 'OK') : localize('Continue')),
                 cancelText: opts.cancelText ?? localize('Cancel'),
             });
         });
     }, []);
 
-    const confirm = useCallback(
-        (options: DialogOptions | string) => open(options, 'confirm') as Promise<boolean>,
-        [open]
-    );
-    const alertFn = useCallback(
-        (options: DialogOptions | string) => open(options, 'alert') as Promise<void>,
-        [open]
-    );
-    const promptFn = useCallback(
-        (options: DialogOptions | string) => open(options, 'prompt') as Promise<string | null>,
-        [open]
-    );
+    const confirm = useCallback((options: DialogOptions | string) => open(options, 'confirm') as Promise<boolean>, [open]);
+    const alertFn = useCallback((options: DialogOptions | string) => open(options, 'alert') as Promise<void>, [open]);
+    const promptFn = useCallback((options: DialogOptions | string) => open(options, 'prompt') as Promise<string | null>, [open]);
 
     const handleConfirm = () => {
         if (state.variant === 'prompt') {
@@ -320,34 +370,49 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     const isDangerAction = state.danger || state.tone === 'danger';
     const showResults = state.isSessionResult && !!state.snapshot && state.snapshot.trades >= 0;
+    const celebrationPayout = state.isCelebration ? getSessionPayoutDisplay(state.snapshot) : null;
 
     const statsView = useMemo(() => {
         if (!showResults || !state.snapshot) return null;
         const s = state.snapshot;
         const pnlTone = s.netProfit > 0 ? 'pos' : s.netProfit < 0 ? 'neg' : 'neu';
         const items = [
+            {
+                label: localize('Session payout'),
+                value: celebrationPayout != null ? formatMoney(celebrationPayout) : typeof s.totalPayout === 'number' && s.totalPayout > 0 ? s.totalPayout.toFixed(2) : formatMoney(Math.max(0, s.netProfit)),
+                tone: celebrationPayout != null || (s.totalPayout ?? 0) > 0 || s.netProfit > 0 ? ('pos' as const) : ('neu' as const),
+                wide: true,
+                hero: state.isCelebration,
+            },
+            { label: localize('Net P/L'), value: formatMoney(s.netProfit), tone: pnlTone },
             { label: localize('Total trades'), value: String(s.trades), tone: 'neu' as const },
             { label: localize('Wins'), value: String(s.wins), tone: 'pos' as const },
             { label: localize('Losses'), value: String(s.losses), tone: 'neg' as const },
             { label: localize('Win rate'), value: formatPct(s.winRate), tone: s.winRate >= 50 ? ('pos' as const) : ('neu' as const) },
-            { label: localize('Net P/L'), value: formatMoney(s.netProfit), tone: pnlTone, wide: true },
         ];
         if (typeof s.totalStake === 'number' && s.totalStake > 0) {
             items.push({ label: localize('Total stake'), value: s.totalStake.toFixed(2), tone: 'neu' as const });
         }
-        if (typeof s.totalPayout === 'number' && s.totalPayout > 0) {
-            items.push({ label: localize('Total payout'), value: s.totalPayout.toFixed(2), tone: 'neu' as const });
-        }
+        const seen = new Set<string>();
+        const deduped = items.filter(it => {
+            if (seen.has(it.label)) return false;
+            seen.add(it.label);
+            return true;
+        });
+
         return (
             <div className='app-dialog__results' aria-label={localize('Session results')}>
                 <div className='app-dialog__results-head'>
                     <span className='app-dialog__results-line' />
-                    <span>{localize('Session results')}</span>
+                    <span>{state.isCelebration ? localize('Your winning session') : localize('Session results')}</span>
                     <span className='app-dialog__results-line' />
                 </div>
                 <div className='app-dialog__stats'>
-                    {items.map(it => (
-                        <div key={it.label} className={`app-dialog__stat ${it.wide ? 'app-dialog__stat--wide' : ''} app-dialog__stat--${it.tone}`}>
+                    {deduped.map(it => (
+                        <div
+                            key={it.label}
+                            className={`app-dialog__stat ${it.wide ? 'app-dialog__stat--wide' : ''} app-dialog__stat--${it.tone}${(it as any).hero ? ' app-dialog__stat--hero' : ''}`}
+                        >
                             <span className='app-dialog__stat-label'>{it.label}</span>
                             <span className='app-dialog__stat-value'>{it.value}</span>
                         </div>
@@ -360,7 +425,21 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 </div>
             </div>
         );
-    }, [showResults, state.snapshot]);
+    }, [showResults, state.snapshot, state.isCelebration, celebrationPayout]);
+
+    const confettiPieces = useMemo(
+        () =>
+            Array.from({ length: 22 }, (_, i) => ({
+                id: i,
+                left: `${(i * 37 + 7) % 100}%`,
+                delay: `${(i % 7) * 0.12}s`,
+                dur: `${2.6 + (i % 5) * 0.4}s`,
+                hue: [46, 158, 199, 338, 142, 24, 268][i % 7],
+                size: 6 + (i % 4) * 2,
+                drift: ((i % 3) - 1) * 18,
+            })),
+        []
+    );
 
     return (
         <AppDialogContext.Provider value={{ confirm, alert: alertFn, prompt: promptFn }}>
@@ -377,7 +456,7 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                           onClose={handleCancel}
                           has_close_icon
                           is_mobile_full_width={false}
-                          className={`app-dialog app-dialog--tone-${state.tone}${isDangerAction ? ' app-dialog--danger' : ''}${state.isSessionResult ? ' app-dialog--session' : ''}`}
+                          className={`app-dialog app-dialog--tone-${state.tone}${isDangerAction ? ' app-dialog--danger' : ''}${state.isSessionResult ? ' app-dialog--session' : ''}${state.isCelebration ? ' app-dialog--celebration' : ''}`}
                           login={() => {}}
                       >
                           <div className='app-dialog__cinema'>
@@ -388,11 +467,42 @@ export const AppDialogProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                                       <span className='app-dialog__icon-ring app-dialog__icon-ring--outer' />
                                       <span className='app-dialog__icon'>{icons[state.tone]}</span>
                                   </div>
-                                  {state.tone === 'success' && <div className='app-dialog__sparkles' aria-hidden='true' />}
+                                  {(state.tone === 'success' || state.isCelebration) && <div className='app-dialog__sparkles' aria-hidden='true' />}
+                                  {state.isCelebration && (
+                                      <div className='app-dialog__confetti' aria-hidden='true'>
+                                          {confettiPieces.map(p => (
+                                              <span
+                                                  key={p.id}
+                                                  className='app-dialog__confetti-piece'
+                                                  style={{
+                                                      left: p.left,
+                                                      animationDelay: p.delay,
+                                                      animationDuration: p.dur,
+                                                      backgroundColor: `hsl(${p.hue} 92% 58%)`,
+                                                      width: `${p.size}px`,
+                                                      height: `${p.size * 1.6}px`,
+                                                      ['--drift' as any]: `${p.drift}px`,
+                                                  }}
+                                              />
+                                          ))}
+                                      </div>
+                                  )}
                               </div>
                               <div className='app-dialog__copy'>
-                                  {state.isSessionResult && <div className='app-dialog__eyebrow'>{localize('Live session update')}</div>}
-                                  <h3 className='app-dialog__title'>{state.title}</h3>
+                                  {state.isSessionResult && (
+                                      <div className='app-dialog__eyebrow'>
+                                          {state.isCelebration ? localize('Successful session complete') : localize('Live session update')}
+                                      </div>
+                                  )}
+                                  <h3 className='app-dialog__title'>{state.isCelebration ? `${state.title} \u{1F389}` : state.title}</h3>
+                                  {state.isCelebration && celebrationPayout != null && (
+                                      <div className='app-dialog__payout-hero' aria-label={localize('Session payout')}>
+                                          <span className='app-dialog__payout-label'>{localize('Session payout')}</span>
+                                          <span className='app-dialog__payout-value'>
+                                              <AnimatedAmount value={celebrationPayout} />
+                                          </span>
+                                      </div>
+                                  )}
                                   {typeof state.message === 'string' ? (
                                       <p className='app-dialog__message'>{state.message}</p>
                                   ) : (

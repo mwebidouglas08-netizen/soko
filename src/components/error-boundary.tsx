@@ -6,6 +6,7 @@ interface Props {
 
 interface State {
     error: Error | null;
+    errorKey: number;
 }
 
 /**
@@ -155,13 +156,6 @@ export default class ErrorBoundary extends Component<Props, State> {
                                 cursor: 'pointer',
                                 boxShadow: '0 0 24px rgba(251, 191, 36, 0.4)',
                                 transition: 'transform 0.2s, box-shadow 0.2s',
-                                ':hover': {
-                                    transform: 'translateY(-1px)',
-                                    boxShadow: '0 0 32px rgba(251, 191, 36, 0.6)',
-                                },
-                                ':active': {
-                                    transform: 'translateY(0)',
-                                },
                             }}
                         >
                             Reload App

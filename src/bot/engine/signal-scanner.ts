@@ -51,8 +51,9 @@ import {
     isMarketUnavailableError,
     monitorUntilSettled,
     requestContractQuote,
+    releaseQuote,
 } from '../deriv/execution';
-import { accountBalance, currentLoginId, getContractsFor, getTicksHistory, isApiReady, isAuthorized } from '../deriv/api';
+import { accountBalance, currentLoginId, currentSocket, getContractsFor, getTicksHistory, isApiReady, isAuthorized } from '../deriv/api';
 import { isDemoAccount } from '@/utils/account-helpers';
 
 export interface SignalScannerState {
@@ -130,6 +131,7 @@ export class SignalScannerEngine {
     private quoteBlocked = new Set<string>();
     private busy = false;
     private running = false;
+    private generation = 0;
     private lastTradeAt = 0;
     private eventSeq = 0;
     private martingaleStep = 0;
@@ -220,6 +222,10 @@ export class SignalScannerEngine {
 
     async start(config?: Partial<SignalScannerConfig>): Promise<void> {
         if (this.running) return;
+        if (this.state.risk.openPositions > 0 || this.state.openTrade) {
+            this.logEvent('risk', 'Cannot restart while a position is open or its settlement is unknown.');
+            return;
+        }
         if (config) this.configure(config);
 
         if (!isApiReady()) {
@@ -242,12 +248,13 @@ export class SignalScannerEngine {
         const liveOff = authorized && !accountIsDemo && !cfg.allowLiveTrading;
 
         this.running = true;
+        const generation = ++this.generation;
         this.lastTradeAt = 0;
         this.martingaleStep = 0;
         this.setAutoTradeBlock(null);
         // Funded accounts use the real balance; paper mode (no login) uses a
         // nominal bankroll so the equity cap and P/L tracking behave sensibly.
-        const startEquity = authorized ? accountBalance() : cfg.paperTrading ? PAPER_START_EQUITY : 0;
+        const startEquity = cfg.paperTrading ? PAPER_START_EQUITY : authorized ? accountBalance() : 0;
         this.update({
             accountIsDemo,
             liveTrading: authorized ? cfg.allowLiveTrading : false,
@@ -274,11 +281,13 @@ export class SignalScannerEngine {
         try {
             symbols = await discoverSyntheticSymbols();
         } catch (e: any) {
+            if (!this.running || generation !== this.generation) return;
             this.running = false;
             this.setStatus('error', e?.message || 'Market discovery failed');
             this.logEvent('error', e?.message || 'Market discovery failed');
             return;
         }
+        if (!this.running || generation !== this.generation) return;
         symbols = symbols.filter(s => !s.isSuspended && s.exchangeIsOpen).slice(0, 40);
 
         // Probe contract availability before choosing scan targets. Symbols are sorted
@@ -307,6 +316,7 @@ export class SignalScannerEngine {
             );
             probed.push(...resolved);
         }
+        if (!this.running || generation !== this.generation) return;
         const watch = probed.filter(p => p.fams.some(f => neededFamilies.has(f))).map(p => p.s);
         if (!watch.length) {
             this.running = false;
@@ -341,6 +351,7 @@ export class SignalScannerEngine {
             })
         );
 
+        if (!this.running || generation !== this.generation || !this.feed) return;
         this.feed.start();
         this.update({ equity: this.currentEquity(), risk: initialRiskState(this.currentEquity()) });
         const famCount = new Set([...this.familiesBySymbol.values()].flat()).size;
@@ -353,6 +364,7 @@ export class SignalScannerEngine {
     stop() {
         const wasRunning = this.running;
         this.running = false;
+        this.generation++;
         if (this.scanTimer) clearInterval(this.scanTimer);
         this.scanTimer = null;
         if (this.feed) this.feed.stop();
@@ -364,7 +376,7 @@ export class SignalScannerEngine {
 
     emergencyStop() {
         this.stop();
-        this.update({ status: 'stopped', message: 'Emergency stop engaged', openTrade: null });
+        this.update({ status: 'stopped', message: 'Emergency stop engaged' });
         this.logEvent('risk', 'Emergency stop engaged — all activity halted.');
     }
 
@@ -377,7 +389,7 @@ export class SignalScannerEngine {
 
     /** Tracked equity (paper bankroll or last known), falling back to the live balance. */
     private currentEquity(): number {
-        return this.state.equity > 0 ? this.state.equity : accountBalance();
+        return this.state.config.paperTrading ? this.state.equity : accountBalance();
     }
 
     private onTick(symbol: string, series: SymbolSeries) {
@@ -420,7 +432,7 @@ export class SignalScannerEngine {
         const equity = this.currentEquity();
         if (equity > 0) {
             const cap = equity * DEFAULT_RISK_LIMITS.maxStakePctEquity;
-            stake = Math.min(stake, Math.max(cap, MIN_ORDER_STAKE));
+            stake = Math.min(stake, cap);
         }
         return stake;
     }
@@ -551,6 +563,7 @@ export class SignalScannerEngine {
             maxConsecutiveLosses: config.maxConsecutiveLosses,
             maxOpenPositions: config.maxOpenPositions,
         };
+        if (!Number.isFinite(stake) || stake < MIN_ORDER_STAKE || stake > config.maxStake || this.currentEquity() < stake) return { ok: false, reason: 'Stake exceeds available equity or is below the minimum' };
         if (risk.suspended) return { ok: false, reason: risk.suspensionReason || 'Suspended' };
         if (risk.openPositions >= limits.maxOpenPositions) return { ok: false, reason: 'Open position in progress' };
         if (risk.dailyPnl <= -limits.maxDailyLoss) return { ok: false, reason: 'Daily loss limit' };
@@ -561,7 +574,7 @@ export class SignalScannerEngine {
         // so skip the cap there instead of blocking every trade.
         const equity = this.currentEquity();
         if (equity > 0) {
-            const cap = Math.max(equity * limits.maxStakePctEquity, MIN_ORDER_STAKE);
+            const cap = equity * limits.maxStakePctEquity;
             if (stake > cap) {
                 return { ok: false, reason: 'Stake exceeds equity cap' };
             }
@@ -670,6 +683,10 @@ export class SignalScannerEngine {
         // requires an authorized session (unavailable in paper mode) and would
         // otherwise fail on markets the public socket can't price.
         if (cfg.paperTrading) {
+            if (signal.action === 'CALL' || signal.action === 'PUT') {
+                this.logEvent('error', 'Paper rise/fall settlement is not supported; signal skipped.');
+                return false;
+            }
             const ratio = estimatePayoutRatio(signal.strength);
             this.logEvent(
                 'quote',
@@ -692,6 +709,9 @@ export class SignalScannerEngine {
             durationUnit: cfg.durationUnit,
         };
         this.setStatus('proposing', `Requesting quote: ${signal.displayName} ${ACTION_LABEL[signal.action]}`);
+        const orderGeneration = this.generation;
+        const orderLogin = currentLoginId();
+        const orderSocket = currentSocket();
         const { quote, error } = await requestContractQuote(quoteReq);
         if (!quote) {
             const detail = error || 'no quote';
@@ -709,6 +729,7 @@ export class SignalScannerEngine {
             }
             return false;
         }
+        if (!this.running || !this.state.config.autoTrade || !isAuthorized() || (!isDemoAccount(currentLoginId()) && !this.state.config.allowLiveTrading)) { releaseQuote(quote); return false; }
         this.logEvent('quote', `Quote: ${signal.displayName} ${ACTION_LABEL[signal.action]} — payout ${quote.payout.toFixed(2)} (stake ${stake.toFixed(2)})`, { symbol: signal.symbol, action: signal.action });
 
         const record: TradeRecord = {
@@ -733,7 +754,7 @@ export class SignalScannerEngine {
         };
 
         this.setStatus('buying', `Submitting order: ${signal.displayName} ${ACTION_LABEL[signal.action]}`);
-        const buy = await executeBuyFresh(quote, stake, () => requestContractQuote(quoteReq));
+        const buy = await executeBuyFresh(quote, stake, () => requestContractQuote(quoteReq), () => this.running && this.generation === orderGeneration && isAuthorized() && currentLoginId() === orderLogin && currentSocket() === orderSocket && (isDemoAccount(orderLogin) || this.state.config.allowLiveTrading) && this.state.config.autoTrade);
         if (buy.error || buy.contractId === undefined) {
             this.update({ trades: [{ ...record, stage: 'rejected', error: buy.error, closedAt: Date.now() }, ...this.state.trades] });
             if (this.running) this.setStatus('scanning', `Order rejected: ${buy.error}`);

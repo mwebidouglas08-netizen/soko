@@ -29,7 +29,7 @@ const HedgingToolPage = observer(() => {
     const [durationTicks, setDurationTicks] = useState(5);
     const [autoDuration, setAutoDuration] = useState(true);
 
-    const { session, snap } = useHubSession(() => ({
+    const { snap } = useHubSession(() => ({
         symbols: VOL_MARKETS.map(m => m.symbol),
         stake: 0.5,
         martingale: 1,
@@ -44,37 +44,7 @@ const HedgingToolPage = observer(() => {
     const price = snap.quotes[symbol] || 0;
     const digits = snap.digits[symbol] || [];
     const last = digits[digits.length - 1];
-    const payoutA = 1.95;
-    const payoutB = 1.95;
 
-    const executeHedge = () => {
-        session.updateOptions({ durationTicks: autoDuration ? Math.max(1, durationTicks) : durationTicks, stake: stakePerLeg });
-        const run = async () => {
-            const legA =
-                strategyId === 'ONLY_UPS' || strategyId === 'HIGHER_LOWER'
-                    ? { symbol, contractType: 'CALL' as const }
-                    : strategyId === 'ONLY_DOWNS'
-                      ? { symbol, contractType: 'PUT' as const }
-                      : strategyId === 'OVER_UNDER'
-                        ? { symbol, contractType: 'DIGITOVER' as const, barrier: 5 }
-                        : strategyId === 'TOUCH' || strategyId === 'ENDS_BETWEEN' || strategyId === 'STAYS_BETWEEN'
-                          ? { symbol, contractType: 'DIGITEVEN' as const }
-                          : { symbol, contractType: 'DIGITODD' as const };
-            const legB =
-                strategyId === 'ONLY_UPS' || strategyId === 'HIGHER_LOWER'
-                    ? { symbol, contractType: 'PUT' as const }
-                    : strategyId === 'ONLY_DOWNS'
-                      ? { symbol, contractType: 'CALL' as const }
-                      : strategyId === 'OVER_UNDER'
-                        ? { symbol, contractType: 'DIGITUNDER' as const, barrier: 4 }
-                        : strategyId === 'TOUCH' || strategyId === 'ENDS_BETWEEN' || strategyId === 'STAYS_BETWEEN'
-                          ? { symbol, contractType: 'DIGITODD' as const }
-                          : { symbol, contractType: 'DIGITEVEN' as const };
-            await session.buyOnce(legA, stakePerLeg);
-            await session.buyOnce(legB, stakePerLeg);
-        };
-        void run();
-    };
 
     return (
         <div className='hub-page hedging-tool'>
@@ -82,8 +52,8 @@ const HedgingToolPage = observer(() => {
                 <div>
                     <h1 className='hub-page__title'>Hedging Tool</h1>
                     <p className='hub-page__subtitle'>
-                        Fire two opposing contracts at once so one leg always covers the other. Pick the market and
-                        hedge strategy, set the stake per leg, and execute.
+                        Execution is disabled: two independent orders are not atomic and can leave you exposed.
+                        Several listed strategies are not supported by this tool.
                     </p>
                 </div>
                 <div className='hub-page__actions'>
@@ -133,8 +103,8 @@ const HedgingToolPage = observer(() => {
                     <span>Duration (ticks)</span>
                     <input type='number' min='1' max='10' value={durationTicks} onChange={e => setDurationTicks(Number(e.target.value))} disabled={autoDuration} />
                 </label>
-                <button type='button' className='hub-btn' disabled={snap.busy} onClick={executeHedge}>
-                    Execute hedge
+                <button type='button' className='hub-btn' disabled title='Hedge execution is unavailable'>
+                    Execution unavailable
                 </button>
             </div>
 
@@ -145,7 +115,7 @@ const HedgingToolPage = observer(() => {
                         <strong>{strategy.legA}</strong>
                     </header>
                     <p>
-                        Stake {stakePerLeg.toFixed(2)} USD · Payout ≈ {(stakePerLeg * payoutA).toFixed(2)} USD
+                        Stake {stakePerLeg.toFixed(2)} USD
                     </p>
                 </article>
                 <article className='hedging-tool__leg'>
@@ -154,7 +124,7 @@ const HedgingToolPage = observer(() => {
                         <strong>{strategy.legB}</strong>
                     </header>
                     <p>
-                        Stake {stakePerLeg.toFixed(2)} USD · Payout ≈ {(stakePerLeg * payoutB).toFixed(2)} USD
+                        Stake {stakePerLeg.toFixed(2)} USD
                     </p>
                 </article>
             </div>

@@ -33,10 +33,12 @@ import {
     isMarketUnavailableError,
     monitorUntilSettled,
     requestSimpleQuote,
+    releaseQuote,
 } from '../deriv/execution';
 import {
     accountBalance,
     currentLoginId,
+    currentSocket,
     getContractsFor,
     getTicksHistory,
     isApiReady,
@@ -142,6 +144,7 @@ export class AIBotEngine {
     private comboBlocked = new Set<string>();
     private busy = false;
     private running = false;
+    private generation = 0;
     private eventSeq = 0;
     private martingaleStep = 0;
     private confirmKey: string | null = null;
@@ -229,6 +232,10 @@ export class AIBotEngine {
 
     async start(config?: Partial<AIBotConfig>): Promise<void> {
         if (this.running) return;
+        if (this.state.risk.openPositions > 0 || this.state.openTrade) {
+            this.logEvent('risk', 'Cannot restart while a position is open or its settlement is unknown.');
+            return;
+        }
         if (config) this.configure(config);
 
         if (!isApiReady()) {
@@ -250,6 +257,7 @@ export class AIBotEngine {
         const liveOff = authorized && !accountIsDemo && !cfg.allowLiveTrading;
 
         this.running = true;
+        const generation = ++this.generation;
         this.martingaleStep = 0;
         this.confirmKey = null;
         this.confirmCount = 0;
@@ -276,11 +284,13 @@ export class AIBotEngine {
         try {
             symbols = await discoverSyntheticSymbols();
         } catch (e: any) {
+            if (!this.running || generation !== this.generation) return;
             this.running = false;
             this.setStatus('error', e?.message || 'Market discovery failed');
             this.logEvent('error', e?.message || 'Market discovery failed');
             return;
         }
+        if (!this.running || generation !== this.generation) return;
         symbols = symbols.filter(s => !s.isSuspended && s.exchangeIsOpen).slice(0, 40);
 
         // Probe contract availability before choosing watch markets. Many synthetic
@@ -315,6 +325,7 @@ export class AIBotEngine {
             );
             probed.push(...resolved);
         }
+        if (!this.running || generation !== this.generation) return;
         const tradable = probed
             .filter(p => p.fams.length > 0 && (!neededFamilies.size || p.fams.some(f => neededFamilies.has(f))))
             .map(p => p.s);
@@ -357,6 +368,7 @@ export class AIBotEngine {
             })
         );
 
+        if (!this.running || generation !== this.generation || !this.feed) return;
         this.feed.start();
         this.update({ equity: accountBalance() });
         this.logEvent('scan', `Scanning ${watch.length} markets with ${this.activeRules().length} purchase rules.`);
@@ -368,6 +380,7 @@ export class AIBotEngine {
     stop() {
         const wasRunning = this.running;
         this.running = false;
+        this.generation++;
         if (this.scanTimer) clearInterval(this.scanTimer);
         this.scanTimer = null;
         if (this.feed) this.feed.stop();
@@ -378,7 +391,7 @@ export class AIBotEngine {
 
     emergencyStop() {
         this.stop();
-        this.update({ status: 'stopped', message: 'Emergency stop engaged', openTrade: null });
+        this.update({ status: 'stopped', message: 'Emergency stop engaged' });
         this.logEvent('risk', 'Emergency stop engaged — all activity halted.');
     }
 
@@ -547,6 +560,7 @@ export class AIBotEngine {
             maxConsecutiveLosses: DEFAULT_RISK_LIMITS.maxConsecutiveLosses,
             maxOpenPositions: 1,
         };
+        if (!Number.isFinite(stake) || stake < MIN_ORDER_STAKE || stake > config.maxStake || accountBalance() < stake) return { ok: false, reason: 'Stake exceeds available equity or is below the minimum' };
         if (risk.suspended) return { ok: false, reason: risk.suspensionReason || 'Suspended' };
         if (risk.openPositions >= limits.maxOpenPositions) return { ok: false, reason: 'Open position in progress' };
         if (stake > limits.maxStake) stake = limits.maxStake;
@@ -554,7 +568,7 @@ export class AIBotEngine {
         // minimum stake — a pre-auth/zero balance must not block every trade.
         const equity = accountBalance();
         if (equity > 0) {
-            const cap = Math.max(equity * limits.maxStakePctEquity, MIN_ORDER_STAKE);
+            const cap = equity * limits.maxStakePctEquity;
             if (stake > cap) return { ok: false, reason: 'Stake exceeds equity cap' };
         }
         return { ok: true };
@@ -590,6 +604,9 @@ export class AIBotEngine {
             durationUnit: cfg.durationUnit,
         };
         this.setStatus('proposing', `Quote: ${analysis.displayName} ${ct}`);
+        const orderGeneration = this.generation;
+        const orderLogin = currentLoginId();
+        const orderSocket = currentSocket();
         const { quote, error } = await requestSimpleQuote(quoteReq);
         if (!quote) {
             const detail = error || 'no quote';
@@ -615,6 +632,7 @@ export class AIBotEngine {
             }
             return;
         }
+        if (!this.running || !this.state.config.autoTrade || !isAuthorized() || (!isDemoAccount(currentLoginId()) && !this.state.config.allowLiveTrading)) { releaseQuote(quote); return; }
         this.logEvent('quote', `Quote: ${analysis.displayName} ${ct}${prediction !== undefined ? `(${prediction})` : ''} — payout ${quote.payout.toFixed(2)} (stake ${stake.toFixed(2)})`, { symbol: analysis.symbol, contractType: ct });
 
         const prob = this.empiricalProb(analysis, ct);
@@ -641,7 +659,7 @@ export class AIBotEngine {
         };
 
         this.setStatus('buying', `Submitting: ${analysis.displayName} ${ct}`);
-        const buy = await executeBuyFresh(quote, stake, () => requestSimpleQuote(quoteReq));
+        const buy = await executeBuyFresh(quote, stake, () => requestSimpleQuote(quoteReq), () => this.running && this.generation === orderGeneration && isAuthorized() && currentLoginId() === orderLogin && currentSocket() === orderSocket && (isDemoAccount(orderLogin) || this.state.config.allowLiveTrading) && this.state.config.autoTrade);
         if (buy.error || buy.contractId === undefined) {
             if (buy.error && /no return/i.test(buy.error)) this.comboBlocked.add(comboKey);
             this.update({ trades: [{ ...record, stage: 'rejected', error: buy.error, closedAt: Date.now() }, ...this.state.trades] });

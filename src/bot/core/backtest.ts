@@ -83,7 +83,7 @@ export const simulateOverUnder = (
         maxDrawdown,
         maxConsecutiveLosses,
         expectedValuePerTrade: trades.length ? net / trades.length : 0,
-        takeRate: digits.length - lookback ? trades.length / (digits.length - lookback) : 0,
+        takeRate: digits.length > lookback ? trades.length / (digits.length - lookback) : 0,
     };
 };
 

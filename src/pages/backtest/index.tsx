@@ -63,9 +63,10 @@ const BacktestPage = () => {
         setValidated(null);
         setTicks(null);
         try {
+            if (!Number.isInteger(count) || count < 100 || count > 10000 || !Number.isInteger(lookback) || lookback < 1 || !Number.isInteger(minSample) || minSample < 1 || minSample > lookback || !Number.isInteger(barrier) || barrier < 0 || barrier > 9 || !Number.isFinite(stake) || stake <= 0 || !Number.isFinite(payoutRatio) || payoutRatio <= 1 || !Number.isFinite(minEvPct)) throw new Error('Check your inputs: sample must fit within lookback, and stake, payout, barrier and tick count must be valid.');
             const history = await fetchHistoricalTicks(symbol, Math.max(count, lookback + 50));
             setTicks(history);
-            const params = { direction, barrier, payoutRatio, stake, lookback, minSample, minEvPct };
+            const params = { direction, barrier, payoutRatio, stake, lookback, minSample, minEvPct: minEvPct / 100 };
             const result = validateOutOfSample(history.digits, params);
             setValidated(result);
         } catch (e) {
@@ -81,7 +82,7 @@ const BacktestPage = () => {
                 <h2>Backtest</h2>
                 <p className='bt-sub'>
                     Replays real Deriv tick history through the Over/Under signal rules. Past
-                    performance on historical data is not a guarantee of future results.
+                    performance on historical data is not a guarantee of future results. Payout ratio is a user-supplied assumption, not a historical broker quote.
                 </p>
             </div>
 

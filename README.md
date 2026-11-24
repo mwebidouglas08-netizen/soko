@@ -11,7 +11,7 @@ execution, and dashboard/tutorials.
 
 ## Prerequisites
 
-- Node.js 18.18 or later
+- Node.js 24 (see `.nvmrc`)
 
 ## Step 1: Register Your App ID
 
@@ -22,7 +22,7 @@ execution, and dashboard/tutorials.
 
 ## Step 2: Configure `.env`
 
-Copy `.env.example` to `.env` and fill in your values:
+Copy `.env.example` to `.env` and fill in your values. The repository no longer ships a partner-specific `.env.production`; set the deployment variables in your hosting environment:
 
 ```bash
 cp .env.example .env
@@ -66,12 +66,11 @@ Tab title and favicon use `NEXT_PUBLIC_DERIV_APP_NAME` when set, otherwise `plat
 ## Step 3: Local Development
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-The app is available at `http://localhost:4003`. (`npm install` and `npm run dev`
-also regenerate brand CSS — see Branding below.)
+The app is available at `http://localhost:4003`. (The build regenerates brand CSS via `prebuild`.)
 
 ## Step 4: Build for Production
 
@@ -140,3 +139,27 @@ not Next.js config:
 
 When assembled by the App Builder, these are configured for you (logo upload, color,
 font, and app name are injected at deploy time).
+
+## Trading and deployment safety
+
+Trading carries a risk of losing the entire stake. Use demo accounts to test;
+patterns and backtests are not evidence of future returns. Hub-session tools
+currently place orders only on authorized demo accounts. Hedge execution is
+disabled because separate orders are not atomic and several strategies were
+mislabelled. Stops prevent orders that have not yet been submitted; a submitted
+order cannot be recalled and must still be monitored at the broker.
+
+Copy-trader tokens live in memory only and must be re-entered after reload.
+Previously stored tokens are removed when the copy-trader is opened. Revoke any
+exposed tokens with Deriv; base64 is not encryption. Existing open master trades
+are not copied on connection, and orders with unknown durations are skipped.
+
+The optional `/api/ai-rationale` endpoint is disabled by default. It incurs
+third-party API costs and has no built-in distributed authentication or rate
+limiter. Only set `AI_RATIONALE_PUBLIC_ENABLED=true` with `GEMINI_API_KEY` on
+the server after placing it behind an authenticated, rate-limited gateway.
+Never put `GEMINI_API_KEY` in a `NEXT_PUBLIC_` variable or browser bundle.
+
+Run `npm run type-check`, `npm test -- --runInBand --coverage=false`, and
+`npm run build` before submitting changes. `prebuild` regenerates the tracked
+brand stylesheet, so check the diff for unintended generated changes.

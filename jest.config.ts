@@ -96,6 +96,7 @@ const config: Config = {
         'react-dom/server': '<rootDir>/__mocks__/react-dom-server.js',
         '@deriv-com/translations': '<rootDir>/__mocks__/translation.mock.js',
         '@deriv-com/ui': derivComUiDir,
+        '^@/bot/(.*)$': '<rootDir>/src/bot/$1',
         '^@/external/(.*)$': '<rootDir>/src/external/$1',
         '^@/adapters/(.*)$': '<rootDir>/src/adapters/$1',
         '^@/utils/(.*)$': '<rootDir>/src/utils/$1',

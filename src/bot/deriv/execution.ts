@@ -388,6 +388,7 @@ export const executeBuy = async (quote: ProposalQuote, amount: number): Promise<
     if (quote.maxStake !== undefined && price - 1e-9 > quote.maxStake) {
         return { error: `Stake ${price} is above the ${quote.maxStake} maximum for this market` };
     }
+    if (!Number.isFinite(amount) || amount <= 0 || price > amount + 1e-9) return { error: 'Quoted price exceeds the requested stake' };
     const currency = accountCurrency();
     if (quote.currency && currency && quote.currency !== currency) {
         return { error: `Quote currency ${quote.currency} does not match account currency ${currency}` };
@@ -453,13 +454,15 @@ export const isMarketUnavailableError = (message: string): boolean =>
 export const executeBuyFresh = async (
     quote: ProposalQuote,
     amount: number,
-    refetch: () => Promise<{ quote?: ProposalQuote; error?: string }>
+    refetch: () => Promise<{ quote?: ProposalQuote; error?: string }>,
+    canBuy: (quote: ProposalQuote) => boolean = () => true
 ): Promise<BuyResult> => {
     // Buy and always detach the live proposal stream afterwards — a kept-alive
     // subscription would keep streaming (and count against the shared budget)
     // long after the trade decision was made.
     const buyOnce = async (q: ProposalQuote): Promise<BuyResult> => {
         try {
+            if (!canBuy(q)) return { error: 'Order cancelled before purchase' };
             return await executeBuy(q, amount);
         } finally {
             releaseQuote(q);
@@ -534,6 +537,7 @@ const settleFrom = (poc: any): Settlement | { error: string } => {
         };
     }
     const profit = hasProfit ? Number(poc.profit) : sellPrice - buyPrice;
+    if (!Number.isFinite(profit)) return { error: 'Invalid settlement profit — outcome not recorded' };
     const isWon = hasWinFlag ? poc.is_won === 1 || poc.is_won === true : profit > 0;
     const exitTick = poc.exit_tick !== undefined ? Number(poc.exit_tick) : undefined;
     return {

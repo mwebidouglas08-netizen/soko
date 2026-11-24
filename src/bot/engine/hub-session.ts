@@ -9,6 +9,8 @@ import {
     settlementTimeoutMs,
 } from '../deriv/execution';
 import { pipSizeDefault } from '../core/algo-pro-ai';
+import { currentLoginId, currentSocket, isAuthorized } from '../deriv/api';
+import { isDemoAccount } from '@/utils/account-helpers';
 
 export type HubContractType =
     | 'DIGITEVEN'
@@ -108,6 +110,8 @@ export class HubSession {
     private snap: HubSessionSnapshot;
     private consecutiveLosses = 0;
     private inFlight = false;
+    private unresolvedPosition = false;
+    private generation = 0;
     private tickTotal = 0;
     private idSeq = 0;
     private hooks: { onTick?: (symbol: string, series: SymbolSeries) => void };
@@ -166,7 +170,9 @@ export class HubSession {
     }
 
     start() {
-        if (this.snap.running) return;
+        if (this.snap.running || this.inFlight || this.unresolvedPosition) return;
+        this.generation++;
+        this.tickTotal = 0;
         this.snap = this.emptySnap();
         this.snap.running = true;
         this.consecutiveLosses = 0;
@@ -193,6 +199,7 @@ export class HubSession {
     }
 
     stop(reason = 'Bot stopped by user') {
+        this.generation++;
         if (!this.snap.running) return;
         this.snap.running = false;
         this.feed?.stop();
@@ -207,10 +214,23 @@ export class HubSession {
     }
 
     private async execute(intent: HubTradeIntent, amount?: number, manual = false): Promise<HubTradeRow | null> {
-        if (this.inFlight) return null;
+        if (this.inFlight || this.unresolvedPosition) {
+            this.log('Order blocked: a prior position is still open or has an unknown outcome.');
+            this.emit();
+            return null;
+        }
+        if (!isAuthorized() || !currentLoginId() || !isDemoAccount(currentLoginId())) {
+            this.log('Trading from this tool is limited to authorized demo accounts.');
+            this.emit();
+            return null;
+        }
+        const generation = this.generation;
+        const login = currentLoginId();
+        const socket = currentSocket();
         this.inFlight = true;
+        this.snap.busy = true;
+        this.emit();
         if (!manual) {
-            this.snap.busy = true;
             this.snap.nextStake = this.snap.nextStake || this.opts.stake;
         }
         const stake = amount ?? (this.snap.nextStake || this.opts.stake);
@@ -231,13 +251,23 @@ export class HubSession {
                 this.log(`Trade error: ${error || 'no quote'}`);
                 return null;
             }
-            const buy = await executeBuy(quote, stake);
-            releaseQuote(quote);
+            if (generation !== this.generation || !isAuthorized() || currentLoginId() !== login || currentSocket() !== socket || (!manual && !this.snap.running)) {
+                releaseQuote(quote);
+                this.log('Order cancelled before purchase: session stopped or account changed.');
+                return null;
+            }
+            let buy;
+            try {
+                buy = await executeBuy(quote, stake);
+            } finally {
+                releaseQuote(quote);
+            }
             if (buy.error || !buy.contractId) {
                 this.log(`Trade error: ${buy.error || 'buy failed'}`);
                 return null;
             }
-            const pip = this.feed?.getSeries(intent.symbol)?.pipSize || pipSizeDefault(intent.symbol);
+            this.unresolvedPosition = true;
+            const pip = this.feed?.getSeries(intent.symbol)?.pipSize ?? pipSizeDefault(intent.symbol);
             const settle = await monitorUntilSettled(
                 buy.contractId,
                 pip,
@@ -248,6 +278,7 @@ export class HubSession {
                 this.log(`Settlement error: ${settle.error}`);
                 return null;
             }
+            this.unresolvedPosition = false;
             const profit = settle.profit || 0;
             const result: 'win' | 'loss' = settle.isWon ? 'win' : 'loss';
             row = {
@@ -256,7 +287,7 @@ export class HubSession {
                 name,
                 contract: contractLabel(intent.contractType, intent.barrier),
                 stake,
-                payout: buy.payout || settle.profit || 0,
+                payout: buy.payout ?? settle.sellPrice,
                 result,
                 profit,
                 at: Date.now(),

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <xml xmlns="https://developers.google.com/blockly/xml" collection="false" is_dbot="true">
   <variables>
     <variable id="mz_stake">Stake</variable>
@@ -22,7 +22,7 @@
     <variable id="mz_signal_ev">Signal EV</variable>
   </variables>
   <block type="trade_definition" id="mz_trade_definition" deletable="false" x="0" y="60">
-    <comment pinned="false" h="420" w="800">Maziwa AI v13 (martingale recovery, aggressive scan): continuously scans ALL live Deriv synthetic volatility markets in real time for Over/Under signals across ALL digit barriers using live tick frequency, transition matrix, trend/momentum, edge and payout/EV assurance. No blind trades. After a loss it applies a firm martingale recovery (stake × Martingale, capped at Max Stake) to recover lost money; on win it resets to Base Stake. Trading is risky: no strategy can guarantee profits or eliminate losses; validate in demo.</comment>
+    <comment pinned="false" h="460" w="860">Maziwa AI v15 (precision Over/Under): scans live Deriv synthetic volatility markets with multi-window real-tick analysis (recency-weighted frequency, transition probability, short/mid trend agreement, entropy/chop filters, edge and EV gates). It trades only high-assurance opportunities, switches to the strongest market, and waits when conditions are unclear (no blind trades). Recovery uses controlled martingale capped by Max Stake and guarded by Max Loss Streak. Trading is risky; no strategy can guarantee profits or eliminate losses—validate in demo and size risk conservatively.</comment>
     <statement name="TRADE_OPTIONS">
       <block type="trade_definition_market" id="mz_market" deletable="false" movable="false">
         <mutation xmlns="http://www.w3.org/1999/xhtml" vh_enabled="false" vh_max_steps="1" vh_min_trades="1" vh_stake="0.35"></mutation>
@@ -52,19 +52,19 @@
     <statement name="INITIALIZATION">
       <block type="variables_set" id="mz_set_stake"><field name="VAR" id="mz_stake">Stake</field><value name="VALUE"><block type="math_number"><field name="NUM">0.35</field></block></value>
       <next><block type="variables_set" id="mz_set_base"><field name="VAR" id="mz_base_stake">Base Stake</field><value name="VALUE"><block type="math_number"><field name="NUM">0.35</field></block></value>
-      <next><block type="variables_set" id="mz_set_mg"><field name="VAR" id="mz_martingale">Martingale</field><value name="VALUE"><block type="math_number"><field name="NUM">2.2</field></block></value>
-      <next><block type="variables_set" id="mz_set_tp"><field name="VAR" id="mz_take_profit">Take Profit</field><value name="VALUE"><block type="math_number"><field name="NUM">12</field></block></value>
-      <next><block type="variables_set" id="mz_set_sl"><field name="VAR" id="mz_stop_loss">Stop Loss</field><value name="VALUE"><block type="math_number"><field name="NUM">40</field></block></value>
+      <next><block type="variables_set" id="mz_set_mg"><field name="VAR" id="mz_martingale">Martingale</field><value name="VALUE"><block type="math_number"><field name="NUM">2.1</field></block></value>
+      <next><block type="variables_set" id="mz_set_tp"><field name="VAR" id="mz_take_profit">Take Profit</field><value name="VALUE"><block type="math_number"><field name="NUM">15</field></block></value>
+      <next><block type="variables_set" id="mz_set_sl"><field name="VAR" id="mz_stop_loss">Stop Loss</field><value name="VALUE"><block type="math_number"><field name="NUM">35</field></block></value>
       <next><block type="variables_set" id="mz_set_mt"><field name="VAR" id="mz_max_trades">Max Trades</field><value name="VALUE"><block type="math_number"><field name="NUM">500</field></block></value>
       <next><block type="variables_set" id="mz_set_tr"><field name="VAR" id="mz_trades">Trades</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
       <next><block type="variables_set" id="mz_set_sig"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean"><field name="BOOL">FALSE</field></block></value>
       <next><block type="variables_set" id="mz_set_dir"><field name="VAR" id="mz_direction">Trade Direction</field><value name="VALUE"><block type="math_number"><field name="NUM">4</field></block></value>
       <next><block type="variables_set" id="mz_set_pred"><field name="VAR" id="mz_prediction">Prediction</field><value name="VALUE"><block type="math_number"><field name="NUM">2</field></block></value>
       <next><block type="variables_set" id="mz_set_ls"><field name="VAR" id="mz_loss_streak">Loss Streak</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
-      <next><block type="variables_set" id="mz_set_mls"><field name="VAR" id="mz_max_loss_streak">Max Loss Streak</field><value name="VALUE"><block type="math_number"><field name="NUM">6</field></block></value>
+      <next><block type="variables_set" id="mz_set_mls"><field name="VAR" id="mz_max_loss_streak">Max Loss Streak</field><value name="VALUE"><block type="math_number"><field name="NUM">5</field></block></value>
       <next><block type="variables_set" id="mz_set_dur"><field name="VAR" id="mz_duration">Duration</field><value name="VALUE"><block type="math_number"><field name="NUM">1</field></block></value>
       <next><block type="variables_set" id="mz_set_rec"><field name="VAR" id="mz_recover_amount">Recover Amount</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
-      <next><block type="variables_set" id="mz_set_ms"><field name="VAR" id="mz_max_stake">Max Stake</field><value name="VALUE"><block type="math_number"><field name="NUM">15</field></block></value>
+      <next><block type="variables_set" id="mz_set_ms"><field name="VAR" id="mz_max_stake">Max Stake</field><value name="VALUE"><block type="math_number"><field name="NUM">12</field></block></value>
       <next><block type="variables_set" id="mz_set_scan"><field name="VAR" id="mz_scan">Scan</field><value name="VALUE"><block type="lists_create_with"><mutation items="0"></mutation></block></value>
       <next><block type="variables_set" id="mz_set_conf"><field name="VAR" id="mz_confidence">Confidence</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
       <next><block type="variables_set" id="mz_set_sth"><field name="VAR" id="mz_signal_theoretical">Signal Theoretical</field><value name="VALUE"><block type="math_number"><field name="NUM">0</field></block></value>
@@ -77,8 +77,8 @@
         <statement name="DO"><block type="timeout" id="mz_delay"><statement name="TIMEOUTSTACK">
           <block type="variables_set" id="mz_do_scan"><field name="VAR" id="mz_scan">Scan</field>
             <value name="VALUE"><block type="maziwa_scan_signal">
-              <value name="MIN_CONFIDENCE"><shadow type="math_number"><field name="NUM">88</field></shadow></value>
-              <value name="WINDOW"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+              <value name="MIN_CONFIDENCE"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+              <value name="WINDOW"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
               <value name="MAX_SYMBOLS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
               <value name="LOSS_STREAK"><block type="variables_get"><field name="VAR" id="mz_loss_streak">Loss Streak</field></block></value>
               <value name="TOTAL_PROFIT"><block type="total_profit"></block></value>
@@ -97,7 +97,7 @@
               <next><block type="variables_set" id="mz_set_signal_true"><field name="VAR" id="mz_signal">Entry Signal</field><value name="VALUE"><block type="logic_boolean"><field name="BOOL">TRUE</field></block></value></block></next></block></next></block></next></block></next></block></next></block></next></block>
             </statement>
           </block></next></block>
-        </statement><value name="SECONDS"><block type="math_number"><field name="NUM">0.02</field></block></value></block></statement>
+        </statement><value name="SECONDS"><block type="math_number"><field name="NUM">0.01</field></block></value></block></statement>
         <next><block type="trade_definition_tradeoptions" id="mz_opts"><mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation><field name="DURATIONTYPE_LIST">t</field><value name="DURATION"><block type="variables_get"><field name="VAR" id="mz_duration">Duration</field></block></value><value name="AMOUNT"><shadow type="math_number_positive"><field name="NUM">0.35</field></shadow><block type="variables_get"><field name="VAR" id="mz_stake">Stake</field></block></value><value name="PREDICTION"><shadow type="math_number_positive"><field name="NUM">2</field></shadow><block type="variables_get"><field name="VAR" id="mz_prediction">Prediction</field></block></value></block></next>
       </block></next></block>
     </statement>
@@ -141,11 +141,11 @@
         </statement>
         <next><block type="controls_if"><mutation xmlns="http://www.w3.org/1999/xhtml" elseif="2" else="1"></mutation>
           <value name="IF0"><block type="logic_compare"><field name="OP">GTE</field><value name="A"><block type="total_profit"></block></value><value name="B"><block type="variables_get"><field name="VAR" id="mz_take_profit">Take Profit</field></block></value></block></value>
-          <statement name="DO0"><block type="text_print"><value name="TEXT"><shadow type="text"><field name="TEXT">Maziwa AI v14: Take profit reached. Session secured.</field></shadow></value></block></statement>
+          <statement name="DO0"><block type="text_print"><value name="TEXT"><shadow type="text"><field name="TEXT">Maziwa AI v15: Take profit reached. Session secured with smart precision.</field></shadow></value></block></statement>
           <value name="IF1"><block type="logic_compare"><field name="OP">LTE</field><value name="A"><block type="total_profit"></block></value><value name="B"><block type="math_single"><field name="OP">NEG</field><value name="NUM"><block type="variables_get"><field name="VAR" id="mz_stop_loss">Stop Loss</field></block></value></block></value></block></value>
-          <statement name="DO1"><block type="text_print"><value name="TEXT"><shadow type="text"><field name="TEXT">Maziwa AI v14: Stop loss reached. Session stopped to protect balance.</field></shadow></value></block></statement>
+          <statement name="DO1"><block type="text_print"><value name="TEXT"><shadow type="text"><field name="TEXT">Maziwa AI v15: Stop loss reached. Session paused to protect capital.</field></shadow></value></block></statement>
           <value name="IF2"><block type="logic_compare"><field name="OP">GTE</field><value name="A"><block type="variables_get"><field name="VAR" id="mz_trades">Trades</field></block></value><value name="B"><block type="variables_get"><field name="VAR" id="mz_max_trades">Max Trades</field></block></value></block></value>
-          <statement name="DO2"><block type="text_print"><value name="TEXT"><shadow type="text"><field name="TEXT">Maziwa AI v14: Max trades reached. Session complete.</field></shadow></value></block></statement>
+          <statement name="DO2"><block type="text_print"><value name="TEXT"><shadow type="text"><field name="TEXT">Maziwa AI v15: Max trades reached. Session complete.</field></shadow></value></block></statement>
           <statement name="ELSE"><block type="trade_again"></block></statement>
         </block></next></block></next></block></next></block>
     </statement>

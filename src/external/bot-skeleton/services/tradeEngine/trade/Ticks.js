@@ -352,23 +352,23 @@ export default Engine =>
         }
 
         async scanBestVolatilitySignal(opts = {}) {
-            const windowSize = Math.max(20, Math.min(120, Number(opts.windowSize) || 40));
-            const minHistory = Math.max(20, Math.min(windowSize, Number(opts.minHistory) || 30));
-            const baseMinConfidence = Number.isFinite(Number(opts.minConfidence))
-                ? Math.min(99, Math.max(75, Number(opts.minConfidence)))
-                : 88;
-            const maxSymbols = Math.max(1, Math.min(80, Number(opts.maxSymbols) || 60));
-            const lossStreak = Math.max(0, Number(opts.lossStreak) || 0);
-            const totalProfit = Number.isFinite(Number(opts.totalProfit)) ? Number(opts.totalProfit) : 0;
-            const recoverAmount = Math.max(0, Number(opts.recoverAmount) || 0);
+            const clamp01 = v => Math.max(0, Math.min(1, v));
+            const safeNum = (v, d = 0) => (Number.isFinite(Number(v)) ? Number(v) : d);
+
+            const windowSize = Math.max(30, Math.min(120, Math.floor(safeNum(opts.windowSize, 50))));
+            const minHistory = Math.max(25, Math.min(windowSize, Math.floor(safeNum(opts.minHistory, 35))));
+            const baseMinConfidence = Math.min(99, Math.max(80, safeNum(opts.minConfidence, 90)));
+            const maxSymbols = Math.max(1, Math.min(80, Math.floor(safeNum(opts.maxSymbols, 60))));
+            const lossStreak = Math.max(0, Math.floor(safeNum(opts.lossStreak, 0)));
+            const totalProfit = safeNum(opts.totalProfit, 0);
+            const recoverAmount = Math.max(0, safeNum(opts.recoverAmount, 0));
             const inRecovery = recoverAmount > 0 || lossStreak > 0 || totalProfit < 0;
 
-            // High-selectivity defaults: scan broadly, but only trade clear, real opportunities.
             let minConfidence = baseMinConfidence;
-            if (inRecovery) minConfidence += Math.min(6, 2 + Math.min(lossStreak, 4));
-            if (recoverAmount > 0) minConfidence += Math.min(3, Math.ceil(recoverAmount / 5));
-            if (totalProfit < 0) minConfidence += Math.min(2, Math.ceil(Math.abs(totalProfit) / 30));
-            minConfidence = Math.min(98, minConfidence);
+            if (inRecovery) minConfidence += Math.min(5, 2 + Math.min(lossStreak, 3));
+            if (recoverAmount > 0) minConfidence += Math.min(2, Math.ceil(recoverAmount / 10));
+            if (totalProfit < 0) minConfidence += Math.min(2, Math.ceil(Math.abs(totalProfit) / 50));
+            minConfidence = Math.min(99, minConfidence);
 
             let candidates = Array.isArray(opts.symbols) && opts.symbols.length ? opts.symbols : null;
             if (!candidates) {
@@ -390,76 +390,98 @@ export default Engine =>
             this._maziwaScanCursor = (startIdx + Math.max(1, batch.length)) % candidates.length;
 
             const tickSvc = this.$scope?.ticksService;
-            const clamp01 = v => Math.max(0, Math.min(1, v));
 
             const evaluate = (digits, sym) => {
                 if (!Array.isArray(digits) || digits.length < minHistory) return null;
-                const recent = digits.slice(-windowSize).filter(d => Number.isFinite(d) && d >= 0 && d <= 9);
+                const recent = digits.slice(-windowSize).filter(d => Number.isInteger(d) && d >= 0 && d <= 9);
                 if (recent.length < minHistory) return null;
 
                 const n = recent.length;
                 const last1 = recent[n - 1];
                 const last2 = n >= 2 ? recent[n - 2] : null;
                 const last3 = n >= 3 ? recent[n - 3] : null;
+                const last4 = n >= 4 ? recent[n - 4] : null;
+                const shortWindow = Math.min(15, n);
+                const midWindow = Math.min(30, n);
+                const shortSlice = recent.slice(-shortWindow);
+                const midSlice = recent.slice(-midWindow);
 
                 const freq = Array(10).fill(0);
-                const recentFreq = Array(10).fill(0);
-                const wRecent = Math.min(14, n);
+                const shortFreq = Array(10).fill(0);
+                const midFreq = Array(10).fill(0);
                 for (let i = 0; i < n; i++) {
-                    // Strong recency weighting for faster adaptation to live ticks.
-                    const w = 0.15 + 0.85 * Math.pow((i + 1) / n, 1.35);
+                    const recency = (i + 1) / n;
+                    const w = 0.12 + 0.88 * Math.pow(recency, 1.45);
                     freq[recent[i]] += w;
                 }
-                for (let i = n - wRecent; i < n; i++) {
-                    recentFreq[recent[i]] += 1;
-                }
+                for (let i = 0; i < shortSlice.length; i++) shortFreq[shortSlice[i]] += 1;
+                for (let i = 0; i < midSlice.length; i++) midFreq[midSlice[i]] += 1;
                 const freqSum = freq.reduce((a, b) => a + b, 0) || 1;
+                const shortSum = shortSlice.length || 1;
+                const midSum = midSlice.length || 1;
 
-                const trans = Array.from({ length: 10 }, () => Array(10).fill(0.35)); // Laplace smoothing
-                const transRow = Array(10).fill(3.5);
+                let entropy = 0;
+                for (let d = 0; d < 10; d++) {
+                    const p = freq[d] / freqSum;
+                    if (p > 0) entropy -= p * Math.log(p);
+                }
+                const entropyNorm = entropy / Math.log(10);
+                if (entropyNorm > 0.985 && !inRecovery) return null;
+
+                const trans = Array.from({ length: 10 }, () => Array(10).fill(0.4));
+                const transRow = Array(10).fill(4);
                 for (let i = 1; i < n; i++) {
                     const a = recent[i - 1];
                     const b = recent[i];
-                    if (a >= 0 && a <= 9 && b >= 0 && b <= 9) {
-                        trans[a][b] += 1;
-                        transRow[a] += 1;
-                    }
+                    trans[a][b] += 1;
+                    transRow[a] += 1;
                 }
 
                 const probDigit = d => freq[d] / freqSum;
                 const probNextGivenLast = d => {
                     if (last1 == null) return probDigit(d);
-                    const pCond = trans[last1][d] / (transRow[last1] || 1);
-                    const confidenceMix = transRow[last1] >= 8 ? 0.72 : transRow[last1] >= 4 ? 0.58 : 0.45;
-                    return confidenceMix * pCond + (1 - confidenceMix) * probDigit(d);
+                    const row = transRow[last1] || 1;
+                    const pCond = trans[last1][d] / row;
+                    const mix = row >= 10 ? 0.72 : row >= 6 ? 0.6 : 0.48;
+                    return mix * pCond + (1 - mix) * probDigit(d);
                 };
 
-                const candidatesDefs = [];
-                for (let barrier = 0; barrier <= 8; barrier++) candidatesDefs.push({ type: 'DIGITOVER', barrier });
-                for (let barrier = 1; barrier <= 9; barrier++) candidatesDefs.push({ type: 'DIGITUNDER', barrier });
+                let alternations = 0;
+                for (let i = 1; i < n; i++) if (recent[i] !== recent[i - 1]) alternations++;
+                const alternationRate = alternations / Math.max(1, n - 1);
+
+                const defs = [];
+                for (let barrier = 0; barrier <= 8; barrier++) defs.push({ type: 'DIGITOVER', barrier });
+                for (let barrier = 1; barrier <= 9; barrier++) defs.push({ type: 'DIGITUNDER', barrier });
 
                 let best = null;
-                for (const def of candidatesDefs) {
+                for (const def of defs) {
                     const isOver = def.type === 'DIGITOVER';
                     const barrier = def.barrier;
                     const isWin = d => (isOver ? d > barrier : d < barrier);
-                    const isLoss = d => !isWin(d);
                     const winDigits = [];
                     for (let d = 0; d <= 9; d++) if (isWin(d)) winDigits.push(d);
-                    if (winDigits.length === 0 || winDigits.length === 10) continue;
+                    if (!winDigits.length || winDigits.length === 10) continue;
 
                     const theoretical = winDigits.length / 10;
-                    // Avoid tiny-payout setups except in controlled recovery (where EV still must be strong).
-                    if (!inRecovery && theoretical > 0.82) continue;
-                    // Never take blind/random entries: require recent confirmation.
-                    if (!isWin(last1) || last2 == null || !isWin(last2)) continue;
+                    if (theoretical < 0.2 || theoretical > 0.85) continue;
+                    if (!inRecovery && theoretical > 0.8) continue;
+                    if (!isWin(last1) || !isWin(last2)) continue;
+                    if (last3 != null && !isWin(last3) && !inRecovery) continue;
 
                     let wins = 0;
+                    let shortWins = 0;
+                    let midWins = 0;
                     let lossClusterRecent = 0;
                     const last6 = recent.slice(-6);
                     for (let i = 0; i < n; i++) if (isWin(recent[i])) wins++;
-                    for (let i = 0; i < last6.length; i++) if (isLoss(last6[i])) lossClusterRecent++;
+                    for (let i = 0; i < shortSlice.length; i++) if (isWin(shortSlice[i])) shortWins++;
+                    for (let i = 0; i < midSlice.length; i++) if (isWin(midSlice[i])) midWins++;
+                    for (let i = 0; i < last6.length; i++) if (!isWin(last6[i])) lossClusterRecent++;
+
                     const winRate = wins / n;
+                    const shortRate = shortWins / shortSum;
+                    const midRate = midWins / midSum;
 
                     let safeStreak = 0;
                     for (let i = n - 1; i >= 0; i--) {
@@ -468,70 +490,80 @@ export default Engine =>
                     }
 
                     let pNext = 0;
-                    for (const d of winDigits) pNext += probNextGivenLast(d);
+                    let pShort = 0;
+                    for (const d of winDigits) {
+                        pNext += probNextGivenLast(d);
+                        pShort += shortFreq[d] / shortSum;
+                    }
                     pNext = clamp01(pNext);
+                    pShort = clamp01(pShort);
+                    const pConsensus = clamp01(pNext * 0.65 + pShort * 0.2 + midRate * 0.15);
 
-                    const shortWin = recentFreq.reduce((acc, c, d) => acc + (isWin(d) ? c : 0), 0) / wRecent;
                     const edge = winRate - theoretical;
-                    const modelEdge = pNext - theoretical;
+                    const modelEdge = pConsensus - theoretical;
+                    const shortEdge = shortRate - theoretical;
+                    const midEdge = midRate - theoretical;
 
-                    // Trend/momentum: recent segment should support, not oppose, the direction.
-                    const seg = Math.max(6, Math.floor(n / 2));
+                    const seg = Math.max(8, Math.floor(n / 2));
                     const older = recent.slice(0, seg);
                     const newer = recent.slice(seg);
                     const rate = arr => (arr.length ? arr.filter(isWin).length / arr.length : 0);
                     const olderRate = rate(older);
                     const newerRate = rate(newer);
                     const trendDelta = newerRate - olderRate;
-                    const trendOk = newerRate + 0.01 >= olderRate && newerRate >= theoretical;
+                    const trendOk = newerRate + 0.015 >= olderRate && newerRate >= theoretical;
 
-                    // High-assurance gates (real data, no blind trades).
-                    if (safeStreak < 2) continue;
                     if (lossClusterRecent >= 2) continue;
                     if (!trendOk) continue;
-                    if (trendDelta < -0.01) continue;
-                    if (edge < 0.03) continue;
-                    if (modelEdge < 0.05) continue;
-                    if (pNext < theoretical + 0.06) continue;
-                    if (winRate < theoretical + 0.03) continue;
-                    if (shortWin < theoretical + 0.02) continue;
-                    if (last3 != null && isLoss(last3)) continue; // no chop right before entry
+                    if (trendDelta < -0.015) continue;
+                    if (shortEdge < 0.04) continue;
+                    if (midEdge < 0.03) continue;
+                    if (edge < 0.035) continue;
+                    if (modelEdge < 0.055) continue;
+                    if (pConsensus < theoretical + 0.065) continue;
+                    if (winRate < theoretical + 0.04) continue;
+                    if (shortRate < theoretical + 0.03) continue;
+                    if (safeStreak < 2) continue;
+                    if (last4 != null && !isWin(last4) && safeStreak < 3 && !inRecovery) continue;
+                    if (alternationRate > 0.93 && theoretical < 0.65) continue;
 
-                    // Payout/EV-conscious: prefer stronger expected value, not just "safer" low payout.
-                    const payoutFactor = 1 / Math.max(0.1, theoretical);
-                    const ev = pNext * payoutFactor - 1;
+                    const payoutFactor = 1 / Math.max(0.2, theoretical);
+                    const ev = pConsensus * payoutFactor - 1;
                     const breakEven = 1 / payoutFactor;
-                    if (ev < 0.08) continue;
-                    if (pNext < breakEven + 0.05) continue;
+                    if (ev < 0.1) continue;
+                    if (pConsensus < breakEven + 0.06) continue;
 
-                    if (theoretical <= 0.6 && (ev < 0.1 || modelEdge < 0.06)) continue;
-                    if (theoretical <= 0.5 && (ev < 0.12 || safeStreak < 3 || modelEdge < 0.07)) continue;
-                    if (theoretical <= 0.4 && (ev < 0.15 || safeStreak < 3 || modelEdge < 0.08)) continue;
+                    if (theoretical <= 0.6 && (ev < 0.12 || modelEdge < 0.065)) continue;
+                    if (theoretical <= 0.5 && (ev < 0.14 || safeStreak < 3 || modelEdge < 0.075)) continue;
+                    if (theoretical <= 0.4 && (ev < 0.17 || safeStreak < 3 || modelEdge < 0.085)) continue;
+                    if (theoretical <= 0.3 && (ev < 0.2 || safeStreak < 4 || modelEdge < 0.095)) continue;
 
-                    // Recovery after loss: stronger assurance and firm EV, but still only on real opportunity.
                     if (inRecovery) {
                         if (safeStreak < 3) continue;
-                        if (ev < 0.12) continue;
-                        if (modelEdge < 0.07) continue;
-                        if (pNext < theoretical + 0.08) continue;
-                        if (lossStreak >= 2 && (ev < 0.15 || safeStreak < 3)) continue;
-                        if (lossStreak >= 3 && safeStreak < 4) continue;
+                        if (ev < 0.14) continue;
+                        if (modelEdge < 0.075) continue;
+                        if (pConsensus < theoretical + 0.085) continue;
+                        if (lossStreak >= 2 && (ev < 0.16 || safeStreak < 3)) continue;
+                        if (lossStreak >= 3 && (ev < 0.18 || safeStreak < 4)) continue;
                     }
 
+                    const windowAgreement = clamp01(1 - Math.abs(shortRate - midRate) * 2.2);
                     let score = 0;
-                    score += Math.min(28, safeStreak * 6);
-                    if (last3 != null && isWin(last3)) score += 8;
-                    score += Math.max(0, Math.min(34, modelEdge * 110));
-                    score += Math.max(0, Math.min(22, edge * 95));
-                    score += Math.max(0, Math.min(18, (shortWin - theoretical) * 90));
-                    score += Math.max(0, Math.min(26, ev * 45));
-                    score += Math.max(-3, Math.min(10, trendDelta * 45));
+                    score += Math.min(26, safeStreak * 5.5);
+                    if (last3 != null && isWin(last3)) score += 6;
+                    score += Math.max(0, Math.min(34, modelEdge * 115));
+                    score += Math.max(0, Math.min(20, edge * 90));
+                    score += Math.max(0, Math.min(16, shortEdge * 90));
+                    score += Math.max(0, Math.min(24, ev * 42));
+                    score += Math.max(-4, Math.min(10, trendDelta * 45));
+                    score += windowAgreement * 10;
+                    score += (1 - entropyNorm) * 8;
+                    if (lossClusterRecent === 0) score += 4;
 
-                    // Balance safety and payout: reward higher payout only when probability edge is real.
-                    const payoutBias = Math.max(0, (0.75 - theoretical)) * 12;
-                    score += payoutBias * clamp01(0.35 + modelEdge * 3.2 + ev * 1.4);
+                    const payoutBias = Math.max(0, (0.78 - theoretical)) * 10;
+                    score += payoutBias * clamp01(0.35 + modelEdge * 3 + ev * 1.3);
 
-                    const confidence = Math.max(0, Math.min(99, Math.round(44 + score)));
+                    const confidence = Math.max(0, Math.min(99, Math.round(43 + score)));
                     if (confidence < minConfidence) continue;
 
                     const candidate = {
@@ -539,20 +571,24 @@ export default Engine =>
                         contractType: def.type,
                         prediction: barrier,
                         confidence,
-                        pNext,
+                        pNext: pConsensus,
                         winRate,
                         edge,
                         safeStreak,
                         theoretical,
                         ev,
                         trendDelta,
+                        shortRate,
+                        midRate,
+                        entropyNorm,
                     };
 
                     if (
                         !best ||
                         candidate.confidence > best.confidence ||
                         (candidate.confidence === best.confidence && candidate.ev > best.ev) ||
-                        (candidate.confidence === best.confidence && candidate.ev === best.ev && candidate.pNext > best.pNext)
+                        (candidate.confidence === best.confidence && candidate.ev === best.ev && candidate.pNext > best.pNext) ||
+                        (candidate.confidence === best.confidence && candidate.ev === best.ev && candidate.pNext === best.pNext && candidate.safeStreak > best.safeStreak)
                     ) {
                         best = candidate;
                     }
@@ -569,13 +605,12 @@ export default Engine =>
                         const ticks = await tickSvc.request({ symbol: sym });
                         digits = this.getLastDigitsFromList(ticks || []);
                     }
-                    return Array.isArray(digits) ? digits.filter(d => Number.isFinite(d)) : [];
+                    return Array.isArray(digits) ? digits.filter(d => Number.isInteger(d) && d >= 0 && d <= 9) : [];
                 } catch (e) {
                     return [];
                 }
             };
 
-            // Parallel scan across the batch for speed (real-time tick data per symbol).
             const settled = await Promise.all(
                 batch.map(async sym => {
                     try {
@@ -608,6 +643,7 @@ export default Engine =>
                     reason: best ? 'below_confidence' : 'no_signal',
                     candidates: batch.length,
                     scanned: batch.length,
+                    inRecovery,
                 };
             }
 
@@ -628,6 +664,7 @@ export default Engine =>
                     confidence: 0,
                     reason: 'symbol_switch_failed',
                     candidates: batch.length,
+                    scanned: batch.length,
                 };
             }
 

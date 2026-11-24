@@ -1,4 +1,4 @@
-import { localize } from '@deriv-com/translations';
+﻿import { localize } from '@deriv-com/translations';
 import { modifyContextMenu } from '../../../utils';
 
 window.Blockly.Blocks.maziwa_scan_signal = {
@@ -52,7 +52,7 @@ window.Blockly.Blocks.maziwa_scan_signal = {
             colourSecondary: window.Blockly.Colours.Base.colourSecondary,
             colourTertiary: window.Blockly.Colours.Base.colourTertiary,
             tooltip: localize(
-                'Scans live volatility markets in real time (digit frequency, transition model, trend, edge and payout/EV), switches to the strongest Over/Under opportunity, and returns [symbol, direction(4=Over,5=Under), prediction, confidence, theoretical, ev]. It tightens selectivity during recovery/drawdown and returns an empty list when no high-assurance signal is found (no blind trades).'
+                'Scans live volatility markets in real time with multi-window digit analysis (frequency, transition, short/mid trend, entropy/chop filters, edge and EV). Switches to the strongest Over/Under opportunity and returns [symbol, direction(4=Over,5=Under), prediction, confidence, theoretical, ev]. Returns empty when no high-assurance signal exists (no blind trades).'
             ),
             category: window.Blockly.Categories.Tick_Analysis,
         };
@@ -70,9 +70,9 @@ window.Blockly.Blocks.maziwa_scan_signal = {
 
 window.Blockly.JavaScript.javascriptGenerator.forBlock.maziwa_scan_signal = block => {
     const g = window.Blockly.JavaScript.javascriptGenerator;
-    const minConfidence = g.valueToCode(block, 'MIN_CONFIDENCE', g.ORDER_ATOMIC) || '82';
-    const windowSize = g.valueToCode(block, 'WINDOW', g.ORDER_ATOMIC) || '25';
-    const maxSymbols = g.valueToCode(block, 'MAX_SYMBOLS', g.ORDER_ATOMIC) || '40';
+    const minConfidence = g.valueToCode(block, 'MIN_CONFIDENCE', g.ORDER_ATOMIC) || '90';
+    const windowSize = g.valueToCode(block, 'WINDOW', g.ORDER_ATOMIC) || '50';
+    const maxSymbols = g.valueToCode(block, 'MAX_SYMBOLS', g.ORDER_ATOMIC) || '60';
     const lossStreak = g.valueToCode(block, 'LOSS_STREAK', g.ORDER_ATOMIC) || '0';
     const totalProfit = g.valueToCode(block, 'TOTAL_PROFIT', g.ORDER_ATOMIC) || '0';
     const recoverAmount = g.valueToCode(block, 'RECOVER_AMOUNT', g.ORDER_ATOMIC) || '0';

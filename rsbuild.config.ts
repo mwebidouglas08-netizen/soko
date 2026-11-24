@@ -5,9 +5,9 @@ import { defineConfig, loadEnv, rspack } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
 
-// Load .env.production into process.env before `source.define` reads it below.
-// Heroku's build doesn't surface it otherwise; a missing file is a no-op.
-loadEnv({ mode: 'production' });
+
+// Load only the environment for the command being run, never production during dev.
+loadEnv({ mode: process.env.NODE_ENV || (process.argv.includes('build') ? 'production' : 'development') });
 
 const isStaticBuild = process.env.NEXT_PUBLIC_APP_BUILD === 'true';
 

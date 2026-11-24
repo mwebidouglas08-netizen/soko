@@ -52,9 +52,10 @@ const callModel = async (apiKey, model, payload, attempts = 3) => {
     let lastErr = 'unknown';
     for (let i = 0; i < attempts; i += 1) {
         try {
-            const upstream = await fetch(`${GEMINI_URL(model)}?key=${apiKey}`, {
+            const upstream = await fetch(GEMINI_URL(model), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+                signal: AbortSignal.timeout(8000),
                 body: JSON.stringify(payload),
             });
             if (upstream.ok) {
@@ -81,9 +82,17 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Deploy only behind an authenticated rate-limiting gateway. The browser-facing
+    // endpoint cannot safely enforce a distributed quota using process memory.
+    if (process.env.AI_RATIONALE_PUBLIC_ENABLED !== 'true') {
+        return res.status(200).json({ rationale: null, source: 'unavailable', note: 'AI rationale disabled on this deployment.' });
+    }
     const apiKey = process.env.GEMINI_API_KEY;
     const input = typeof req.body === 'string' ? safeParse(req.body) : req.body || {};
 
+    if (!input || typeof input !== 'object' || Array.isArray(input) || typeof input.symbol !== 'string' || !/^[A-Za-z0-9_]{1,30}$/.test(input.symbol) || !['BUY', 'SELL', 'HOLD'].includes(input.direction)) {
+        return res.status(400).json({ error: 'Invalid signal input' });
+    }
     if (!apiKey) {
         return res.status(200).json({
             rationale: null,

@@ -39,7 +39,7 @@ import {
     requestQuote,
     ProposalQuote,
 } from '../deriv/execution';
-import { accountBalance, currentLoginId, isApiReady, isAuthorized, getTicksHistory } from '../deriv/api';
+import { accountBalance, currentLoginId, currentSocket, isApiReady, isAuthorized, getTicksHistory } from '../deriv/api';
 import { isDemoAccount } from '@/utils/account-helpers';
 
 export interface EngineState {
@@ -114,6 +114,7 @@ export class OUBotEngine {
     private lastProposalAt = 0;
     private busy = false;
     private running = false;
+    private generation = 0;
     private lastActiveTradeAt = 0;
     private eventSeq = 0;
     private state: EngineState;
@@ -190,13 +191,16 @@ export class OUBotEngine {
         this.update({
             status: 'stopped',
             message: 'Emergency stop engaged',
-            openTrade: null,
         });
         this.logEvent('risk', 'Emergency stop engaged — all activity halted.');
     }
 
     async start(config?: Partial<EngineConfig>): Promise<void> {
         if (this.running) return;
+        if (this.state.risk.openPositions > 0 || this.state.openTrade) {
+            this.logEvent('risk', 'Cannot restart while a position is open or its settlement is unknown.');
+            return;
+        }
         if (config) this.configure(config);
 
         if (!isApiReady()) {
@@ -220,6 +224,7 @@ export class OUBotEngine {
         }
 
         this.running = true;
+        const generation = ++this.generation;
         this.lastActiveTradeAt = 0;
         this.update({ accountIsDemo, dryRun, equity: accountBalance() });
         this.logEvent(
@@ -233,12 +238,14 @@ export class OUBotEngine {
         try {
             await this.discover();
         } catch (e: any) {
+            if (!this.running || generation !== this.generation) return;
             this.running = false;
             this.setStatus('error', e?.message || 'Market discovery failed');
             this.logEvent('error', e?.message || 'Market discovery failed');
             return;
         }
 
+        if (!this.running || generation !== this.generation) return;
         this.setStatus('warming', `Warming up ${this.symbols.length} markets…`);
 
         // The feed must exist before warm-up: bootstrapDigits() writes into the series
@@ -256,6 +263,7 @@ export class OUBotEngine {
         await this.bootstrapDigits();
         this.logEvent('discover', `Discovered ${this.symbols.length} synthetic markets. Digit buffers warmed.`);
 
+        if (!this.running || generation !== this.generation || !this.feed) return;
         this.feed.start();
 
         this.update({ equity: accountBalance(), risk: initialRiskState(accountBalance()) });
@@ -267,6 +275,7 @@ export class OUBotEngine {
     stop() {
         const wasRunning = this.running;
         this.running = false;
+        this.generation++;
         if (this.scanTimer) clearInterval(this.scanTimer);
         this.scanTimer = null;
         if (this.feed) this.feed.stop();
@@ -493,6 +502,7 @@ export class OUBotEngine {
             }
 
             if (active) {
+                if (!isDemoAccount(currentLoginId())) { this.setStatus('scanning', 'Active practice is limited to demo accounts.'); return; }
                 const now = Date.now();
                 if (now - this.lastActiveTradeAt < cfg.activeIntervalMs) return;
                 this.lastActiveTradeAt = now;
@@ -524,7 +534,7 @@ export class OUBotEngine {
                         holdReason = `Sample ${opp.sampleSize} below ${cfg.limits.minSampleSize} on ${opp.displayName}`;
                         continue;
                     }
-                    const verdict = evaluateOpportunity(opp, this.state.risk, cfg.limits, accountBalance(), Date.now(), { skipEdgeGates: true });
+                    const verdict = evaluateOpportunity(opp, this.state.risk, cfg.limits, accountBalance(), Date.now());
                     if (!verdict.allowed) {
                         holdReason = verdict.reason;
                         if (this.state.risk.suspended) {
@@ -576,6 +586,9 @@ export class OUBotEngine {
             durationUnit: cfg.durationUnit,
         };
         this.setStatus('proposing', `Requesting quote: ${opp.displayName} ${opp.direction} ${opp.barrier}`);
+        const orderGeneration = this.generation;
+        const orderLogin = currentLoginId();
+        const orderSocket = currentSocket();
         const { quote, error } = await requestQuote(quoteReq);
         if (error || !quote) {
             if (this.running) this.setStatus('scanning', `Quote failed: ${error || 'no quote'}`);
@@ -584,10 +597,8 @@ export class OUBotEngine {
         }
         const finalEdge = assessEdge(opp.empiricalProb, quote.payout, stake, cfg.limits.minExpectedValue);
         // The confidence gate at scan time already selected this setup; at buy
-        // time only refuse a live payout that is outright negative EV (the
-        // strict minEV floor belongs to ranking, not to blocking trades the
-        // confidence gate approved).
-        if (!active && finalEdge.expectedValuePct < 0) {
+        // Recheck the configured edge and payout floors on the live quote.
+        if (!active && (finalEdge.expectedValuePct < cfg.limits.minExpectedValue || finalEdge.payoutRatio < cfg.limits.minPayoutRatio)) {
             releaseQuote(quote);
             if (this.running) this.setStatus('scanning', 'Quote no longer meets EV threshold. Skipping.');
             return;
@@ -614,8 +625,9 @@ export class OUBotEngine {
             simulated: false,
         };
         this.logEvent('quote', `Quote: ${opp.displayName} ${opp.direction} ${opp.barrier} — payout ${finalEdge.payoutRatio.toFixed(2)}× (stake ${stake.toFixed(2)} → ${quote.payout.toFixed(2)})`, { symbol: opp.symbol, direction: opp.direction, barrier: opp.barrier, stake, payout: quote.payout });
+        if (!this.running || this.state.dryRun || !isAuthorized() || (!isDemoAccount(currentLoginId()) && !this.state.config.allowLiveTrading)) { releaseQuote(quote); return; }
         this.setStatus('buying', `Submitting order: ${opp.direction} ${opp.barrier} on ${opp.displayName}`);
-        const buy = await executeBuyFresh(quote, stake, () => requestQuote(quoteReq));
+        const buy = await executeBuyFresh(quote, stake, () => requestQuote(quoteReq), (freshQuote) => (active || (assessEdge(opp.empiricalProb, freshQuote.payout, stake, cfg.limits.minExpectedValue).expectedValuePct >= cfg.limits.minExpectedValue && freshQuote.payout / stake >= cfg.limits.minPayoutRatio)) && this.running && this.generation === orderGeneration && isAuthorized() && currentLoginId() === orderLogin && currentSocket() === orderSocket && (isDemoAccount(orderLogin) || this.state.config.allowLiveTrading) && !this.state.dryRun);
         if (buy.error || buy.contractId === undefined) {
             this.update({
                 trades: [{ ...record, stage: 'rejected', error: buy.error, closedAt: Date.now() }, ...this.state.trades],

@@ -47,6 +47,8 @@ interface MarketData {
 const RISK_ORDER: Record<HubStrategy['risk'], number> = { 'Very Low': 0, Low: 1, Medium: 2, High: 3 };
 
 /** Minimum signal strength before Auto Trading will place a trade. */
+const riskAllowed = (risk: HubStrategy['risk'], level: 'low' | 'medium' | 'high') =>
+    RISK_ORDER[risk] <= ({ low: 1, medium: 2, high: 3 }[level]);
 const AUTO_TRADE_CONFIDENCE = 70;
 /** Minimum gap between automated deployments, in ms. */
 const AUTO_TRADE_COOLDOWN_MS = 60000;
@@ -354,7 +356,7 @@ const AITradingHub: React.FC<TProps> = observer(({ onOpenDashboard }) => {
 
         const wantsRise = best.signal === 'BUY';
         const strategy = HUB_STRATEGIES.find(s => s.symbol === best.symbol && (s.direction === 'CALL') === wantsRise);
-        if (!strategy) return;
+        if (!strategy || !riskAllowed(strategy.risk, riskLevel)) return;
 
         // Space out automated deployments so a flat market cannot queue a
         // string of identical trades.
@@ -392,16 +394,16 @@ const AITradingHub: React.FC<TProps> = observer(({ onOpenDashboard }) => {
             cancelled = true;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [autoTradeEnabled, isLoggedIn, isEngineRunning, isDeploying, isAnalyzing, markets, runPanel]);
+    }, [autoTradeEnabled, isLoggedIn, isEngineRunning, isDeploying, isAnalyzing, markets, runPanel, riskLevel]);
 
     const toggleAutoTrade = useCallback(() => {
         const next = !autoTradeEnabled;
-        setAutoTradeEnabled(next);
         if (next && !isLoggedIn) {
             flashNotice('Log in to enable Auto Trading.');
             runPanel?.showLoginDialog?.();
             return;
         }
+        setAutoTradeEnabled(next);
         if (next) {
             flashNotice('Auto Trading on — it will act when a setup appears on a live market.');
         } else {
@@ -411,9 +413,7 @@ const AITradingHub: React.FC<TProps> = observer(({ onOpenDashboard }) => {
 
     const deployStrategy = useCallback(
         async (strategy: HubStrategy) => {
-            const exceedsRisk =
-                (riskLevel === 'low' && RISK_ORDER[strategy.risk] > 1) ||
-                (riskLevel === 'medium' && RISK_ORDER[strategy.risk] > 3);
+            const exceedsRisk = !riskAllowed(strategy.risk, riskLevel);
             if (exceedsRisk) {
                 flashNotice(`${strategy.name} is ${strategy.risk} risk — raise the Risk setting to deploy it.`);
                 return;

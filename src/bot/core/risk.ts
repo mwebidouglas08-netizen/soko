@@ -151,12 +151,12 @@ export const evaluateOpportunity = (
     }
 
     const stake = Math.min(opp.stake, limits.maxStake, equity * limits.maxStakePctEquity);
-    const rounded = Math.max(0.35, Math.round(stake * 100) / 100);
-    if (rounded > limits.maxStake) {
+    const rounded = Math.floor(stake * 100) / 100;
+    if (!Number.isFinite(rounded) || rounded < 0.35 || rounded > limits.maxStake || rounded > equity * limits.maxStakePctEquity) {
         return {
             allowed: false,
             gate: 'stake_too_high',
-            reason: `Sized stake ${rounded} exceeds max ${limits.maxStake}`,
+            reason: `Stake cannot meet the minimum within the account equity and stake limits`,
             stake: 0,
         };
     }

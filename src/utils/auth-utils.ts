@@ -6,6 +6,10 @@
  * Clears authentication data from local storage and reloads the page
  */
 export const clearAuthData = () => {
+    localStorage.removeItem('auth_info');
+    localStorage.removeItem('deriv_accounts');
+    sessionStorage.removeItem('oauth_csrf_token');
+    sessionStorage.removeItem('oauth_code_verifier');
     localStorage.removeItem('authToken');
     localStorage.removeItem('active_loginid');
     localStorage.removeItem('client.country');

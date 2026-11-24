@@ -4,9 +4,7 @@ import { getActiveSymbols, getContractsFor } from './api';
 
 const computePipSize = (pip: unknown, quote?: unknown): number => {
     if (typeof pip === 'number' && pip > 0) {
-        const s = pip.toString();
-        const dot = s.indexOf('.');
-        if (dot >= 0) return s.length - dot - 1;
+        return Math.max(0, Math.min(10, -Math.floor(Math.log10(pip))));
     }
     if (typeof quote === 'string' && quote.includes('.')) {
         return quote.length - quote.indexOf('.') - 1;

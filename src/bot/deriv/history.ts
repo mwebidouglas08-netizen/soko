@@ -37,29 +37,25 @@ export const fetchHistoricalTicks = (
         }
         const digits: number[] = [];
         const quotes: number[] = [];
-        let pipSize = 2;
+        let pipSize: number | undefined;
+        let finished = false;
         const timer = setTimeout(() => {
             try { ws.close(); } catch { /* already closed */ }
             reject(new Error(`Timed out fetching ${count} ticks for ${symbol}`));
         }, timeoutMs);
 
         const finish = (err?: string) => {
+            if (finished) return;
+            finished = true;
             clearTimeout(timer);
             try { ws.close(); } catch { /* already closed */ }
             if (err) reject(new Error(err));
             else if (digits.length === 0) reject(new Error(`No ticks returned for ${symbol}`));
-            else resolve({ digits, quotes, pipSize });
+            else resolve({ digits, quotes, pipSize: pipSize! });
         };
 
         ws.onopen = () => {
-            ws.send(
-                JSON.stringify({
-                    ticks_history: symbol,
-                    count,
-                    end: 'latest',
-                    style: 'ticks',
-                })
-            );
+            ws.send(JSON.stringify({ active_symbols: 'brief' }));
         };
         ws.onmessage = event => {
             try {
@@ -68,8 +64,16 @@ export const fetchHistoricalTicks = (
                     finish(msg.error.message || 'ticks_history error');
                     return;
                 }
+                if (Array.isArray(msg.active_symbols)) {
+                    const meta = msg.active_symbols.find((item: any) => (item.symbol || item.underlying_symbol) === symbol);
+                    const pip = Number(meta?.pip);
+                    if (Number.isFinite(pip) && pip > 0) pipSize = Math.max(0, -Math.floor(Math.log10(pip)));
+                    ws.send(JSON.stringify({ ticks_history: symbol, count, end: 'latest', style: 'ticks' }));
+                    return;
+                }
                 if (msg.msg_type === 'history' && Array.isArray(msg.history?.prices)) {
-                    pipSize = typeof msg.history.pip_size === 'number' ? msg.history.pip_size : 2;
+                    if (typeof msg.history.pip_size === 'number') pipSize = msg.history.pip_size;
+                    if (!Number.isInteger(pipSize) || pipSize! < 0 || pipSize! > 10) { finish(`Precision unavailable for ${symbol}`); return; }
                     for (const price of msg.history.prices) {
                         const q = Number(price);
                         if (!Number.isFinite(q)) continue;
@@ -93,6 +97,6 @@ export const fetchHistoricalTicks = (
         ws.onerror = () => finish('WebSocket error while fetching history');
         ws.onclose = () => {
             // If the socket closes after delivering data, resolve what we have.
-            if (digits.length > 0) finish();
+            if (!finished) finish(digits.length ? undefined : 'WebSocket closed before history arrived');
         };
     });

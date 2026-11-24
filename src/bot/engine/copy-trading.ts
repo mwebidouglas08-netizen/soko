@@ -95,9 +95,10 @@ const DEFAULT_SETTINGS: CopySettings = {
 };
 
 const socketURL = (token: string): string => {
-    const base = isProduction() ? WS_SERVERS.PRODUCTION : WS_SERVERS.STAGING;
+    // Legacy token authorization is sent in the first WebSocket frame, never in the URL.
+    void token;
     const appId = process.env.NEXT_PUBLIC_DERIV_APP_ID || '1089';
-    return `${base.replace(/^http/, 'ws')}?app_id=${appId}&token=${encodeURIComponent(token)}&l=EN`;
+    return `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}&l=EN`;
 };
 
 /**
@@ -167,8 +168,10 @@ export class CopyTradingEngine {
     private masterSocket: WebSocket | null = null;
     private running = false;
     private masterAuthorized = false;
+    private awaitingInitialPortfolio = true;
     private seenContracts = new Set<number>();
     private replicatedContracts = new Set<number>();
+    private generation = 0;
     private eventSeq = 0;
     private copierSeq = 0;
     private reconnectAttempts = 0;
@@ -245,6 +248,7 @@ export class CopyTradingEngine {
                 });
             }
             this.state = { ...this.state, settings, copiers };
+            this.persist();
         } catch {
             // corrupt/unavailable storage — fall back to defaults
         }
@@ -256,7 +260,6 @@ export class CopyTradingEngine {
                 settings: this.state.settings,
                 copiers: this.state.copiers.map(c => ({
                     id: c.id,
-                    token: encodeToken(this.tokens.get(c.id) || ''),
                     label: c.label,
                     enabled: c.enabled,
                 })),
@@ -368,6 +371,7 @@ export class CopyTradingEngine {
             return;
         }
         this.masterToken = token;
+        this.generation++;
         this.running = true;
         this.masterAuthorized = false;
         this.reconnectAttempts = 0;
@@ -395,6 +399,8 @@ export class CopyTradingEngine {
         const wasActive =
             this.running || this.state.status === 'connecting' || this.state.status === 'running';
         this.running = false;
+        this.generation++;
+        this.masterToken = null;
         if (this.reconnectTimer) {
             clearTimeout(this.reconnectTimer);
             this.reconnectTimer = null;
@@ -484,7 +490,7 @@ export class CopyTradingEngine {
                 timeoutMs: SOCKET_TIMEOUT_MS,
                 onOpen: s => {
                     try {
-                        s.send(JSON.stringify({ authorize: 1 }));
+                        s.send(JSON.stringify({ authorize: token }));
                     } catch {
                         finish('socket send failed');
                     }
@@ -529,12 +535,14 @@ export class CopyTradingEngine {
             clearTimeout(this.reconnectTimer);
             this.reconnectTimer = null;
         }
+        const token = this.masterToken;
+        const generation = this.generation;
         try {
-            this.masterSocket = this.openSocket(this.masterToken, {
+            this.masterSocket = this.openSocket(token, {
                 onOpen: ws => {
-                    this.masterSocket = ws;
+                    if (!this.running || generation !== this.generation || ws !== this.masterSocket) { ws.close(); return; }
                     try {
-                        ws.send(JSON.stringify({ authorize: 1 }));
+                        ws.send(JSON.stringify({ authorize: token }));
                     } catch {
                         /* socket gone */
                     }
@@ -607,6 +615,7 @@ export class CopyTradingEngine {
                         : 'signals only; copiers must be demo accounts (or enable "Allow real copiers").'
                 }`
             );
+            this.awaitingInitialPortfolio = true;
             this.masterSend({ portfolio: 1, subscribe: 1 });
             return;
         }
@@ -659,10 +668,14 @@ export class CopyTradingEngine {
             : Array.isArray(portfolio)
               ? portfolio
               : [];
+        const initial = this.awaitingInitialPortfolio;
+        this.awaitingInitialPortfolio = false;
         for (const entry of open) {
             const id = Number(entry?.contract_id);
         if (!Number.isFinite(id) || this.seenContracts.has(id)) continue;
         this.seenContracts.add(id);
+        if (initial) this.replicatedContracts.add(id);
+        this.bumpStat('observed');
         // details and observed accounting are handled in handleMasterContract to avoid duplicates
         this.masterSend({ proposal_open_contract: 1, contract_id: id, subscribe: 1 });
         }
@@ -692,11 +705,16 @@ export class CopyTradingEngine {
         const contractId = Number(poc.contract_id);
         const contractType = String(poc.contract_type || '');
         const symbol = String(poc.symbol || poc.underlying_symbol || '');
-        const duration = Number(poc.duration) || 1;
-        const durationUnit = String(poc.duration_unit || 't');
+        const duration = Number(poc.duration);
+        const durationUnit = String(poc.duration_unit || '');
         const currency = String(poc.currency || '');
         const masterStake = Number(poc.buy_price ?? poc.purchase_price ?? 0);
 
+        if (!Number.isInteger(duration) || duration < 1 || !['t', 's', 'm', 'h', 'd'].includes(durationUnit)) {
+            this.bumpStat('skipped');
+            this.logEvent('warn', `Master #${contractId} duration unknown — not copied.`);
+            return;
+        }
         if (!contractType || !symbol) {
             this.bumpStat('skipped');
             this.logEvent('warn', `Master #${contractId} has no contract details — not copied.`);
@@ -713,7 +731,9 @@ export class CopyTradingEngine {
             return;
         }
 
+        const generation = this.generation;
         for (const copier of [...this.state.copiers]) {
+            if (!this.running || generation !== this.generation || !this.state.settings.replicationEnabled) break;
             if (!copier.enabled) continue;
             const token = this.tokens.get(copier.id);
             const meta = this.copierMeta.get(copier.id);
@@ -781,7 +801,11 @@ export class CopyTradingEngine {
             const last = this.lastBuyAttemptAt.get(copier.id) ?? 0;
             const wait = Math.max(0, BUY_SPACING_MS - (now - last));
             this.lastBuyAttemptAt.set(copier.id, now + wait);
-            const begin = () => this.openBuySocket(copier, token, order, resolve);
+            const generation = this.generation;
+            const begin = () => {
+                if (!this.running || generation !== this.generation || !this.state.settings.replicationEnabled || !this.state.copiers.some(c => c.id === copier.id && c.enabled && c.authorized) || (!this.copierMeta.get(copier.id)?.isVirtual && !this.state.settings.allowRealCopiers)) { resolve(null); return; }
+                this.openBuySocket(copier, token, order, resolve);
+            };
             if (wait > 0) setTimeout(begin, wait);
             else begin();
         });
@@ -810,8 +834,10 @@ export class CopyTradingEngine {
         },
         resolve: (contractId: number | null) => void
     ): void {
+        const generation = this.generation;
+        const permitted = () => this.running && generation === this.generation && this.state.settings.replicationEnabled && this.state.copiers.some(c => c.id === copier.id && c.enabled && c.authorized) && (this.copierMeta.get(copier.id)?.isVirtual || this.state.settings.allowRealCopiers);
         let resolved = false;
-        let phase: 'proposal' | 'buy' | 'monitoring' | 'done' = 'proposal';
+        let phase: 'authorize' | 'proposal' | 'buy' | 'monitoring' | 'done' = 'authorize';
         let retried = false;
         let contractId: number | null = null;
         let ws: WebSocket | null = null;
@@ -904,7 +930,7 @@ export class CopyTradingEngine {
             ws = this.openSocket(token, {
                 onOpen: s => {
                     try {
-                        sendProposal(s);
+                        s.send(JSON.stringify({ authorize: token }));
                     } catch {
                         finishBuy(null, 'socket send failed');
                         return;
@@ -951,6 +977,13 @@ export class CopyTradingEngine {
                         finishBuy(null, detail);
                         return;
                     }
+                    if (phase === 'authorize' && msg?.authorize) {
+                        const virtual = msg.authorize.is_virtual === 1 || msg.authorize.is_virtual === true;
+                        if (!permitted() || (!virtual && !this.state.settings.allowRealCopiers)) { finishBuy(null, 'copy cancelled before proposal'); return; }
+                        phase = 'proposal';
+                        try { sendProposal(s); } catch { finishBuy(null, 'socket send failed'); }
+                        return;
+                    }
                     if (msg?.proposal) {
                         if (phase !== 'proposal') return; // live stream refresh — already bought
                         const p = msg.proposal;
@@ -964,6 +997,7 @@ export class CopyTradingEngine {
                             finishBuy(null, `no return: payout ${payout} never exceeds the ${ask} stake`);
                             return;
                         }
+                        if (!permitted()) { finishBuy(null, 'copy cancelled before purchase'); return; }
                         phase = 'buy';
                         try {
                             s.send(JSON.stringify({ buy: p.id, price: ask }));

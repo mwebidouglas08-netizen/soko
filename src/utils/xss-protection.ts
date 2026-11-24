@@ -224,7 +224,8 @@ export function sanitizeUrl(url: string): string {
     }
 
     // Additional checks for encoded schemes
-    const decodedUrl = decodeURIComponent(trimmedUrl);
+    let decodedUrl: string;
+    try { decodedUrl = decodeURIComponent(trimmedUrl); } catch { return ''; }
     for (const scheme of DANGEROUS_SCHEMES) {
         if (decodedUrl.startsWith(scheme)) {
             return '';

@@ -3,6 +3,7 @@ import { useStore } from '@/hooks/useStore';
 import { navigateToHubView } from '@/services/hub-navigation';
 import { voiceService } from '@/services/voice-service';
 import { request } from '@/bot/deriv/api';
+import { TickFeed } from '@/bot/deriv/ticks';
 import { api_base } from '@/external/bot-skeleton/services/api/api-base';
 import templateXml from '@/xml/ai-signal-scanner.xml';
 import {
@@ -42,7 +43,8 @@ const AISignalScannerPage = () => {
     const [results, setResults] = useState<Candidate[]>([]);
     const [loading, setLoading] = useState(false);
     const [configOpen, setConfigOpen] = useState(false);
-    const [tick, setTick] = useState<{ price: number | null; digit: number | null }>({ price: null, digit: null });
+    const [tick, setTick] = useState<{ price: number | null; digit: number | null; pipSize?: number }>({ price: null, digit: null });
+    const watchPip = tick.pipSize ?? markets.find(m => m.symbol === watch)?.pipSize;
     const [params, setParams] = useState<BotParams>({
         stake: 0.5,
         martingale: 2,
@@ -73,6 +75,7 @@ const AISignalScannerPage = () => {
                 .map((s: any) => ({
                     symbol: s.symbol ?? s.underlying_symbol,
                     displayName: s.display_name ?? s.underlying_symbol_name ?? s.symbol,
+                    pipSize: Number(s.pip) > 0 ? Math.max(0, Math.min(10, -Math.floor(Math.log10(Number(s.pip))))) : undefined,
                 }))
                 .filter((m: Market) => !!m.symbol);
             if (!cancelled && list.length) setMarkets(list);
@@ -84,26 +87,19 @@ const AISignalScannerPage = () => {
 
     // Live "Latest Tick" readout for the chosen watch market.
     useEffect(() => {
-        const api = api_base.api;
-        if (!api || !watch) {
+        if (!watch) {
             setTick({ price: null, digit: null });
             return;
         }
         setTick({ price: null, digit: null });
-        api.send({ forget_all: 'ticks' });
-        api.send({ ticks: watch, subscribe: 1 });
-        const subscription = api.onMessage().subscribe((message: any) => {
-            const data = message?.data;
-            if (data?.msg_type !== 'tick' || !data.tick || data.tick.symbol !== watch) return;
-            const price = toPrice(data.tick.quote ?? data.tick.ask);
-            if (price === null) return;
-            setTick({ price, digit: lastDigit(price, decimalsOf(price)) });
-        });
-        return () => {
-            subscription?.unsubscribe?.();
-            api.send({ forget_all: 'ticks' });
-        };
-    }, [watch]);
+        const pip = markets.find(m => m.symbol === watch)?.pipSize;
+        if (pip === undefined) return;
+        const feed = new TickFeed({ onTick: (_symbol, point, series) => setTick({ price: point.quote, digit: point.digit, pipSize: series.pipSize }) });
+        feed.setSymbols([watch]);
+        feed.seed(watch, pip, []);
+        feed.start();
+        return () => feed.stop();
+    }, [watch, markets]);
 
     const pushLog = useCallback((line: string) => {
         setLogs(prev => [...prev.slice(-30), line]);
@@ -147,7 +143,8 @@ const AISignalScannerPage = () => {
                             else if (prices[t] < prices[t - 1]) sequence.push('down');
                         }
                     } else {
-                        const decimals = decimalsOf(prices[prices.length - 1]);
+                        const decimals = data?.history?.pip_size ?? market.pipSize;
+                        if (!Number.isInteger(decimals) || decimals < 0 || decimals > 10) continue;
                         sequence = prices.map(p => lastDigit(p, decimals)).filter(d => d !== null);
                     }
                     let best: Candidate | null = null;
@@ -360,9 +357,9 @@ const AISignalScannerPage = () => {
                         Latest Tick:{' '}
                         {tick.price !== null ? (
                             <span className='signal-ai__market-price'>
-                                {tick.price.toFixed(decimalsOf(tick.price)).slice(0, -1)}
+                                {tick.price.toFixed((watchPip ?? decimalsOf(tick.price))).slice(0, -1)}
                                 <strong className='signal-ai__market-last-digit'>
-                                    {tick.price.toFixed(decimalsOf(tick.price)).slice(-1)}
+                                    {tick.price.toFixed((watchPip ?? decimalsOf(tick.price))).slice(-1)}
                                 </strong>
                             </span>
                         ) : (

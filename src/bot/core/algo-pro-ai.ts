@@ -216,7 +216,7 @@ export const pipSizeDefault = (symbol: string): number => (symbol.startsWith('1H
 
 /** Discovery pipSize wins when valid; otherwise the static default (1HZ* → 2, else 3). */
 export const resolveUniversePipSize = (symbol: string, discoveredPipSize?: number): number =>
-    Number.isFinite(discoveredPipSize) && (discoveredPipSize as number) > 0 ? (discoveredPipSize as number) : pipSizeDefault(symbol);
+    Number.isFinite(discoveredPipSize) && (discoveredPipSize as number) >= 0 ? (discoveredPipSize as number) : pipSizeDefault(symbol);
 
 export const pipSizeFromActiveSymbol = (symbol: string, pip_size?: number, decimal_places?: number): number => {
     if (Number.isFinite(pip_size as number) && (pip_size as number) >= 0 && (pip_size as number) <= 10) {
@@ -493,7 +493,7 @@ const evaluateSide = (
         recentRate,
         recoveryRate,
         sample: digits.length,
-        recentSample: Math.min(250, Math.max(30, Math.round(0.12 * digits.length))),
+        recentSample: recentWindow(digits).length,
     };
 };
 
@@ -549,7 +549,7 @@ export const rankMarketSignals = (items: RankedMarketSignal[]): RankedMarketSign
 export const theoreticalProbability = (contractType: AlgoProContractType, barrier?: number): number => {
     switch (contractType) {
         case 'DIGITOVER':
-            return Math.min(1, Math.max(0, (10 - (barrier ?? 0)) / 10));
+            return Math.min(1, Math.max(0, (9 - (barrier ?? 0)) / 10));
         case 'DIGITUNDER':
             return Math.min(1, Math.max(0, (barrier ?? 10) / 10));
         default:
@@ -593,7 +593,7 @@ const winRate = (contractType: AlgoProContractType, barrier: number | undefined,
         }
         const recentN = qualityWindow(moves.length);
         const recent = moves.slice(-recentN);
-        const wins = (list: number[]) => (list.length ? list.filter(x => x === 1).length / list.length : 0);
+        const wins = (list: number[]) => (list.length ? list.filter(x => x === (contractType === 'CALL' ? 1 : 0)).length / list.length : 0);
         return {
             full: wins(moves),
             recent: wins(recent),
@@ -634,7 +634,7 @@ export const signalQuality = (
     const { full, recent, sample, recentSample } = winRate(signal.contractType, signal.barrier, digits, prices);
     const pTheory = theoreticalProbability(signal.contractType, signal.barrier);
     const breakeven = pTheory / 0.95;
-    const blended = 0.55 * full + 0.3 * recent;
+    const blended = (0.55 * full + 0.3 * recent) / 0.85;
     return {
         blended,
         fullRate: full,

@@ -66,6 +66,8 @@ const Main = observer(() => {
     const { ui, dashboard } = useStore() ?? {};
     const [requestedView, setRequestedView] = useState<HubViewId>('dashboard');
     const activeView = resolveView(requestedView);
+    const [visited, setVisited] = useState<Set<HubViewId>>(() => new Set(['dashboard']));
+    useEffect(() => { setVisited(previous => previous.has(activeView) ? previous : new Set([...previous, activeView])); }, [activeView]);
     // First-visit gate. The intro shows once per device/install, can be reopened
     // with ?landing=1 or ?welcome=1, and is always suppressed on the way back
     // from Deriv OAuth (?code=…) so a login round-trip never lands on marketing.
@@ -133,7 +135,7 @@ const Main = observer(() => {
             ? { animation: 'hubEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both' }
             : {};
 
-    const mount = (view: HubViewId, node: ReactNode, id?: string) => (
+    const mount = (view: HubViewId, node: ReactNode, id?: string) => activeView !== view && !visited.has(view) ? null : (
         <div
             key={id || view}
             className='main-hub'

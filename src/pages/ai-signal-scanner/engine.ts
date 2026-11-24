@@ -15,6 +15,7 @@ export interface Profile {
 export interface Market {
     symbol: string;
     displayName: string;
+    pipSize?: number;
 }
 
 export interface Candidate {

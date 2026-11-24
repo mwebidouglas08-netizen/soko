@@ -483,7 +483,7 @@ const MarketModal = ({ market, onClose }: { market: PdtMarket | null; onClose: (
                             ? 'Connected to Deriv Synthetic Index Engine'
                             : status === 'CONNECTING'
                               ? 'Connecting to Deriv Synthetic Index Engine…'
-                              : 'Live feed reconnecting — simulated ticks in the meantime'}
+                              : 'Live feed disconnected — last received data may be stale'}
                     </span>
                     {state && (
                         <div className='pdt-modal__numbers'>
@@ -497,7 +497,7 @@ const MarketModal = ({ market, onClose }: { market: PdtMarket | null; onClose: (
                             </div>
                             <div>
                                 <span>Source</span>
-                                <b>{state.source === 'DERIV_REALTIME' ? 'LIVE' : 'SIM'}</b>
+                                <b>{state.source === 'DERIV_REALTIME' ? 'LIVE' : 'OFFLINE'}</b>
                             </div>
                         </div>
                     )}
@@ -740,7 +740,7 @@ const AnalysisToolPage = () => {
                 <div className='pdt-topbar__status'>
                     <span className={`pdt-conn pdt-conn--${status.toLowerCase()}`}>
                         <PulseDot on={status === 'CONNECTED'} />
-                        {status === 'CONNECTED' ? 'LIVE DERIV' : status === 'CONNECTING' ? 'CONNECTING…' : 'SIMULATED'}
+                        {status === 'CONNECTED' ? 'LIVE DERIV' : status === 'CONNECTING' ? 'CONNECTING…' : 'OFFLINE'}
                     </span>
                     <button
                         type='button'

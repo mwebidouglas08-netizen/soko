@@ -61,7 +61,7 @@
                             '<h2 style="margin:0 0 12px;font-size:18px;line-height:1.2">App failed to start</h2>' +
                             '<div style="opacity:.85;margin:0 0 12px">A runtime error prevented the app from loading. Copy the error and share it.</div>' +
                             '<pre style="white-space:pre-wrap;word-break:break-word;background:#111827;border:1px solid rgba(255,255,255,.12);padding:12px;border-radius:12px;margin:0 0 16px">' +
-                            String(message || 'Unknown error') +
+                            String(message || 'Unknown error').replace(/[&<>"']/g, function (c) { return ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'})[c]; }) +
                             '</pre>' +
                             '<button id="fatal-boot-reload" style="appearance:none;border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer">Reload</button>' +
                             '</div>';
@@ -71,6 +71,7 @@
                     } catch (e) {}
                 }
                 window.__showFatalError = function (err) {
+                    if (window.__appMounted) return;
                     var splash = document.getElementById('boot-splash');
                     if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
                     var msg = err && (err.stack || err.message) ? (err.stack || err.message) : String(err);
@@ -81,10 +82,12 @@
                         var target = e && e.target;
                         if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) return;
                     } catch (_) {}
+                    if (window.__appMounted || /^(chrome|moz|safari)-extension:/i.test(e.filename || '')) return;
                     var msg = e && e.error ? e.error : e && e.message ? e.message : 'Unknown error';
                     window.__showFatalError(msg);
                 });
                 window.addEventListener('unhandledrejection', function (e) {
+                    if (window.__appMounted) return;
                     var msg = e && e.reason ? e.reason : 'Unhandled promise rejection';
                     window.__showFatalError(msg);
                 });
